@@ -4029,12 +4029,6 @@ window.addEventListener('load', () => {
       const parsed = raw ? JSON.parse(raw) : initLocks();
       const out = {};
       LOCKABLE.forEach(k=> out[k] = !!parsed[k]);
-      // Authoritative server override for power_energy (ensure teacher override wins)
-      try{
-        if(window.serverLocks && typeof window.serverLocks.power_energy === 'boolean'){
-          out.power_energy = !!window.serverLocks.power_energy;
-        }
-      }catch(e){}
       return out;
     }catch(e){ return initLocks(); }
   }
@@ -4300,23 +4294,6 @@ window.addEventListener('load', () => {
       if(locked){ try{ ev.stopImmediatePropagation(); }catch(e){} }
     }catch(e){}
   }, true);
-})();
-</script>
-<script>
-/* FINAL SERVER LOCK ENFORCER – DO NOT DUPLICATE */
-(function(){
-  if (typeof fetchLocksFromServer !== 'function') return;
-
-  const name = localStorage.getItem('studentName') || '';
-  const section = localStorage.getItem('studentSection') || '';
-  if (!name || !section) return;
-
-  fetchLocksFromServer(name, section)
-    .then(() => {
-      if (typeof updateStudentLocks === 'function') updateStudentLocks();
-      if (typeof applyEffectiveLocks === 'function') applyEffectiveLocks();
-    })
-    .catch(()=>{});
 })();
 </script>
  </body>
