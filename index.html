@@ -2057,7 +2057,7 @@ button,
     <!-- End Series and Parallel Circuits Section -->
     
     <!-- Power Section -->
-    <section id="power" class="section" data-topic="energy">
+    <section id="power" class="section" data-topic="power_energy">
      <div class="card power-full">
       <div class="card-content">
         <!-- ⚡ Power & Energy Simulator (IFRAMED) -->
@@ -4143,7 +4143,9 @@ window.addEventListener('load', () => {
         power_energy: 'charge',
         charge: 'magnetism'
       };
-      const nextTopic = NEXT[passed];
+      let nextTopic = NEXT[passed];
+      // Defensive: ensure a Parallel quiz always unlocks Power & Energy
+      try{ if(String(passed).toLowerCase() === 'parallel') nextTopic = 'power_energy'; }catch(e){}
       if (!nextTopic) return;
       // Persist the single lock change immediately (write only this key)
       try{
