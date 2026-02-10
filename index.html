@@ -4296,6 +4296,23 @@ window.addEventListener('load', () => {
   }, true);
 })();
 </script>
+<script>
+/* FINAL SERVER LOCK ENFORCER – DO NOT DUPLICATE */
+(function(){
+  if (typeof fetchLocksFromServer !== 'function') return;
+
+  const name = localStorage.getItem('studentName') || '';
+  const section = localStorage.getItem('studentSection') || '';
+  if (!name || !section) return;
+
+  fetchLocksFromServer(name, section)
+    .then(() => {
+      if (typeof updateStudentLocks === 'function') updateStudentLocks();
+      if (typeof applyEffectiveLocks === 'function') applyEffectiveLocks();
+    })
+    .catch(()=>{});
+})();
+</script>
  </body>
 </html>
 
