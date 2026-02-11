@@ -4019,19 +4019,13 @@ window.addEventListener('load', () => {
   }
 
   function getLocks(){
-    try{
-      // Prefer server-provided locks when available
-      if(window.serverLocks && typeof window.serverLocks === 'object'){
-        const out = {};
-        LOCKABLE.forEach(k=> out[k] = !!window.serverLocks[k]);
-        return out;
-      }
-      const raw = localStorage.getItem(LOCK_KEY);
-      const parsed = raw ? JSON.parse(raw) : initLocks();
-      const out = {};
-      LOCKABLE.forEach(k=> out[k] = !!parsed[k]);
-      return out;
-    }catch(e){ return initLocks(); }
+    // Always use server locks as single source of truth
+    if (window.serverLocks && typeof window.serverLocks === 'object') {
+      return window.serverLocks;
+    }
+
+    // If server locks not loaded yet, return empty object
+    return {};
   }
 
   // Persist only normalized lockable keys
@@ -4168,16 +4162,7 @@ window.addEventListener('load', () => {
   });
 
   // Initialize on load
-  try{ initLocks(); }catch(e){}
-  // Replay-safe unlock: apply any quizzes marked as passed (safe immediate unlocks)
-  try{
-    const PKEY = 'EL_QUIZ_PASSED';
-    const passed = JSON.parse(localStorage.getItem(PKEY) || '{}');
-    Object.keys(passed||{}).forEach(function(t){
-      try{ if(passed[t]) setLock(t, true); }catch(e){}
-    });
-    try{ if(typeof updateStudentLocks === 'function') updateStudentLocks(); }catch(e){}
-  }catch(e){}
+  
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ /* noop */ });
   
   // Reapply UI when storage changes
