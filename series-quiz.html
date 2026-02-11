@@ -1,0 +1,1542 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Series Circuits Quiz</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Orbitron', 'Rajdhani', 'Exo 2', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1d3a 50%, #0f1629 100%);
+      color: #00f0ff;
+      overflow: auto;
+    }
+
+    .quiz-container {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated background circuit pattern */
+    .circuit-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .circuit-line {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+      animation: pulse-line 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-line {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Floating electrons */
+    .electron {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #ffd700;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #ffd700, 0 0 30px #ffd700;
+      animation: float-electron 8s linear infinite;
+    }
+
+    @keyframes float-electron {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate(100vw, 50vh) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    /* Electric sparks */
+    .spark {
+      position: absolute;
+      width: 2px;
+      height: 40px;
+      background: linear-gradient(180deg, #00f0ff, transparent);
+      animation: spark-fall 3s ease-in infinite;
+      opacity: 0;
+    }
+
+    @keyframes spark-fall {
+      0% {
+        transform: translateY(0) scaleY(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+      }
+      90% {
+        opacity: 0.5;
+      }
+      100% {
+        transform: translateY(100vh) scaleY(2);
+        opacity: 0;
+      }
+    }
+
+    /* Glowing orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 240, 255, 0.6), transparent);
+      animation: pulse-orb 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-orb {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: scale(1.5);
+        opacity: 0.6;
+      }
+    }
+
+    /* Circuit nodes */
+    .circuit-node {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: #00f0ff;
+      border-radius: 50%;
+      box-shadow: 0 0 20px #00f0ff;
+      animation: blink-node 2s ease-in-out infinite;
+    }
+
+    @keyframes blink-node {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.3); }
+    }
+
+    /* Lightning bolts background */
+    .bg-lightning {
+      position: absolute;
+      width: 3px;
+      height: 150px;
+      background: linear-gradient(180deg, #ffd700, transparent);
+      transform-origin: top;
+      animation: lightning-flash 5s ease-in-out infinite;
+      opacity: 0;
+    }
+
+    @keyframes lightning-flash {
+      0%, 90%, 100% { opacity: 0; }
+      91%, 93%, 95% { opacity: 0.8; }
+      92%, 94% { opacity: 0; }
+    }
+
+    /* Start Screen */
+    .start-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      z-index: 1;
+      padding: 40px 20px;
+      text-align: center;
+    }
+
+    .logo-container {
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .electric-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 4px solid #00f0ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.6),
+                  inset 0 0 40px rgba(0, 240, 255, 0.3);
+      animation: rotate-glow 4s linear infinite;
+    }
+
+    @keyframes rotate-glow {
+      0%, 100% { box-shadow: 0 0 40px rgba(0, 240, 255, 0.6), inset 0 0 40px rgba(0, 240, 255, 0.3); }
+      50% { box-shadow: 0 0 60px rgba(255, 215, 0, 0.8), inset 0 0 60px rgba(255, 215, 0, 0.4); }
+    }
+
+    .electric-circle svg {
+      width: 100px;
+      height: 100px;
+      filter: drop-shadow(0 0 10px #00f0ff);
+    }
+
+    .title {
+      font-size: 56px;
+      font-weight: 900;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #00f0ff 0%, #ffd700 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      text-shadow: 0 0 30px rgba(0, 240, 255, 0.5);
+      letter-spacing: 4px;
+    }
+
+    .subtitle {
+      font-size: 24px;
+      color: #7dd3fc;
+      margin-bottom: 40px;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    .student-info-form {
+      width: 100%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .form-label {
+      font-size: 18px;
+      font-weight: 700;
+      color: #00f0ff;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .form-input,
+    .form-select {
+      padding: 16px 20px;
+      font-size: 18px;
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      background: rgba(26, 29, 58, 0.9);
+      border: 2px solid #00f0ff;
+      border-radius: 12px;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: #ffd700;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    }
+
+    .form-input::placeholder {
+      color: #7dd3fc;
+      opacity: 0.6;
+    }
+
+    .form-select {
+      cursor: pointer;
+    }
+
+    .form-select option {
+      background: #1a1d3a;
+      color: #ffffff;
+      padding: 10px;
+    }
+
+    .start-btn {
+      background: linear-gradient(135deg, #0ea5e9 0%, #00f0ff 100%);
+      color: #0a0e27;
+      border: none;
+      padding: 20px 60px;
+      font-size: 24px;
+      font-weight: 900;
+      border-radius: 50px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.6),
+                  0 8px 20px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.9),
+                  0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .start-btn:active {
+      transform: translateY(0);
+    }
+
+    .start-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+    }
+
+    /* Quiz Screen */
+    .quiz-screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .quiz-header {
+      padding: 30px 40px;
+      background: rgba(10, 14, 39, 0.9);
+      border-bottom: 2px solid #00f0ff;
+      box-shadow: 0 4px 20px rgba(0, 240, 255, 0.3);
+    }
+
+    .student-info-display {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      background: rgba(0, 240, 255, 0.1);
+      border-radius: 12px;
+      border: 1px solid #00f0ff;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .student-name-display,
+    .student-section-display {
+      font-size: 16px;
+      font-weight: 600;
+      color: #00f0ff;
+      letter-spacing: 1px;
+    }
+
+    .student-section-display {
+      color: #ffd700;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .question-counter {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffd700;
+      letter-spacing: 1px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 16px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 2px solid #00f0ff;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00f0ff 0%, #ffd700 100%);
+      width: 0%;
+      transition: width 0.5s ease;
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: progress-shine 2s infinite;
+    }
+
+    @keyframes progress-shine {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .quiz-content {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .question-container {
+      width: 100%;
+      max-width: 900px;
+      background: rgba(26, 29, 58, 0.95);
+      padding: 50px;
+      border-radius: 20px;
+      border: 2px solid #00f0ff;
+      box-shadow: 0 0 40px rgba(0, 240, 255, 0.4);
+    }
+
+    .question-text {
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 40px;
+      line-height: 1.6;
+      text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .choice-btn {
+      background: linear-gradient(135deg, rgba(10, 14, 39, 0.9) 0%, rgba(26, 29, 58, 0.9) 100%);
+      color: #00f0ff;
+      border: 2px solid #00f0ff;
+      padding: 24px 30px;
+      font-size: 20px;
+      font-weight: 600;
+      border-radius: 15px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+      /* hide leading letter labels like "A. " by shifting them out of view */
+      text-indent: -3ch;
+    }
+    .choice-btn::before {
+      content: '◯';
+      display: inline-block;
+      margin-right: 12px;
+      font-size: 1.05em;
+      color: inherit;
+      vertical-align: middle;
+    }
+
+    .choice-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.2) 0%, rgba(14, 165, 233, 0.2) 100%);
+      border-color: #ffd700;
+      color: #ffd700;
+      transform: translateX(10px);
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+    }
+
+    .choice-btn.selected {
+      background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(255, 215, 0, 0.3) 100%);
+      border-color: #ffd700;
+      color: #ffd700;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.7);
+      animation: electric-pulse 0.6s ease;
+    }
+
+    @keyframes electric-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .choice-btn.selected::after {
+      content: '⚡';
+      position: absolute;
+      right: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 28px;
+      animation: spark 0.6s ease;
+    }
+
+    @keyframes spark {
+      0% { opacity: 0; transform: translateY(-50%) scale(0); }
+      50% { opacity: 1; transform: translateY(-50%) scale(1.5); }
+      100% { opacity: 1; transform: translateY(-50%) scale(1); }
+    }
+
+    .navigation-buttons {
+      display: flex;
+      gap: 20px;
+      margin-top: 40px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+      color: #0a0e27;
+      border: none;
+      padding: 18px 40px;
+      font-size: 20px;
+      font-weight: 900;
+      border-radius: 50px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      transition: all 0.3s ease;
+      display: none;
+      position: relative;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(255, 215, 0, 0.9);
+    }
+
+    .nav-btn.visible {
+      display: inline-block;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+      box-shadow: 0 0 15px rgba(100, 116, 139, 0.4);
+    }
+
+    .prev-btn {
+      background: linear-gradient(135deg, #0ea5e9 0%, #00f0ff 100%);
+    }
+
+    .prev-btn:hover:not(:disabled) {
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.9);
+    }
+
+    .next-btn.nav-btn::after {
+      content: '→';
+      margin-left: 10px;
+      font-size: 24px;
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .prev-btn::before {
+      content: '←';
+      margin-right: 10px;
+      font-size: 24px;
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .next-btn {
+      padding-right: 50px;
+    }
+
+    .prev-btn {
+      padding-left: 50px;
+    }
+
+    /* Result Modal */
+    .result-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .result-content {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1d3a 100%);
+      padding: 60px;
+      border-radius: 30px;
+      text-align: center;
+      max-width: 600px;
+      width: 90%;
+      border: 3px solid #00f0ff;
+      box-shadow: 0 0 60px rgba(0, 240, 255, 0.6);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-content.passed {
+      border-color: #ffd700;
+      box-shadow: 0 0 60px rgba(255, 215, 0, 0.8);
+    }
+
+    .result-content.failed {
+      border-color: #ef4444;
+      box-shadow: 0 0 60px rgba(239, 68, 68, 0.6);
+    }
+
+    .result-icon {
+      font-size: 120px;
+      margin-bottom: 30px;
+      animation: result-appear 0.8s ease;
+    }
+
+    @keyframes result-appear {
+      0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    .result-title {
+      font-size: 56px;
+      font-weight: 900;
+      margin-bottom: 30px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+    }
+
+    .result-content.passed .result-title {
+      background: linear-gradient(135deg, #ffd700 0%, #00f0ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: glow-text 2s ease-in-out infinite;
+    }
+
+    .result-content.failed .result-title {
+      color: #ef4444;
+    }
+
+    @keyframes glow-text {
+      0%, 100% { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6)); }
+      50% { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 1)); }
+    }
+
+    .result-student-info {
+      font-size: 20px;
+      color: #7dd3fc;
+      margin-bottom: 20px;
+      line-height: 1.8;
+    }
+
+    .result-score {
+      font-size: 40px;
+      font-weight: 700;
+      color: #00f0ff;
+      margin-bottom: 20px;
+    }
+
+    .result-message {
+      font-size: 22px;
+      color: #7dd3fc;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .result-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .result-btn {
+      background: linear-gradient(135deg, #0ea5e9 0%, #00f0ff 100%);
+      color: #0a0e27;
+      border: none;
+      padding: 18px 40px;
+      font-size: 20px;
+      font-weight: 900;
+      border-radius: 50px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    .result-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.9);
+    }
+
+    .result-btn.exit {
+      background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+    }
+
+    /* Lightning animation for passed result */
+    .lightning {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .bolt {
+      position: absolute;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, #ffd700, transparent);
+      animation: lightning-strike 1.5s ease-in-out infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes lightning-strike {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .title {
+        font-size: 36px;
+      }
+      
+      .subtitle {
+        font-size: 18px;
+      }
+      
+      .question-container {
+        padding: 30px 20px;
+      }
+      
+      .question-text {
+        font-size: 22px;
+      }
+      
+      .choice-btn {
+        font-size: 18px;
+        padding: 20px 24px;
+      }
+      
+      .result-content {
+        padding: 40px 30px;
+      }
+      
+      .result-title {
+        font-size: 40px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="quiz-container"><!-- Animated background -->
+   <div class="circuit-bg" id="circuitBg"></div><!-- Start Screen -->
+   <div class="start-screen" id="startScreen">
+    <div class="logo-container">
+     <div class="electric-circle">
+      <svg viewbox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M50 10 L60 40 L40 40 Z M50 90 L40 60 L60 60 Z" fill="#ffd700" /> <circle cx="50" cy="50" r="8" fill="#00f0ff" /> <path d="M20 50 L35 50 M65 50 L80 50" stroke="#00f0ff" stroke-width="3" />
+      </svg>
+     </div>
+    </div>
+    <h1 class="title" id="quizTitle">Series Circuits Quiz</h1>
+    <p class="subtitle" id="quizSubtitle">Test Your Knowledge of Electricity</p>
+    <form class="student-info-form" id="studentForm">
+     <div class="form-group"><label for="studentName" class="form-label">Full Name:</label> <input type="text" id="studentName" class="form-input" placeholder="Enter your full name" required>
+     </div>
+     <div class="form-group"><label for="studentSection" class="form-label">Section:</label> <select id="studentSection" class="form-select" required> <option value="">Select your section</option> <option value="STEM 201">STEM 201</option> <option value="STEM 202">STEM 202</option> <option value="STEM 203">STEM 203</option> <option value="STEM 204">STEM 204</option> <option value="STEM 205">STEM 205</option> <option value="STEM 206">STEM 206</option> <option value="STEM 207">STEM 207</option> </select>
+     </div><button type="submit" class="start-btn"> <span id="startButtonText">Start Quiz</span> </button>
+    </form>
+   </div><!-- Quiz Screen -->
+   <div class="quiz-screen" id="quizScreen">
+    <div class="quiz-header">
+     <div class="student-info-display" id="studentInfoDisplay"><span class="student-name-display" id="studentNameDisplay"></span> <span class="student-section-display" id="studentSectionDisplay"></span>
+     </div>
+     <div class="progress-info"><span class="question-counter" id="questionCounter">Question 1 of 15</span>
+     </div>
+     <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+     </div>
+    </div>
+    <div class="quiz-content">
+     <div class="question-container">
+      <div class="question-text" id="questionText"></div>
+      <div class="choices" id="choices"></div>
+      <div class="navigation-buttons"><button class="nav-btn prev-btn" id="prevBtn">Previous</button> <button class="nav-btn next-btn" id="nextBtn">Next</button>
+      </div>
+     </div>
+    </div>
+   </div><!-- Result Modal -->
+   <div class="result-modal" id="resultModal">
+    <div class="result-content" id="resultContent">
+     <div class="lightning" id="lightning"></div>
+     <div class="result-icon" id="resultIcon"></div>
+     <h2 class="result-title" id="resultTitle"></h2>
+     <div class="result-student-info" id="resultStudentInfo"></div>
+     <div class="result-score" id="resultScore"></div>
+     <p class="result-message" id="resultMessage"></p>
+     <div class="result-buttons"><button class="result-btn" id="retryBtn"><span id="retryButtonText">Retry Quiz</span></button> <button class="result-btn exit" id="exitBtn"><span id="exitButtonText">Exit</span></button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      quiz_title: "Series Circuits Quiz",
+      quiz_subtitle: "Test Your Knowledge of Electricity",
+      start_button_text: "Start Quiz",
+      pass_message: "Excellent work! You've mastered series circuits!",
+      fail_message: "Keep studying! Review series circuits and try again.",
+      retry_button_text: "Retry Quiz",
+      exit_button_text: "Exit",
+      background_color: "#0a0e27",
+      primary_color: "#00f0ff",
+      accent_color: "#ffd700",
+      text_color: "#ffffff",
+      button_color: "#0ea5e9"
+    };
+
+    const questions = [
+      {
+        question: "In a series circuit, what happens to the current at every point?",
+        choices: [
+          "A. Current is different at each component",
+          "B. Current is the same throughout",
+          "C. Current decreases as it flows",
+          "D. Current increases at resistors"
+        ],
+        correct: 1
+      },
+      {
+        question: "What happens when one light bulb burns out in a series circuit?",
+        choices: [
+          "A. All other bulbs continue to glow",
+          "B. Only the bulbs after it go out",
+          "C. All bulbs go out",
+          "D. The bulbs get brighter"
+        ],
+        correct: 2
+      },
+      {
+        question: "If three resistors (2Ω, 3Ω, and 5Ω) are connected in series, what is the total resistance?",
+        choices: [
+          "A. 1Ω",
+          "B. 5Ω",
+          "C. 10Ω",
+          "D. 30Ω"
+        ],
+        correct: 2
+      },
+      {
+        question: "A series circuit has a 12V battery and a total resistance of 4Ω. What is the current flowing through the circuit? (Use V = IR)",
+        choices: [
+          "A. 2A",
+          "B. 3A",
+          "C. 4A",
+          "D. 48A"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which of the following is a real-life example of a series circuit?",
+        choices: [
+          "A. Household electrical outlets",
+          "B. Car headlights",
+          "C. Old-style Christmas lights",
+          "D. Modern LED light strips"
+        ],
+        correct: 2
+      },
+      {
+        question: "What happens to the total voltage in a series circuit?",
+        choices: [
+          "A. It is divided among all components",
+          "B. It remains the same at each component",
+          "C. It increases at each resistor",
+          "D. It becomes zero"
+        ],
+        correct: 0
+      },
+      {
+        question: "Three identical batteries (1.5V each) are connected in series. What is the total voltage?",
+        choices: [
+          "A. 1.5V",
+          "B. 3V",
+          "C. 4.5V",
+          "D. 6V"
+        ],
+        correct: 2
+      },
+      {
+        question: "A circuit has two resistors in series: 6Ω and 4Ω. If the total voltage is 20V, what is the current?",
+        choices: [
+          "A. 2A",
+          "B. 4A",
+          "C. 10A",
+          "D. 20A"
+        ],
+        correct: 0
+      },
+      {
+        question: "In a series circuit, adding more resistors will:",
+        choices: [
+          "A. Increase the total current",
+          "B. Decrease the total resistance",
+          "C. Increase the total resistance",
+          "D. Have no effect on resistance"
+        ],
+        correct: 2
+      },
+      {
+        question: "A flashlight typically uses which type of circuit for its batteries?",
+        choices: [
+          "A. Parallel circuit",
+          "B. Series circuit",
+          "C. Complex circuit",
+          "D. Short circuit"
+        ],
+        correct: 1
+      },
+      {
+        question: "If the voltage across a 5Ω resistor in a series circuit is 10V, what is the current through it?",
+        choices: [
+          "A. 0.5A",
+          "B. 2A",
+          "C. 5A",
+          "D. 50A"
+        ],
+        correct: 1
+      },
+      {
+        question: "What is the main disadvantage of series circuits in home lighting?",
+        choices: [
+          "A. They use too much electricity",
+          "B. If one bulb fails, all lights go out",
+          "C. They are too expensive",
+          "D. They produce too much heat"
+        ],
+        correct: 1
+      },
+      {
+        question: "A series circuit has resistors of 10Ω, 20Ω, and 30Ω. If the current is 2A, what is the total voltage?",
+        choices: [
+          "A. 30V",
+          "B. 60V",
+          "C. 120V",
+          "D. 240V"
+        ],
+        correct: 2
+      },
+      {
+        question: "In a series circuit with three equal resistors and a 24V battery, what is the voltage drop across each resistor?",
+        choices: [
+          "A. 4V",
+          "B. 6V",
+          "C. 8V",
+          "D. 12V"
+        ],
+        correct: 2
+      },
+      {
+        question: "Which statement best describes current flow in a series circuit?",
+        choices: [
+          "A. Current splits at each branch",
+          "B. Current follows a single path through all components",
+          "C. Current varies based on resistance",
+          "D. Current flows in multiple directions"
+        ],
+        correct: 1
+      }
+    ];
+
+    let currentQuestion = 0;
+    let userAnswers = [];
+    let score = 0;
+    let shuffledQuestions = [];
+    let shuffledChoices = [];
+    let studentName = '';
+    let studentSection = '';
+    let allSubmissions = [];
+
+    const startScreen = document.getElementById('startScreen');
+    const quizScreen = document.getElementById('quizScreen');
+    const studentForm = document.getElementById('studentForm');
+    const questionCounter = document.getElementById('questionCounter');
+    const progressBar = document.getElementById('progressBar');
+    const questionText = document.getElementById('questionText');
+    const choicesContainer = document.getElementById('choices');
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const resultModal = document.getElementById('resultModal');
+    const resultContent = document.getElementById('resultContent');
+    const resultIcon = document.getElementById('resultIcon');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultScore = document.getElementById('resultScore');
+    const resultMessage = document.getElementById('resultMessage');
+    const retryBtn = document.getElementById('retryBtn');
+    const exitBtn = document.getElementById('exitBtn');
+
+    // Fisher-Yates shuffle algorithm
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    // Shuffle choices while tracking correct answer
+    function shuffleChoices(question) {
+      const choicesWithIndex = question.choices.map((choice, index) => ({
+        text: choice,
+        wasCorrect: index === question.correct
+      }));
+      const shuffled = shuffleArray(choicesWithIndex);
+      return {
+        choices: shuffled.map(item => item.text),
+        correctIndex: shuffled.findIndex(item => item.wasCorrect)
+      };
+    }
+
+    function createCircuitBackground() {
+      const circuitBg = document.getElementById('circuitBg');
+      
+      // Circuit lines
+      for (let i = 0; i < 12; i++) {
+        const line = document.createElement('div');
+        line.className = 'circuit-line';
+        const isHorizontal = Math.random() > 0.5;
+        if (isHorizontal) {
+          line.style.width = `${Math.random() * 400 + 150}px`;
+          line.style.height = '2px';
+          line.style.top = `${Math.random() * 100}%`;
+          line.style.left = `${Math.random() * 100}%`;
+        } else {
+          line.style.width = '2px';
+          line.style.height = `${Math.random() * 400 + 150}px`;
+          line.style.top = `${Math.random() * 100}%`;
+          line.style.left = `${Math.random() * 100}%`;
+        }
+        line.style.animationDelay = `${Math.random() * 3}s`;
+        circuitBg.appendChild(line);
+      }
+
+      // Floating electrons
+      for (let i = 0; i < 15; i++) {
+        const electron = document.createElement('div');
+        electron.className = 'electron';
+        electron.style.top = `${Math.random() * 100}%`;
+        electron.style.left = `${-10 - Math.random() * 50}%`;
+        electron.style.animationDelay = `${Math.random() * 8}s`;
+        electron.style.animationDuration = `${6 + Math.random() * 4}s`;
+        circuitBg.appendChild(electron);
+      }
+
+      // Electric sparks
+      for (let i = 0; i < 20; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        spark.style.left = `${Math.random() * 100}%`;
+        spark.style.top = `${-10}%`;
+        spark.style.animationDelay = `${Math.random() * 3}s`;
+        spark.style.animationDuration = `${2 + Math.random() * 2}s`;
+        circuitBg.appendChild(spark);
+      }
+
+      // Glowing orbs
+      for (let i = 0; i < 8; i++) {
+        const orb = document.createElement('div');
+        orb.className = 'orb';
+        const size = 100 + Math.random() * 200;
+        orb.style.width = `${size}px`;
+        orb.style.height = `${size}px`;
+        orb.style.top = `${Math.random() * 100}%`;
+        orb.style.left = `${Math.random() * 100}%`;
+        orb.style.animationDelay = `${Math.random() * 4}s`;
+        orb.style.animationDuration = `${3 + Math.random() * 3}s`;
+        circuitBg.appendChild(orb);
+      }
+
+      // Circuit nodes
+      for (let i = 0; i < 25; i++) {
+        const node = document.createElement('div');
+        node.className = 'circuit-node';
+        node.style.top = `${Math.random() * 100}%`;
+        node.style.left = `${Math.random() * 100}%`;
+        node.style.animationDelay = `${Math.random() * 2}s`;
+        circuitBg.appendChild(node);
+      }
+
+      // Background lightning
+      for (let i = 0; i < 10; i++) {
+        const lightning = document.createElement('div');
+        lightning.className = 'bg-lightning';
+        lightning.style.left = `${Math.random() * 100}%`;
+        lightning.style.top = `${Math.random() * 50}%`;
+        lightning.style.transform = `rotate(${-20 + Math.random() * 40}deg)`;
+        lightning.style.animationDelay = `${Math.random() * 5}s`;
+        circuitBg.appendChild(lightning);
+      }
+    }
+
+    function startQuiz(event) {
+      event.preventDefault();
+      
+      const nameInput = document.getElementById('studentName');
+      const sectionInput = document.getElementById('studentSection');
+      
+      studentName = nameInput.value.trim();
+      studentSection = sectionInput.value;
+      
+      if (!studentName || !studentSection) {
+        return;
+      }
+      
+      // Display student info in quiz header
+      document.getElementById('studentNameDisplay').textContent = `Name: ${studentName}`;
+      document.getElementById('studentSectionDisplay').textContent = `Section: ${studentSection}`;
+      
+      startScreen.style.display = 'none';
+      quizScreen.style.display = 'flex';
+      currentQuestion = 0;
+      userAnswers = [];
+      score = 0;
+      
+      // Shuffle questions at the start of quiz
+      shuffledQuestions = shuffleArray(questions);
+      
+      // Shuffle choices for each question
+      shuffledChoices = shuffledQuestions.map(question => shuffleChoices(question));
+      
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const question = shuffledQuestions[currentQuestion];
+      const shuffledChoice = shuffledChoices[currentQuestion];
+      
+      questionCounter.textContent = `Question ${currentQuestion + 1} of ${shuffledQuestions.length}`;
+      questionText.textContent = question.question;
+      
+      const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+      progressBar.style.width = `${progress}%`;
+      
+      choicesContainer.innerHTML = '';
+      shuffledChoice.choices.forEach((choice, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        // display-only: strip leading A./B./C./D. labels from the rendered text
+        btn.textContent = choice.replace(/^[A-D]\.?\s*/i, '');
+        btn.onclick = () => selectAnswer(index);
+        
+        // Restore previous selection if exists
+        if (userAnswers[currentQuestion] === index) {
+          btn.classList.add('selected');
+        }
+        
+        choicesContainer.appendChild(btn);
+      });
+      
+      // Update button visibility and states
+      updateNavigationButtons();
+    }
+
+    function updateNavigationButtons() {
+      // Previous button
+      if (currentQuestion === 0) {
+        prevBtn.disabled = true;
+        prevBtn.classList.remove('visible');
+      } else {
+        prevBtn.disabled = false;
+        prevBtn.classList.add('visible');
+      }
+      
+      // Next button
+      if (userAnswers[currentQuestion] !== undefined) {
+        nextBtn.classList.add('visible');
+        nextBtn.disabled = false;
+      } else {
+        nextBtn.classList.remove('visible');
+        nextBtn.disabled = true;
+      }
+      
+      // Change text for last question
+      if (currentQuestion === shuffledQuestions.length - 1) {
+        nextBtn.textContent = 'Finish';
+      } else {
+        nextBtn.textContent = 'Next';
+      }
+    }
+
+    function selectAnswer(index) {
+      const choices = document.querySelectorAll('.choice-btn');
+      choices.forEach(btn => btn.classList.remove('selected'));
+      choices[index].classList.add('selected');
+      
+      userAnswers[currentQuestion] = index;
+      updateNavigationButtons();
+    }
+
+    function nextQuestion() {
+      if (currentQuestion < shuffledQuestions.length - 1) {
+        currentQuestion++;
+        loadQuestion();
+      } else {
+        calculateScore();
+        showResults();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        loadQuestion();
+      }
+    }
+
+    function calculateScore() {
+      score = 0;
+      shuffledQuestions.forEach((question, index) => {
+        const correctIndex = shuffledChoices[index].correctIndex;
+        if (userAnswers[index] === correctIndex) {
+          score++;
+        }
+      });
+    }
+
+    async function showResults() {
+      quizScreen.style.display = 'none';
+      resultModal.style.display = 'flex';
+      
+      const percentage = (score / shuffledQuestions.length) * 100;
+      const passed = percentage >= 75;
+      // DO NOT post to parent here; post AFTER PASSED UI is shown below
+      // Optional: send full result to parent for central collection
+      try {
+        const result = {
+          topic: 'series',
+          studentName: studentName || '',
+          studentSection: studentSection || '',
+          score: score,
+          total: shuffledQuestions.length,
+          percentage: percentage,
+          passed
+        };
+        window.parent.postMessage({ type: 'QUIZ_RESULT', payload: result }, '*');
+      } catch (e) {
+        /* ignore */
+      }
+      // Submit score to Google Form (no UI changes)
+      try {
+        submitScoreToGoogleForm({
+          studentName: studentName || '',
+          studentSection: studentSection || '',
+          quizName: 'Series Circuits',
+          score: score,
+          percentage: percentage,
+          passed: passed
+        });
+      } catch (e) { /* ignore */ }
+      
+      resultContent.className = 'result-content ' + (passed ? 'passed' : 'failed');
+      
+      // Display student info in results
+      document.getElementById('resultStudentInfo').innerHTML = `
+        <strong>${studentName}</strong><br>
+        ${studentSection}
+      `;
+      
+      if (passed) {
+        resultIcon.textContent = '⚡';
+        resultTitle.textContent = 'YOU PASSED!';
+        resultScore.textContent = `${score} / ${shuffledQuestions.length} (${percentage.toFixed(0)}%)`;
+        resultMessage.textContent = window.elementSdk?.config?.pass_message || defaultConfig.pass_message;
+        
+        const lightning = document.getElementById('lightning');
+        lightning.innerHTML = '';
+        for (let i = 0; i < 6; i++) {
+          const bolt = document.createElement('div');
+          bolt.className = 'bolt';
+          bolt.style.left = `${Math.random() * 100}%`;
+          bolt.style.animationDelay = `${Math.random() * 1.5}s`;
+          lightning.appendChild(bolt);
+        }
+        // Notify parent only after PASS UI is rendered
+        try {
+          window.parent.postMessage({ type: 'QUIZ_PASSED', topic: 'parallel' }, '*');
+        } catch (e) { }
+        // Also notify backend to unlock the NEXT topic for this student (safe backend call)
+        try{
+          (function(){
+            var name = (typeof studentName !== 'undefined' && studentName) ? studentName : (localStorage.getItem('studentName')||'');
+            var section = (typeof studentSection !== 'undefined' && studentSection) ? studentSection : (localStorage.getItem('studentSection')||'');
+            var url = 'https://script.google.com/macros/s/AKfycbx-VVgOkLZOBr1yK2THSGWdbaFdxrNqYK_V2fgprn1inHxFr1fx5caL-NB3xSrjhnZm/exec';
+            var body = new URLSearchParams();
+            body.append('name', name);
+            body.append('section', section);
+            body.append('action', 'UNLOCK');
+            body.append('topic', 'parallel');
+            fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString(), cache: 'no-store' })
+              .then(function(res){
+                if(!res.ok) return res.text().then(function(t){ throw new Error('HTTP '+res.status+': '+t); });
+                return res.json().catch(function(){ return null; });
+              })
+              .then(function(data){ console.log('Backend unlock request succeeded for parallel', data); })
+              .catch(function(err){ console.error('Backend unlock request failed for parallel', err); });
+          })();
+        }catch(e){ console.error('Backend unlock call error', e); }
+      } else {
+        resultIcon.textContent = '❌';
+        resultTitle.textContent = 'YOU DID NOT PASS';
+        resultScore.textContent = `${score} / ${shuffledQuestions.length} (${percentage.toFixed(0)}%)`;
+        resultMessage.textContent = window.elementSdk?.config?.fail_message || defaultConfig.fail_message;
+      }
+      
+      // Save result to Data SDK
+      if (window.dataSdk) {
+        const result = await window.dataSdk.create({
+          student_name: studentName,
+          section: studentSection,
+          score: score,
+          total_questions: shuffledQuestions.length,
+          percentage: parseFloat(percentage.toFixed(2)),
+          passed: passed,
+          timestamp: new Date().toISOString()
+        });
+        
+        if (!result.isOk) {
+          console.error('Failed to save quiz result:', result.error);
+        }
+      }
+    }
+
+    function submitScoreToGoogleForm({ studentName, studentSection, quizName, score, percentage, passed }) {
+      try {
+        const endpoint = 'https://docs.google.com/forms/d/e/1FAIpQLSdFWHfgpJkW2lzPZCCayDi-rI7pDuIk90zNmqgAVkIXB7tuCw/formResponse';
+        const params = new URLSearchParams();
+        params.append('entry.1885112147', studentName || '');
+        params.append('entry.1789780298', studentSection || '');
+        params.append('entry.871712505', quizName || '');
+        params.append('entry.29929990', String(score || 0));
+        params.append('entry.1068313912', String(Math.round(percentage || 0)));
+        params.append('entry.1408703668', passed ? 'PASSED' : 'FAILED');
+
+        fetch(endpoint, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        }).catch(() => {});
+      } catch (e) {
+        /* ignore errors silently */
+      }
+    }
+
+    function retryQuiz() {
+      resultModal.style.display = 'none';
+      startScreen.style.display = 'flex';
+      document.getElementById('studentName').value = '';
+      document.getElementById('studentSection').value = '';
+      studentName = '';
+      studentSection = '';
+    }
+
+    function exitQuiz() {
+      resultModal.style.display = 'none';
+      startScreen.style.display = 'flex';
+      document.getElementById('studentName').value = '';
+      document.getElementById('studentSection').value = '';
+      studentName = '';
+      studentSection = '';
+    }
+
+    studentForm.addEventListener('submit', startQuiz);
+    nextBtn.addEventListener('click', nextQuestion);
+    prevBtn.addEventListener('click', previousQuestion);
+    retryBtn.addEventListener('click', retryQuiz);
+    exitBtn.addEventListener('click', exitQuiz);
+
+    createCircuitBackground();
+
+    // Initialize Data SDK
+    const dataHandler = {
+      onDataChanged(data) {
+        allSubmissions = data;
+      }
+    };
+
+    if (window.dataSdk) {
+      window.dataSdk.init(dataHandler).then(result => {
+        if (!result.isOk) {
+          console.error('Failed to initialize Data SDK:', result.error);
+        }
+      });
+    }
+
+    async function onConfigChange(config) {
+      const quizTitleElement = document.getElementById('quizTitle');
+      const quizSubtitleElement = document.getElementById('quizSubtitle');
+      const startButtonTextElement = document.getElementById('startButtonText');
+      const retryButtonTextElement = document.getElementById('retryButtonText');
+      const exitButtonTextElement = document.getElementById('exitButtonText');
+
+      if (quizTitleElement) {
+        quizTitleElement.textContent = config.quiz_title || defaultConfig.quiz_title;
+      }
+      if (quizSubtitleElement) {
+        quizSubtitleElement.textContent = config.quiz_subtitle || defaultConfig.quiz_subtitle;
+      }
+      if (startButtonTextElement) {
+        startButtonTextElement.textContent = config.start_button_text || defaultConfig.start_button_text;
+      }
+      if (retryButtonTextElement) {
+        retryButtonTextElement.textContent = config.retry_button_text || defaultConfig.retry_button_text;
+      }
+      if (exitButtonTextElement) {
+        exitButtonTextElement.textContent = config.exit_button_text || defaultConfig.exit_button_text;
+      }
+
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const primaryColor = config.primary_color || defaultConfig.primary_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const buttonColor = config.button_color || defaultConfig.button_color;
+
+      document.body.style.background = `linear-gradient(135deg, ${backgroundColor} 0%, #1a1d3a 50%, #0f1629 100%)`;
+      
+      const electricCircle = document.querySelector('.electric-circle');
+      if (electricCircle) {
+        electricCircle.style.borderColor = primaryColor;
+      }
+
+      const progressBarElement = document.getElementById('progressBar');
+      if (progressBarElement) {
+        progressBarElement.style.background = `linear-gradient(90deg, ${primaryColor} 0%, ${accentColor} 100%)`;
+      }
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.button_color || defaultConfig.button_color,
+              set: (value) => {
+                config.button_color = value;
+                window.elementSdk.setConfig({ button_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["quiz_title", config.quiz_title || defaultConfig.quiz_title],
+          ["quiz_subtitle", config.quiz_subtitle || defaultConfig.quiz_subtitle],
+          ["start_button_text", config.start_button_text || defaultConfig.start_button_text],
+          ["pass_message", config.pass_message || defaultConfig.pass_message],
+          ["fail_message", config.fail_message || defaultConfig.fail_message],
+          ["retry_button_text", config.retry_button_text || defaultConfig.retry_button_text],
+          ["exit_button_text", config.exit_button_text || defaultConfig.exit_button_text]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c5fba73432a87fc',t:'MTc2OTc2MzA5NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

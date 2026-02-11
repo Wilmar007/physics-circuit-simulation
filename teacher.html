@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <script>
+    const LOCK_KEY = "electricityLabLocks";
+    const KEYS = ["ohms","series","parallel","power","energy","charge","magnetism"];
+
+    function getLocks() {
+      const raw = localStorage.getItem(LOCK_KEY);
+      if (!raw) {
+        const init = {};
+        KEYS.forEach(k => init[k] = false);
+        localStorage.setItem(LOCK_KEY, JSON.stringify(init));
+        return init;
+      }
+      return JSON.parse(raw);
+    }
+
+    function saveLocks(locks) {
+      localStorage.setItem(LOCK_KEY, JSON.stringify(locks));
+    }
+    function setLock(topic, val){
+      try{ const l = getLocks(); l[topic] = !!val; saveLocks(l); }catch(e){}
+    }
+    function initLocks(){ getLocks(); }
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Teacher Access - Electricity Lab</title>
+  <style>
+    body{font-family:Segoe UI, Arial; background:#051024; color:#dff; padding:24px}
+    .panel{max-width:900px;margin:0 auto;background:rgba(0,0,0,0.5);padding:18px;border-radius:10px}
+    .row{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+    label{min-width:140px}
+    input[type=text], input[type=password]{padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:#071226;color:#dff}
+    button{padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+    .btn-danger{background:#e53935;color:#fff}
+    .btn-primary{background:#1976d2;color:#fff}
+    .status{background:rgba(255,255,255,0.02);padding:8px;border-radius:6px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.04);text-align:left}
+    /* Teacher UI polish: arrange teacher buttons neatly (CSS only) */
+    #teacherArea button{ padding:10px 14px; font-size:0.98rem; margin:6px 6px 6px 0; border-radius:8px; }
+    /* quick locks: group buttons */
+    #quickLocks{ display:flex; gap:8px; flex-wrap:wrap; }
+    /* topic controls (generated) - force grid layout for neat alignment */
+    .topic-control{ display:grid !important; grid-template-columns: 1fr auto auto; gap:8px; align-items:center; padding:6px 0; }
+    .topic-control .topic-name{ font-size:1rem; }
+    /* make table action buttons readable */
+    #teacherLocksTable button{ padding:8px 10px; font-size:0.95rem; margin-left:6px }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h1>Teacher Access — Electricity Lab</h1>
+    <p>Manage locks, reset progress and view student progress on this browser.</p>
+
+    <div id="loginArea" class="row">
+      <label>Enter PIN</label>
+      <input id="pinInput" type="password" placeholder="PIN">
+      <button id="pinLogin" class="btn btn-primary">Login</button>
+    </div>
+
+    <div id="teacherArea" style="display:none;margin-top:12px">
+      <h3>Teacher Controls</h3>
+      <div class="row">
+        <label>Locks (toggle)</label>
+        <div id="locksContainer" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+      <!-- Simple teacher-only lock buttons (series, parallel, power) -->
+      <div class="row" style="margin-top:8px">
+        <label>Quick Locks</label>
+        <div id="quickLocks">
+          <button onclick="teacherUnlock('series')">Unlock Series</button>
+          <button onclick="teacherLock('series')">Lock Series</button>
+
+          <button onclick="teacherUnlock('parallel')">Unlock Parallel</button>
+          <button onclick="teacherLock('parallel')">Lock Parallel</button>
+
+          <button onclick="teacherUnlock('power')">Unlock Power</button>
+          <button onclick="teacherLock('power')">Lock Power</button>
+        </div>
+      </div>
+      <!-- All topics lock table (teacher-only) -->
+      <div class="row" style="margin-top:12px">
+        <label>All Topic Locks</label>
+        <div id="teacherLocksTableContainer" class="status" style="width:100%">
+          <table id="teacherLocksTable"><thead><tr><th>Topic</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+      <div class="row">
+        <label>Reset Progress</label>
+        <button id="resetProgress" class="btn btn-danger">Reset student progress (this device)</button>
+      </div>
+      <div class="row">
+        <label>Reset Device Locks</label>
+        <button id="resetDeviceLocks" class="btn btn-danger">Reset This Device (locks only)</button>
+      </div>
+      <div class="row">
+        <label>Change PIN</label>
+        <button id="changePin" class="btn">Change PIN</button>
+      </div>
+
+      <h3>Student Progress (read-only)</h3>
+      <div id="progressArea" class="status">
+        <table id="progressTable"><thead><tr><th>Topic</th><th>Status</th><th>Attempts</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div style="margin-top:14px">
+      <button onclick="window.location.href='index.html'">Back to Student View</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const KEYS = {
+    locks: 'electricityLabLocks',
+    progress: 'electricityLab.studentProgress',
+    attempts: 'electricityLab.attempts',
+    pin: 'electricityLab.teacherPIN'
+  };
+
+  const topics = [
+    // label: display, key: student's progress key, storeKey: teacherLocks key, attemptKey: attempts key
+    {label:"Ohm's Law", key:'ohms-law', storeKey:'ohms', attemptKey:'ohms'},
+    {label:'Series', key:'series', storeKey:'series', attemptKey:'series'},
+    {label:'Parallel', key:'parallel', storeKey:'parallel', attemptKey:'parallel'},
+    {label:'Energy', key:'power', storeKey:'energy', attemptKey:'energy'},
+    {label:'Charge', key:'electricCharge', storeKey:'charge', attemptKey:'charge'},
+    {label:'Magnetism', key:'magnetism', storeKey:'magnetism', attemptKey:'magnetism'}
+  ];
+
+  function getJSON(k){ try{ return JSON.parse(localStorage.getItem(k)||'{}'); }catch(e){return{}} }
+  function setJSON(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+  // ensure default PIN
+  if(!localStorage.getItem(KEYS.pin)) localStorage.setItem(KEYS.pin, '1234');
+
+  const pinInput = document.getElementById('pinInput');
+  const pinLogin = document.getElementById('pinLogin');
+  const teacherArea = document.getElementById('teacherArea');
+  const locksContainer = document.getElementById('locksContainer');
+  const progressTable = document.querySelector('#progressTable tbody');
+  const resetBtn = document.getElementById('resetProgress');
+  const changePinBtn = document.getElementById('changePin');
+
+  // Safe load/save helpers using the required storage key
+  function loadTeacherLocks(){
+    try{
+      const raw = localStorage.getItem(KEYS.locks);
+      const obj = raw ? JSON.parse(raw) : {};
+      // Ensure keys exist for known topics (do not remove other keys)
+      const defaults = { series:false, parallel:false, energy:false, charge:false, magnetism:false, ohms:false };
+      return Object.assign({}, defaults, obj);
+    }catch(e){ return { series:false, parallel:false, energy:false, charge:false, magnetism:false, ohms:false }; }
+  }
+
+  function saveTeacherLocks(locks){
+    try{ localStorage.setItem(KEYS.locks, JSON.stringify(locks)); }
+    catch(e){}
+  }
+
+  // Explicit teacher API required by spec
+  function teacherUnlock(topic){
+    // teacher unlock => mark topic as unlocked (true)
+    setLock && setLock(topic, true);
+  }
+
+  function teacherLock(topic){
+    // teacher lock => mark topic as locked (false)
+    setLock && setLock(topic, false);
+  }
+
+  // expose for onclick handlers and external scripts
+  window.teacherUnlock = teacherUnlock;
+  window.teacherLock = teacherLock;
+
+  function renderLocks(){
+    locksContainer.innerHTML = '';
+    const locks = loadTeacherLocks();
+    topics.forEach(t=>{
+      const wrapper = document.createElement('div');
+      wrapper.className = 'topic-control';
+      wrapper.style.display = 'flex'; wrapper.style.alignItems='center'; wrapper.style.gap='8px'; wrapper.style.margin='6px 0';
+
+      const name = document.createElement('span'); name.className='topic-name'; name.textContent = t.label; name.style.minWidth='160px';
+      const btnUnlock = document.createElement('button'); btnUnlock.textContent='Unlock'; btnUnlock.onclick = ()=>teacherUnlock(t.storeKey || t.attemptKey || t.key);
+      const btnLock = document.createElement('button'); btnLock.textContent='Lock'; btnLock.onclick = ()=>teacherLock(t.storeKey || t.attemptKey || t.key);
+
+      wrapper.appendChild(name);
+      wrapper.appendChild(btnUnlock);
+      wrapper.appendChild(btnLock);
+      locksContainer.appendChild(wrapper);
+    });
+  }
+
+  function renderProgress(){
+    progressTable.innerHTML='';
+    const progress = getJSON(KEYS.progress);
+    const attempts = getJSON(KEYS.attempts);
+    topics.forEach(t=>{
+      const tr = document.createElement('tr');
+      const td1 = document.createElement('td'); td1.textContent = t.label; tr.appendChild(td1);
+      const td2 = document.createElement('td');
+      const statusObj = progress[t.key] || {};
+      const teacherVal = (loadTeacherLocks()||{})[t.storeKey];
+      if(teacherVal === false) td2.textContent = '🔒 Locked by Teacher';
+      else if(teacherVal === true) td2.textContent = '🔓 Unlocked by Teacher';
+      else if(statusObj.passed) td2.textContent = 'Passed (by quiz)';
+      else if(statusObj.unlocked) td2.textContent = 'Unlocked (by quiz)';
+      else td2.textContent = 'Locked';
+      tr.appendChild(td2);
+      const td3 = document.createElement('td');
+      const a = attempts[t.attemptKey] || {remaining:3,lastAttempt:0};
+      td3.textContent = (a.remaining!=null? a.remaining : 3) + ' attempts';
+      tr.appendChild(td3);
+      progressTable.appendChild(tr);
+    });
+  }
+
+  pinLogin.addEventListener('click', ()=>{
+    const entered = pinInput.value;
+    const stored = localStorage.getItem(KEYS.pin) || '1234';
+    if(String(entered) !== String(stored)){ alert('Incorrect PIN'); return; }
+    // show teacher area
+    teacherArea.style.display='block';
+    renderLocks(); renderProgress();
+  });
+
+  resetBtn.addEventListener('click', ()=>{
+    if(!confirm('Reset student progress on this device?')) return;
+    localStorage.removeItem(KEYS.progress);
+    localStorage.removeItem(KEYS.attempts);
+    // log action
+    const logKey = 'EL_AUDIT_LOG';
+    const raw = localStorage.getItem(logKey); const arr = raw?JSON.parse(raw):[];
+    arr.push({action:'RESET_PROGRESS',scope:'all',by:'teacher',at:new Date().toISOString()});
+    localStorage.setItem(logKey, JSON.stringify(arr));
+    alert('Student progress reset on this device.');
+    renderProgress();
+  });
+
+  changePinBtn.addEventListener('click', ()=>{
+    const current = localStorage.getItem(KEYS.pin) || '1234';
+    const cur = prompt('Enter current PIN'); if(cur===null) return; if(String(cur)!==String(current)){ alert('Incorrect PIN'); return; }
+    const np = prompt('Enter new PIN'); if(np===null) return; if(String(np).trim()===''){ alert('PIN not changed'); return; }
+    localStorage.setItem(KEYS.pin, String(np)); alert('PIN changed');
+  });
+
+})();
+function teacherUnlock(topic) {
+  setLock && setLock(topic, true);
+}
+
+function teacherLock(topic) {
+  setLock && setLock(topic, false);
+}
+</script>
+<!-- Simple teacher lock helpers (do not affect quizzes) -->
+<script>
+function getTeacherLocks() {
+  return getLocks();
+}
+
+function saveTeacherLocks(locks) {
+  saveLocks(locks);
+}
+
+function teacherLock(topic) {
+  // teacherLock should mark topic as locked (false)
+  setLock && setLock(topic, false);
+}
+
+function teacherUnlock(topic) {
+  // teacherUnlock should mark topic as unlocked (true)
+  setLock && setLock(topic, true);
+}
+</script>
+<script>
+  (function(){
+    function mapTopic(name){
+      if(!name) return null;
+      const s = name.toLowerCase();
+      if(s.indexOf('series') !== -1) return 'series';
+      if(s.indexOf('parallel') !== -1) return 'parallel';
+      if(s.indexOf('power') !== -1 || s.indexOf('energy') !== -1) return 'energy';
+      if(s.indexOf('charge') !== -1) return 'charge';
+      if(s.indexOf('magnet') !== -1) return 'magnetism';
+      return null;
+    }
+
+    function wireButtons(){
+      var buttons = Array.from(document.querySelectorAll('button'));
+      buttons.forEach(function(btn){
+        try{
+          const txt = (btn.innerText||'').trim();
+          const lower = txt.toLowerCase();
+          // match Unlock/Lock + topic
+          if(lower.indexOf('unlock') !== -1 || lower.indexOf('lock') !== -1){
+            const topic = mapTopic(lower);
+            if(!topic) return;
+            // remove any previously-added handler marker
+            if(btn.__lockedWired) return;
+            btn.__lockedWired = true;
+            btn.addEventListener('click', function(ev){
+              try{
+                var shouldUnlock = lower.indexOf('unlock') !== -1;
+                // setLock: true = unlocked, false = locked
+                if(typeof setLock === 'function'){
+                  setLock(topic, shouldUnlock);
+                } else {
+                  // fallback using getLocks/saveLocks
+                  try{ const l = getLocks(); l[topic] = !!shouldUnlock; saveLocks(l); }catch(e){}
+                }
+                try{ renderLocks(); }catch(e){}
+                try{ renderProgress(); }catch(e){}
+              }catch(e){}
+            });
+          }
+        }catch(e){}
+      });
+    }
+
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireButtons);
+    else wireButtons();
+  })();
+</script>
+<script>
+  (function(){
+    const topics = [
+      {key:'home', label:'Home'},
+      {key:'ohms', label:"Ohm's Law"},
+      {key:'practical', label:'Practical'},
+      {key:'series', label:'Series'},
+      {key:'parallel', label:'Parallel'},
+      {key:'power', label:'Power'},
+      {key:'energy', label:'Energy'},
+      {key:'charge', label:'Charge'},
+      {key:'magnetism', label:'Magnetism'}
+    ];
+
+    function readLocks(){
+      try{ return JSON.parse(localStorage.getItem('electricityLabLocks')||'{}'); }catch(e){return{}} }
+
+    function renderTeacherLocksTable(){
+      const tbody = document.querySelector('#teacherLocksTable tbody');
+      if(!tbody) return;
+      const locks = readLocks();
+      tbody.innerHTML = '';
+      topics.forEach(t => {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td'); tdName.textContent = t.label; tr.appendChild(tdName);
+        const tdStatus = document.createElement('td');
+        const isUnlocked = !!locks[t.key];
+        tdStatus.textContent = isUnlocked ? '🔓 Unlocked' : '🔒 Locked';
+        tr.appendChild(tdStatus);
+        const tdActions = document.createElement('td');
+        const btnUnlock = document.createElement('button'); btnUnlock.textContent = 'Unlock';
+        btnUnlock.addEventListener('click', function(){
+          try{ if(typeof window.teacherUnlock === 'function') window.teacherUnlock(t.key); else if(typeof setLock === 'function') setLock(t.key, true); }catch(e){}
+          try{ renderTeacherLocksTable(); }catch(e){}
+        });
+        const btnLock = document.createElement('button'); btnLock.textContent = 'Lock';
+        btnLock.addEventListener('click', function(){
+          try{ if(typeof window.teacherLock === 'function') window.teacherLock(t.key); else if(typeof setLock === 'function') setLock(t.key, false); }catch(e){}
+          try{ renderTeacherLocksTable(); }catch(e){}
+        });
+        tdActions.appendChild(btnUnlock); tdActions.appendChild(document.createTextNode(' ')); tdActions.appendChild(btnLock);
+        tr.appendChild(tdActions);
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function(){
+      renderTeacherLocksTable();
+      const resetBtn = document.getElementById('resetDeviceLocks');
+      if(resetBtn) resetBtn.addEventListener('click', function(){
+        if(!confirm('Remove all locks from this device and reload?')) return;
+        try{ localStorage.removeItem('electricityLabLocks'); }catch(e){}
+        location.reload();
+      });
+
+      // Re-render when teacher area becomes visible
+      const teacherArea = document.getElementById('teacherArea');
+      if(teacherArea){
+        const mo = new MutationObserver(function(){ if(getComputedStyle(teacherArea).display !== 'none') renderTeacherLocksTable(); });
+        mo.observe(teacherArea, { attributes:true, attributeFilter:['style'] });
+      }
+    });
+  })();
+</script>
+</body>
+</html>

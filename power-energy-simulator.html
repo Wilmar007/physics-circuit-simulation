@@ -1,0 +1,1462 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Power &amp; Energy Simulator</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a0b2e 50%, #16213e 100%);
+      color: #00ffff;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      color: #00ffff;
+      text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+      margin-bottom: 10px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .header p {
+      font-size: 1.1em;
+      color: #ffff00;
+      text-shadow: 0 0 10px #ffff00;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    .environment-selector {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .env-button {
+      padding: 15px 40px;
+      font-size: 1.2em;
+      font-weight: bold;
+      border: 3px solid #00ffff;
+      background: rgba(0, 255, 255, 0.1);
+      color: #00ffff;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 10px #00ffff;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .env-button:hover {
+      background: rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 20px #00ffff;
+      transform: scale(1.05);
+    }
+
+    .env-button.active {
+      background: #00ffff;
+      color: #0a0e27;
+      box-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 968px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .simulation-area {
+      background: rgba(10, 14, 39, 0.8);
+      border: 2px solid #00ffff;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .simulation-area::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 50px,
+        rgba(0, 255, 255, 0.03) 50px,
+        rgba(0, 255, 255, 0.03) 51px
+      );
+      pointer-events: none;
+    }
+
+    .devices-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 25px;
+      position: relative;
+      z-index: 1;
+      padding: 10px;
+    }
+
+    .device-card {
+      background: linear-gradient(135deg, rgba(22, 33, 62, 0.95), rgba(10, 14, 39, 0.95));
+      border: 3px solid #2a4a6a;
+      border-radius: 15px;
+      padding: 25px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .device-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Ensure inputs inside device/appliance cards are clickable and editable.
+       Some pseudo-elements previously intercepted pointer events; make
+       pseudo-elements non-interactive and force inputs to accept pointer events. */
+    .appliance-card input,
+    .device-card input {
+      pointer-events: auto !important;
+      position: relative;
+      z-index: 10;
+    }
+
+    .device-card::before,
+    .device-card::after,
+    .appliance-card::before,
+    .appliance-card::after {
+      pointer-events: none;
+    }
+
+    .device-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      border-color: #00ffff;
+      box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+    }
+
+    .device-card:hover::before {
+      opacity: 1;
+    }
+
+    .device-card.active {
+      border-color: #00ff00;
+      background: linear-gradient(135deg, rgba(0, 255, 0, 0.15), rgba(0, 255, 0, 0.05));
+      box-shadow: 0 0 40px rgba(0, 255, 0, 0.6), 
+                  0 0 60px rgba(0, 255, 0, 0.4),
+                  inset 0 0 30px rgba(0, 255, 0, 0.2);
+      animation: deviceGlow 2s ease-in-out infinite;
+    }
+
+    .device-card.active::before {
+      opacity: 1;
+      animation: electricPulse 3s linear infinite;
+    }
+
+    @keyframes deviceGlow {
+      0%, 100% { 
+        box-shadow: 0 0 40px rgba(0, 255, 0, 0.6), 
+                    0 0 60px rgba(0, 255, 0, 0.4),
+                    inset 0 0 30px rgba(0, 255, 0, 0.2);
+      }
+      50% { 
+        box-shadow: 0 0 60px rgba(0, 255, 0, 0.9), 
+                    0 0 80px rgba(0, 255, 0, 0.6),
+                    inset 0 0 40px rgba(0, 255, 0, 0.4);
+      }
+    }
+
+    @keyframes electricPulse {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .device-icon {
+      font-size: 4em;
+      margin-bottom: 15px;
+      filter: grayscale(80%) brightness(0.7);
+      transition: all 0.4s ease;
+      position: relative;
+      display: inline-block;
+    }
+
+    .device-card.active .device-icon {
+      filter: grayscale(0%) brightness(1.3) drop-shadow(0 0 20px #00ff00);
+      animation: iconPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes iconPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .device-name {
+      font-size: 1.1em;
+      color: #00ffff;
+      margin-bottom: 8px;
+      font-weight: bold;
+      text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+      letter-spacing: 0.5px;
+    }
+
+    .device-card.active .device-name {
+      color: #00ff00;
+      text-shadow: 0 0 10px #00ff00;
+    }
+
+    .device-power {
+      font-size: 1em;
+      color: #ffff00;
+      font-weight: bold;
+      padding: 5px 12px;
+      background: rgba(255, 255, 0, 0.1);
+      border-radius: 8px;
+      display: inline-block;
+      border: 1px solid rgba(255, 255, 0, 0.3);
+    }
+
+    .device-card.active .device-power {
+      color: #fff;
+      background: rgba(0, 255, 0, 0.3);
+      border-color: #00ff00;
+      animation: powerBlink 1s ease-in-out infinite;
+    }
+
+    @keyframes powerBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .device-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.85em;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 0, 0, 0.4);
+    }
+
+    .device-card.active .device-status {
+      background: rgba(0, 255, 0, 0.3);
+      color: #00ff00;
+      border-color: #00ff00;
+      animation: statusPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .power-flow-line {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00ff00, transparent);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .device-card.active .power-flow-line {
+      opacity: 1;
+      animation: flowAnimation 2s linear infinite;
+    }
+
+    @keyframes flowAnimation {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .control-panel {
+      background: rgba(10, 14, 39, 0.8);
+      border: 2px solid #ffff00;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 0 30px rgba(255, 255, 0, 0.3);
+    }
+
+    .control-section {
+      margin-bottom: 25px;
+    }
+
+    .control-section h3 {
+      color: #ffff00;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+      text-shadow: 0 0 10px #ffff00;
+    }
+
+    .slider-control {
+      margin-bottom: 20px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      color: #00ffff;
+      font-size: 0.95em;
+    }
+
+    .slider-value {
+      color: #00ff00;
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      background: rgba(0, 255, 255, 0.3);
+      border-radius: 5px;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #00ffff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 15px #00ffff;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: #00ffff;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 15px #00ffff;
+      border: none;
+    }
+
+    .meter-display {
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00ff00;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+
+    .meter-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+
+    .meter-label {
+      color: #00ffff;
+    }
+
+    .meter-value {
+      color: #00ff00;
+      font-weight: bold;
+      text-shadow: 0 0 10px #00ff00;
+    }
+
+    .meter-value.high {
+      color: #ff0000;
+      text-shadow: 0 0 10px #ff0000;
+      animation: blink 0.5s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .energy-bar-container {
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00ffff;
+      border-radius: 10px;
+      height: 30px;
+      overflow: hidden;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .energy-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+    }
+
+    .energy-bar-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-weight: bold;
+      text-shadow: 0 0 5px #000;
+      z-index: 1;
+    }
+
+    .cost-input {
+      margin-top: 15px;
+    }
+
+    .cost-input input {
+      width: 100%;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid #00ffff;
+      border-radius: 5px;
+      color: #00ff00;
+      font-size: 1em;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .warning-box {
+      background: rgba(255, 0, 0, 0.2);
+      border: 2px solid #ff0000;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      color: #ff0000;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+      animation: warningPulse 1s ease-in-out infinite;
+    }
+
+    .warning-box.show {
+      display: block;
+    }
+
+    @keyframes warningPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.5); }
+      50% { box-shadow: 0 0 40px rgba(255, 0, 0, 0.8); }
+    }
+
+    .efficiency-message {
+      background: rgba(0, 255, 0, 0.2);
+      border: 2px solid #00ff00;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+      color: #00ff00;
+      text-align: center;
+      font-weight: bold;
+      display: none;
+    }
+
+    .efficiency-message.show {
+      display: block;
+    }
+
+    .discussion-panel {
+      background: linear-gradient(135deg, #081025 0%, #190a2e 100%);
+      border-radius: 18px;
+      padding: 0;
+      margin-top: 30px;
+      box-shadow: 0 6px 30px rgba(0,0,0,0.6), 0 0 40px rgba(0,246,255,0.06);
+      border: 1px solid rgba(0,246,255,0.06);
+    }
+    .discussion-toggle {
+      background: transparent;
+      color: #00f6ff;
+      border: none;
+      padding: 14px 20px;
+      font-size: 1.05em;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      padding-left: 18px;
+      transition: all 0.2s ease;
+      font-family: 'Orbitron', sans-serif;
+      display:flex; align-items:center; gap:12px;
+    }
+
+    .discussion-toggle:hover {
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    .discussion-content {
+      display: none;
+      color: #00ffff;
+      line-height: 1.6;
+      border-top: 1px solid rgba(255,255,255,0.03);
+      padding: 18px;
+      animation: none;
+    }
+
+    .discussion-content.show {
+      display: block;
+      animation: fadeIn 300ms ease both;
+    }
+
+    /* Neon container and cards */
+    .discussion-container {
+      background: linear-gradient(180deg, rgba(2,10,30,0.6), rgba(20,6,40,0.6));
+      border: 1px solid rgba(0,246,255,0.18);
+      box-shadow: 0 8px 40px rgba(0,246,255,0.04), 0 0 36px rgba(0,255,136,0.02) inset;
+      border-radius: 16px;
+      padding: 16px;
+      display:grid; gap:12px;
+    }
+
+    .discussion-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-left: 6px solid rgba(0,246,255,0.12);
+      padding: 12px 14px;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 14px rgba(0,246,255,0.03);
+      transition: box-shadow 220ms ease, transform 220ms ease;
+    }
+    .discussion-card:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.65), 0 0 24px rgba(0,246,255,0.06); transform: translateY(-2px); }
+
+    .section-header { font-size:1.1em; color:#00f6ff; font-weight:700; display:flex; align-items:center; gap:8px; }
+    .section-header .icon { font-size:1.2em; color:#ffd400; }
+
+    .formula-box { background: rgba(0,0,0,0.45); border:1px solid rgba(0,246,255,0.18); padding:10px; border-radius:8px; font-family: 'Courier New', monospace; font-size:1.05em; color:#00f6ff; }
+    .formula-box:hover { box-shadow: 0 0 18px rgba(0,246,255,0.08); }
+
+    .steps { display:flex; flex-direction:column; gap:8px; }
+    .step-card { background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); padding:10px; border-radius:8px; display:flex; gap:12px; align-items:flex-start; transform:translateX(-8px); opacity:0; animation: slideIn 320ms ease forwards; }
+    .step-number { width:36px; height:36px; border-radius:50%; background:#00f6ff; color:#071026; display:flex; align-items:center; justify-content:center; font-weight:800; box-shadow: 0 4px 14px rgba(0,246,255,0.12); }
+
+    .home-school { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .home-school .column { padding:10px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005)); border-left:6px solid rgba(0,255,136,0.06); }
+
+    .key-takeaways { background: linear-gradient(90deg, rgba(0,255,136,0.03), rgba(0,246,255,0.02)); padding:12px; border-radius:10px; border:1px solid rgba(0,246,255,0.06); box-shadow:0 6px 20px rgba(0,255,136,0.02); }
+    .key-takeaways li { margin-bottom:6px; }
+
+    .discussion-toggle .arrow { margin-left:auto; transition: transform 240ms ease; }
+    .discussion-toggle.open .arrow { transform: rotate(180deg); }
+
+    @keyframes slideIn { from { transform:translateX(-16px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .discussion-content h4 {
+      color: #ffff00;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+
+    .discussion-content p {
+      margin-bottom: 15px;
+      color: #00ffff;
+    }
+
+    .electron-animation {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #00ffff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #00ffff;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    @keyframes electronFlow {
+      0% { opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .circuit-wire {
+      position: absolute;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #00ffff, transparent);
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .time-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .time-button {
+      flex: 1;
+      padding: 10px;
+      background: rgba(0, 255, 255, 0.2);
+      border: 2px solid #00ffff;
+      color: #00ffff;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .time-button:hover {
+      background: rgba(0, 255, 255, 0.4);
+      box-shadow: 0 0 15px #00ffff;
+    }
+
+    .time-button.active {
+      background: #00ffff;
+      color: #0a0e27;
+    }
+    /* Rubric styling appended per request - do not overwrite existing styles */
+    .rubric-box {
+      background: rgba(0, 0, 0, 0.55);
+      border: 2px solid #00ffd5;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-top: 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 213, 0.25);
+    }
+
+    .rubric-box h3 {
+      color: #00ffd5;
+      margin-bottom: 12px;
+      font-size: 1.3rem;
+    }
+
+    .rubric-box li {
+      color: #ffffff;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .rubric-box strong {
+      color: #ffeb3b;
+    }
+    /* ⚡ ELECTRIC ANIMATIONS - appended as requested (CSS only, non-intrusive) */
+
+    /* ⚡ ELECTRIC BACKGROUND ANIMATION */
+    .electric-bg::before,
+    body::before,
+    .simulation-area::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          120deg,
+          rgba(255, 235, 59, 0.06) 0px,
+          rgba(255, 235, 59, 0.06) 2px,
+          transparent 2px,
+          transparent 18px
+        );
+      animation: electricFlow 8s linear infinite;
+      pointer-events: none;
+      opacity: 0.06;
+      z-index: 0;
+    }
+
+    @keyframes electricFlow {
+      from { background-position: 0 0; }
+      to { background-position: 400px 400px; }
+    }
+
+    /* ⚡ PULSE GLOW applied to cards and icons (slow, subtle) */
+    .device-card,
+    .device-icon,
+    .control-panel,
+    .discussion-card {
+      animation: pulseGlow 4.5s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 8px rgba(255,235,59,0.18);
+      }
+      50% {
+        box-shadow: 0 0 36px rgba(255,235,59,0.55);
+      }
+    }
+
+    /* ⚡ ENERGY FLOW LINES — moving highlight for `.power-flow-line` */
+    .power-flow-line {
+      background: linear-gradient(90deg, transparent, rgba(255,235,59,0.65), transparent);
+      opacity: 0.6;
+      animation: electricLine 3s linear infinite;
+    }
+
+    @keyframes electricLine {
+      0% { transform: translateX(-120%); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateX(120%); opacity: 0; }
+    }
+
+    /* ⚡ HOVER ELECTRICITY BURST */
+    button:hover,
+    .env-button:hover,
+    .device-card:hover,
+    .device-icon:hover {
+      box-shadow: 0 0 14px rgba(255,235,59,0.95), 0 0 36px rgba(255,235,59,0.55);
+      transition: box-shadow 0.22s ease;
+    }
+
+    /* Ensure pseudo-elements for background don't cover interactive elements */
+    body::before,
+    .simulation-area::after {
+      pointer-events: none;
+    }
+    /* ⚡ MOVING ELECTRIC BACKGROUND (append as requested) */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          135deg,
+          rgba(255,235,59,0.08) 0px,
+          rgba(255,235,59,0.08) 2px,
+          transparent 2px,
+          transparent 25px
+        );
+      animation: bgElectricMove 10s linear infinite;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.12;
+    }
+
+    @keyframes bgElectricMove {
+      from { background-position: 0 0; }
+      to { background-position: 500px 500px; }
+    }
+
+    /* ⚡ FLOATING ENERGY PARTICLES */
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(
+        circle,
+        rgba(255,235,59,0.45) 1px,
+        transparent 1px
+      );
+      background-size: 60px 60px;
+      animation: particleFloat 20s linear infinite;
+      z-index: -3;
+      pointer-events: none;
+      opacity: 0.12;
+    }
+
+    @keyframes particleFloat {
+      from { background-position: 0 0; }
+      to { background-position: -400px -800px; }
+    }
+
+    /* ⚡ LIGHTNING FLICKER element styling (subtle, behind content) */
+    .lightning-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,235,59,0.12);
+      opacity: 0;
+      animation: lightningPulse 8s infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes lightningPulse {
+      0%, 92%, 100% { opacity: 0; }
+      94% { opacity: 0.35; }
+      96% { opacity: 0.08; }
+    }
+  </style>
+  <style>
+    /* ⚡ ELECTRON FLOW FOR SIMULATORS & DISCUSSIONS (appended per request) */
+    .simulator,
+    .discussion,
+    .solution {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .simulator::before,
+    .discussion::before,
+    .solution::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(255,235,59,0.8) 2px, transparent 3px);
+      background-size: 70px 70px;
+      animation: electronFlowLocal 10s linear infinite;
+      opacity: 0.25;
+      z-index: 0;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px rgba(255,235,59,0.9));
+    }
+
+    .simulator > *,
+    .discussion > *,
+    .solution > * {
+      position: relative;
+      z-index: 2;
+    }
+
+    @keyframes electronFlowLocal {
+      from { background-position: 0 0; }
+      to { background-position: 500px 0; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="lightning-flash"></div>
+  <div class="app-container">
+   <div class="header">
+    <h1 id="main-title">⚡ Power &amp; Energy Simulator</h1>
+    <p id="subtitle">Home and School Electricity Use</p>
+   </div>
+   <!-- How to Use panel placed directly below the simulator title.
+        Default hidden; toggled by the top-right button inside the simulator card.
+        This panel is inserted in normal document flow so it does not float or overlap.
+   -->
+   <div id="howto-panel" style="display:none; margin-bottom:16px; color:#00ffff; background:rgba(10,14,39,0.85); border:2px solid #FFD700; padding:12px; border-radius:8px;">
+     <h3 style="color:#FFD700; margin:0 0 8px 0;">How to Use the Power &amp; Energy Simulator</h3>
+     <ol style="padding-left:18px; margin:0 0 8px 0;">
+       <li>Enter the appliance power in Watts (W).</li>
+       <li>Enter the number of hours used per day.</li>
+       <li>Enter the electricity rate in Philippine Peso (₱ per kWh).</li>
+       <li>Observe how Energy (kWh) and Cost update instantly.</li>
+       <li>Click "Show Solution" to view step-by-step calculations.</li>
+       <li>Compare daily, weekly, monthly, and yearly costs.</li>
+     </ol>
+     <div style="margin-top:8px; font-style:italic;">All values update automatically. No page refresh needed.</div>
+   </div>
+   <div class="environment-selector"><button class="env-button active" data-env="house">🏠 HOUSE</button> <button class="env-button" data-env="school">🏫 SCHOOL</button>
+   </div>
+   <div class="main-content">
+    <div class="simulation-area" style="position:relative;">
+    <!-- How-to button placed at top-right of the simulator card (default hidden panel) -->
+    <button id="howto-toggle" class="btn" style="position:absolute; top:12px; right:12px; z-index:40; background:#FFD700; color:#0a0e27; border:none; padding:8px 12px; border-radius:8px; cursor:pointer;">❓ How to Use</button>
+     <div class="devices-grid" id="devices-grid"><!-- Devices will be populated by JavaScript -->
+     </div>
+    </div>
+    <div class="control-panel">
+     <div class="control-section">
+      <h3>⚡ Controls</h3>
+      <div class="slider-control">
+       <div class="slider-label"><span>Voltage (V)</span> <span class="slider-value" id="voltage-value">220V</span>
+       </div><input type="range" id="voltage-slider" min="110" max="240" value="220" step="1">
+      </div>
+      <div class="slider-control">
+       <div class="slider-label"><span>Usage Time</span> <span class="slider-value" id="time-value">1.0 hours</span>
+       </div><input type="range" id="time-slider" min="0.1" max="12" value="1" step="0.1">
+      </div>
+      <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+        <label style="color:#00ffff;">Hours/day:</label>
+        <input type="number" id="time-input" value="1" step="0.1" min="0" style="width:100px; padding:6px; border-radius:6px; border:1px solid #00ffff; background:rgba(0,0,0,0.6); color:#00ffff;">
+      </div>
+      <div class="time-controls"><button class="time-button active" data-time="1">1h</button> <button class="time-button" data-time="3">3h</button> <button class="time-button" data-time="6">6h</button> <button class="time-button" data-time="12">12h</button>
+      </div>
+     </div>
+     <div class="control-section">
+      <h3>📊 Measurements</h3>
+      <div class="meter-display">
+       <div class="meter-row"><span class="meter-label">Total Power:</span> <span class="meter-value" id="total-power">0 W</span>
+       </div>
+       <div class="meter-row"><span class="meter-label">Total Energy:</span> <span class="meter-value" id="total-energy">0.00 kWh</span>
+       </div>
+      <div class="meter-row"><span class="meter-label">Total Cost:</span> <span class="meter-value" id="total-cost">₱0.00</span>
+       </div>
+      </div>
+      <div class="energy-bar-container">
+       <div class="energy-bar" id="energy-bar"></div>
+       <div class="energy-bar-label" id="energy-bar-label">
+        0%
+       </div>
+      </div>
+      <div class="cost-input">
+      <div class="slider-label"><span id="electricity-rate-label">Electricity Rate (₱/kWh)</span>
+       </div><input type="number" id="cost-per-kwh" value="11.50" step="0.01" min="0">
+      </div>
+      <!-- Solution & How-to controls (added for interactive learning) -->
+      <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+        <button id="solution-toggle" class="btn btn-secondary" style="flex:1;">Show Solution</button>
+      </div>
+      <div id="solution-panel" class="solution" style="margin-top:12px; display:none;">
+        <!-- Step-by-step calculations will be injected here when student requests it -->
+        <div id="solution-steps" style="color:#00ffff; padding:8px;"></div>
+      </div>
+      <!-- howto-panel was moved above the main content to sit directly under the title -->
+      
+      <!-- Time-based breakdowns: daily/weekly/monthly/yearly -->
+      <div style="margin-top:12px; color:#00ffff;">
+        <div style="font-weight:bold; color:#FFD700; margin-bottom:6px;">Time-based Breakdown</div>
+        <div>Daily: <span id="daily-energy">0.00 kWh</span> — <span id="daily-cost">₱0.00</span></div>
+        <div>Weekly (×7): <span id="weekly-energy">0.00 kWh</span> — <span id="weekly-cost">₱0.00</span></div>
+        <div>Monthly (×30): <span id="monthly-energy">0.00 kWh</span> — <span id="monthly-cost">₱0.00</span></div>
+        <div>Yearly (×365): <span id="yearly-energy">0.00 kWh</span> — <span id="yearly-cost">₱0.00</span></div>
+      </div>
+      <div class="warning-box" id="warning-box">
+       ⚠️ HIGH POWER USAGE! Risk of overload!
+      </div>
+      <div class="efficiency-message" id="efficiency-message">
+       ✅ Great! Energy-efficient usage!
+      </div>
+     </div>
+    </div>
+   </div>
+    <div class="discussion-panel" style="margin-top:20px;">
+     <button class="discussion-toggle" id="discussion-toggle"><span class="eye">👁</span><span class="label">Show Discussion</span><span class="arrow">▾</span></button>
+     <div class="discussion-content" id="discussion-content">
+      <div class="discussion-container">
+        <!-- Senior High: Learning Objectives -->
+        <div class="discussion-card">
+          <div class="section-header"><span class="icon">🎯</span><span>Learning Objectives (Senior High)</span></div>
+          <ul style="color:#c8ffff; margin-top:8px; padding-left:18px;">
+            <li>Explain and apply the quantitative relationship between power, energy and time (E = P × t) in kWh.</li>
+            <li>Calculate energy consumption and cost for combinations of appliances, and interpret results for real-life decision making.</li>
+            <li>Design and carry out a short investigation comparing measured and estimated energy use; analyse uncertainty and sources of error.</li>
+            <li>Apply results to evaluate efficiency improvements and simple load-management strategies for households or school labs.</li>
+          </ul>
+        </div>
+
+        <!-- Core concepts and formulas -->
+        <div class="discussion-card">
+          <div class="section-header"><span class="icon">📚</span><span>Core Concepts &amp; Key Formulas</span></div>
+          <div class="formula-box" style="margin-top:8px;">E = P × t</div>
+          <p style="color:#c8ffff; margin-top:8px;">Here: E is energy in watt-hours (Wh) or kilowatt-hours (kWh), P is power in watts (W), and t is time in hours (h). To convert Wh → kWh divide by 1000. Electrical cost = E(kWh) × rate (₱/kWh).</p>
+          <div class="formula-box" style="margin-top:8px;">Cost = E(kWh) × Rate (₱/kWh)</div>
+          <p style="color:#c8ffff; margin-top:8px;">When modelling multiple devices: total energy = Σ (P_i × t_i) / 1000. Use per-device hours when available; for devices that cycle (e.g., refrigerator), use an estimated average operating fraction.</p>
+        </div>
+
+        <!-- Worked Example (multi-device) -->
+        <div class="discussion-card">
+          <div class="section-header"><span class="icon">🧮</span><span>Worked Example (Senior High)</span></div>
+          <p style="color:#c8ffff; margin-top:8px;"><strong>Scenario:</strong> A small household uses a 60 W LED light for 5 h, a 75 W fan for 8 h, and a refrigerator with an effective average of 200 W running 24 h/day (estimated duty cycle).</p>
+          <ol style="color:#c8ffff; margin-top:8px; padding-left:18px;">
+            <li>Energy (Light) = 60 W × 5 h = 300 Wh = 0.300 kWh</li>
+            <li>Energy (Fan) = 75 W × 8 h = 600 Wh = 0.600 kWh</li>
+            <li>Energy (Fridge) = 200 W × 24 h = 4800 Wh = 4.800 kWh</li>
+            <li>Total daily energy = 0.300 + 0.600 + 4.800 = 5.700 kWh</li>
+            <li>At ₱11.50/kWh → Daily cost = 5.700 × ₱11.50 = ₱65.55</li>
+            <li>Monthly (×30) ≈ 171.0 kWh → ₱1966.50; Yearly (×365) ≈ 2080.5 kWh → ₱23,926</li>
+          </ol>
+          <p style="color:#c8ffff; margin-top:8px;">Discussion point: The refrigerator dominates the bill; improving its efficiency or reducing setpoint hours has the largest impact. Ask students to test sensitivity by halving fridge duty cycle or swapping LED for CFL (higher wattage) and compare cost changes.</p>
+        </div>
+
+        <!-- Classroom lab activity -->
+        <div class="discussion-card">
+          <div class="section-header"><span class="icon">🔬</span><span>Classroom Investigation</span></div>
+          <p style="color:#c8ffff; margin-top:8px;">Activity: In groups, measure or estimate energy use for 4 selected devices using the simulator and, where available, a plug-in watt-meter. Collect data for one week and produce a short report.</p>
+          <div style="color:#c8ffff; margin-top:8px; padding-left:18px;"><strong>Steps</strong>
+            <ol>
+              <li>Choose devices and record nameplate wattage (or measure with watt-meter).</li>
+              <li>Record daily usage hours (or timed runs) for 7 days, noting active vs standby periods.</li>
+              <li>Use the simulator to compute daily and weekly energy and cost; log values in a spreadsheet.</li>
+              <li>Plot device contribution (%) and identify the top two contributors to energy use.</li>
+              <li>Propose two practical reduction strategies and estimate saved kWh and ₱/month.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Teacher notes & assessment rubric -->
+        <div class="discussion-card">
+          <div class="section-header"><span class="icon">🧑‍🏫</span><span>Teacher Notes &amp; Assessment</span></div>
+          <p style="color:#c8ffff; margin-top:8px;">Time: one 50-minute lesson + homework; full investigation spans 1 week (data collection) and one lesson for presentations.</p>
+          <div class="rubric-box">
+            <h3>Suggested Rubric (20 pts)</h3>
+            <ul>
+              <li>Method &amp; Data Collection — <strong>6 pts</strong> (clear procedure, reliable measurements)</li>
+              <li>Calculations &amp; Accuracy — <strong>6 pts</strong> (correct energy/cost computations, units shown)</li>
+              <li>Analysis &amp; Graphs — <strong>4 pts</strong> (interprets results, shows contributions)</li>
+              <li>Recommendations &amp; Presentation — <strong>4 pts</strong> (realistic savings, communication)</li>
+            </ul>
+          </div>
+          <p style="color:#c8ffff; margin-top:8px;">Differentiation: offer extension tasks — estimate embodied energy of appliances, introduce basic uncertainty analysis (percent error), or compare tariff structures (time-of-use rates).</p>
+        </div>
+
+        <!-- Safety and measurement tips -->
+        <div class="discussion-card">
+          <div class="section-header"><span class="icon">⚠️</span><span>Safety &amp; Measurement Tips</span></div>
+          <ul style="color:#c8ffff; margin-top:8px; padding-left:18px;">
+            <li>When using watt-meters or plug-in power monitors, follow manufacturer instructions and do not exceed rated loads.</li>
+            <li>Estimate duty cycles (fridge, AC) rather than assuming continuous operation; note that nameplate power is peak, not average.</li>
+            <li>Record times and conditions (e.g., fridge door openings) to contextualise anomalies in data.</li>
+          </ul>
+        </div>
+
+        <!-- Quick reference box -->
+        <div class="discussion-card">
+          <div class="section-header"><span class="icon">📌</span><span>Quick Reference</span></div>
+          <div class="formula-box" style="margin-top:8px;">E (kWh) = (Σ P_i × t_i) / 1000</div>
+          <div style="color:#c8ffff; margin-top:8px;">Cost (₱) = E (kWh) × rate (₱/kWh). Use the simulator to change P, t, and rate to test scenarios and policy ideas for energy savings.</div>
+        </div>
+      </div>
+     </div>
+   </div>
+  </div>
+  <script>
+    const devices = {
+      house: [
+        { name: 'Light Bulb', power: 60, icon: '💡', active: false, hours: 1 },
+        { name: 'Electric Fan', power: 75, icon: '🌀', active: false, hours: 1 },
+        { name: 'Television', power: 150, icon: '📺', active: false, hours: 1 },
+        { name: 'Refrigerator', power: 200, icon: '🧊', active: false, hours: 1 },
+        { name: 'Air Conditioner', power: 1000, icon: '❄️', active: false, hours: 1 },
+        { name: 'Microwave', power: 1200, icon: '📟', active: false, hours: 0.5 }
+      ],
+      school: [
+        { name: 'Projector', power: 350, icon: '📽️', active: false, hours: 2 },
+        { name: 'Smart TV / Interactive Board', power: 300, icon: '🖥️', active: false, hours: 3 },
+        { name: 'Desktop Computer', power: 250, icon: '💻', active: false, hours: 6 },
+        { name: 'Printer / Photocopier', power: 800, icon: '🖨️', active: false, hours: 0.5 },
+        { name: 'Classroom Electric Fan', power: 90, icon: '🌀', active: false, hours: 6 },
+        { name: 'Laboratory Hot Plate', power: 1200, icon: '🧪', active: false, hours: 1 },
+        { name: 'Laboratory Fume Hood', power: 600, icon: '🧪', active: false, hours: 2 }
+      ]
+    };
+
+    let currentEnvironment = 'house';
+    let voltage = 220;
+    let usageTime = 1;
+    // Default electricity rate set to a realistic Philippine residential rate (₱/kWh)
+    let costPerKwh = 11.50;
+    let isRunning = false;
+
+    const defaultConfig = {
+      main_title: '⚡ Power & Energy Simulator',
+      subtitle: 'Home and School Electricity Use',
+      electricity_rate_label: 'Electricity Rate (₱/kWh)',
+      discussion_title: 'Understanding Power and Energy'
+    };
+
+    const config = window.elementSdk?.config || { ...defaultConfig };
+
+    async function onConfigChange(newConfig) {
+      document.getElementById('main-title').textContent = newConfig.main_title || defaultConfig.main_title;
+      document.getElementById('subtitle').textContent = newConfig.subtitle || defaultConfig.subtitle;
+      document.getElementById('electricity-rate-label').textContent = newConfig.electricity_rate_label || defaultConfig.electricity_rate_label;
+      document.getElementById('discussion-title').textContent = newConfig.discussion_title || defaultConfig.discussion_title;
+    }
+
+    function mapToCapabilities(cfg) {
+      return {
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(cfg) {
+      return new Map([
+        ['main_title', cfg.main_title || defaultConfig.main_title],
+        ['subtitle', cfg.subtitle || defaultConfig.subtitle],
+        ['electricity_rate_label', cfg.electricity_rate_label || defaultConfig.electricity_rate_label],
+        ['discussion_title', cfg.discussion_title || defaultConfig.discussion_title]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    function renderDevices() {
+      const grid = document.getElementById('devices-grid');
+      grid.innerHTML = '';
+      
+      const currentDevices = devices[currentEnvironment];
+      
+      currentDevices.forEach((device, index) => {
+        // Create device card with editable power field (students can change power rating)
+        const card = document.createElement('div');
+        card.className = `device-card ${device.active ? 'active' : ''}`;
+        card.innerHTML = `
+          <div class="device-status">${device.active ? 'ON' : 'OFF'}</div>
+          <div class="device-icon">${device.icon}</div>
+          <div class="device-name">${device.name}</div>
+          <div style="margin-top:8px; display:flex; gap:8px; align-items:center; justify-content:center;">
+            <div style="text-align:left;">
+              <label style="color:#00ffff; font-size:0.9em; display:block;">Power (W)</label>
+              <input type="number" class="device-power-input" id="device-power-${index}" value="${device.power}" min="0" step="1" style="width:100px; padding:6px; border-radius:6px; border:1px solid #00ffff; background:rgba(0,0,0,0.6); color:#00ffff;">
+            </div>
+            <div style="text-align:left;">
+              <label style="color:#00ffff; font-size:0.9em; display:block;">Hours/day</label>
+              <input type="number" class="device-hours-input" id="device-hours-${index}" value="${device.hours !== undefined ? device.hours : usageTime}" min="0" step="0.1" style="width:100px; padding:6px; border-radius:6px; border:1px solid #00ffff; background:rgba(0,0,0,0.6); color:#00ffff;">
+            </div>
+          </div>
+        `;
+        // toggle device when clicking card background (but not when interacting with inputs)
+        card.addEventListener('click', (ev) => {
+          // if the click target is either the power or hours input, do not toggle
+          if (ev.target && ev.target.classList && (ev.target.classList.contains('device-power-input') || ev.target.classList.contains('device-hours-input'))) return;
+          toggleDevice(index);
+        });
+        grid.appendChild(card);
+
+        // wire power input to update device power and refresh measurements in real-time
+        const powerInput = card.querySelector(`#device-power-${index}`);
+        if (powerInput) {
+          powerInput.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            devices[currentEnvironment][index].power = val;
+            // update displayed power-dependent metrics
+            updateMeasurements();
+          });
+          // prevent clicks on input from bubbling to card
+          powerInput.addEventListener('click', (e) => e.stopPropagation());
+        }
+        // hours input wiring
+        const hoursInput = card.querySelector(`#device-hours-${index}`);
+        if (hoursInput) {
+          hoursInput.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value) || 0;
+            devices[currentEnvironment][index].hours = val;
+            updateMeasurements();
+          });
+          hoursInput.addEventListener('click', (e) => e.stopPropagation());
+        }
+      });
+      
+      updateMeasurements();
+    }
+
+    function toggleDevice(index) {
+      devices[currentEnvironment][index].active = !devices[currentEnvironment][index].active;
+      renderDevices();
+    }
+
+    function updateMeasurements() {
+      const activeDevices = devices[currentEnvironment].filter(d => d.active);
+      const totalPower = activeDevices.reduce((sum, d) => sum + d.power, 0);
+      // Energy for the given usage time (hours per day) in kWh
+      // Use per-device hours when provided; fall back to global `usageTime`.
+      const totalEnergy = activeDevices.reduce((sum, d) => {
+        const hours = (d.hours !== undefined && d.hours !== null) ? d.hours : usageTime;
+        return sum + ((d.power * hours) / 1000);
+      }, 0);
+      const totalCost = totalEnergy * costPerKwh; // daily cost in ₱
+      // Time-based multipliers
+      const dailyEnergy = totalEnergy;
+      const dailyCost = totalCost;
+      const weeklyEnergy = totalEnergy * 7;
+      const weeklyCost = dailyCost * 7;
+      const monthlyEnergy = totalEnergy * 30;
+      const monthlyCost = dailyCost * 30;
+      const yearlyEnergy = totalEnergy * 365;
+      const yearlyCost = dailyCost * 365;
+      
+      const powerDisplay = document.getElementById('total-power');
+      powerDisplay.textContent = `${totalPower} W`;
+      powerDisplay.className = 'meter-value';
+      if (totalPower > 3000) {
+        powerDisplay.classList.add('high');
+      }
+      
+      document.getElementById('total-energy').textContent = `${totalEnergy.toFixed(2)} kWh`;
+      document.getElementById('total-cost').textContent = `₱${totalCost.toFixed(2)}`;
+
+      // Update time-based breakdown displays (daily/weekly/monthly/yearly)
+      const setText = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+      setText('daily-energy', `${dailyEnergy.toFixed(3)} kWh`);
+      setText('daily-cost', `₱${dailyCost.toFixed(2)}`);
+      setText('weekly-energy', `${weeklyEnergy.toFixed(3)} kWh`);
+      setText('weekly-cost', `₱${weeklyCost.toFixed(2)}`);
+      setText('monthly-energy', `${monthlyEnergy.toFixed(3)} kWh`);
+      setText('monthly-cost', `₱${monthlyCost.toFixed(2)}`);
+      setText('yearly-energy', `${yearlyEnergy.toFixed(3)} kWh`);
+      setText('yearly-cost', `₱${yearlyCost.toFixed(2)}`);
+      
+      const maxEnergy = 20;
+      const energyPercent = Math.min((totalEnergy / maxEnergy) * 100, 100);
+      document.getElementById('energy-bar').style.width = `${energyPercent}%`;
+      document.getElementById('energy-bar-label').textContent = `${energyPercent.toFixed(0)}%`;
+      
+      const warningBox = document.getElementById('warning-box');
+      const efficiencyMessage = document.getElementById('efficiency-message');
+      
+      if (totalPower > 3000) {
+        warningBox.classList.add('show');
+        efficiencyMessage.classList.remove('show');
+      } else if (totalPower < 500 && activeDevices.length > 0) {
+        efficiencyMessage.classList.add('show');
+        warningBox.classList.remove('show');
+      } else {
+        warningBox.classList.remove('show');
+        efficiencyMessage.classList.remove('show');
+      }
+
+      // If the solution panel is visible, refresh the step-by-step breakdown
+      const solPanel = document.getElementById('solution-panel');
+      if (solPanel && solPanel.style.display && solPanel.style.display !== 'none') {
+        const activeDevicesForSolution = devices[currentEnvironment].filter(d => d.active);
+        populateSolution(activeDevicesForSolution, totalPower, totalEnergy, totalCost, { dailyEnergy, dailyCost, weeklyEnergy, weeklyCost, monthlyEnergy, monthlyCost, yearlyEnergy, yearlyCost });
+      }
+    }
+
+    document.querySelectorAll('.env-button').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.env-button').forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        currentEnvironment = button.dataset.env;
+        renderDevices();
+      });
+    });
+
+    document.getElementById('voltage-slider').addEventListener('input', (e) => {
+      voltage = parseInt(e.target.value);
+      document.getElementById('voltage-value').textContent = `${voltage}V`;
+      updateMeasurements();
+    });
+
+    document.getElementById('time-slider').addEventListener('input', (e) => {
+      usageTime = parseFloat(e.target.value);
+      document.getElementById('time-value').textContent = `${usageTime.toFixed(1)} hours`;
+      updateMeasurements();
+      
+      document.querySelectorAll('.time-button').forEach(btn => btn.classList.remove('active'));
+    });
+
+    // Keep a numeric hours input in sync with the slider. Editing this input
+    // updates the slider and triggers real-time recalculation.
+    const timeInputEl = document.getElementById('time-input');
+    if (timeInputEl) {
+      timeInputEl.addEventListener('input', (e) => {
+        const v = parseFloat(e.target.value) || 0;
+        usageTime = v;
+        const slider = document.getElementById('time-slider');
+        if (slider) slider.value = usageTime;
+        document.getElementById('time-value').textContent = `${usageTime.toFixed(1)} hours`;
+        updateMeasurements();
+      });
+    }
+
+    document.querySelectorAll('.time-button').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.time-button').forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+        usageTime = parseFloat(button.dataset.time);
+        document.getElementById('time-slider').value = usageTime;
+        document.getElementById('time-value').textContent = `${usageTime.toFixed(1)} hours`;
+        updateMeasurements();
+      });
+    });
+
+    document.getElementById('cost-per-kwh').addEventListener('input', (e) => {
+      costPerKwh = parseFloat(e.target.value) || 0;
+      updateMeasurements();
+    });
+
+    document.getElementById('discussion-toggle').addEventListener('click', () => {
+      const content = document.getElementById('discussion-content');
+      const button = document.getElementById('discussion-toggle');
+      const label = button.querySelector('.label');
+      const eye = button.querySelector('.eye');
+      // Toggle the discussion container visibility using a 'show' class.
+      // Update the button label and icon, and toggle an 'open' class for arrow rotation.
+      if (content.classList.contains('show')) {
+        content.classList.remove('show');
+        if (label) label.textContent = 'Show Discussion';
+        if (eye) eye.textContent = '👁';
+        button.classList.remove('open');
+      } else {
+        content.classList.add('show');
+        if (label) label.textContent = 'Hide Discussion';
+        if (eye) eye.textContent = '🙈';
+        button.classList.add('open');
+      }
+    });
+
+    // Populate solution panel with step-by-step calculations (totals)
+    // Shows the equations and substituted values for the current inputs.
+    // This function does NOT automatically reveal the panel; it only fills
+    // content when the user opens the solution panel.
+    function populateSolution(activeDevices, totalPower, totalEnergy, totalCost, extras) {
+      const sol = document.getElementById('solution-steps');
+      if (!sol) return;
+      sol.innerHTML = '';
+
+      if (!activeDevices || activeDevices.length === 0) {
+        sol.innerHTML = '<div style="color:#FFD700;">No active devices. Toggle a device to see calculations.</div>';
+        return;
+      }
+
+      // Step 1: Energy calculation
+      const step1 = document.createElement('div');
+      step1.style.marginBottom = '10px';
+      // Build a human-friendly substitution string showing each active device's P × h
+      const terms = activeDevices.map(d => {
+        const h = (d.hours !== undefined && d.hours !== null) ? d.hours : usageTime;
+        return `${d.power} W × ${h} h`;
+      });
+      step1.innerHTML = `
+        <div style="font-weight:bold; color:#FFD700;">Step 1 — Energy</div>
+        <div>E = P × t</div>
+        <div>E = (Power × Hours) ÷ 1000</div>
+        <div>Substitute: E = (${terms.join(' + ')}) ÷ 1000 = ${totalEnergy.toFixed(3)} kWh</div>
+      `;
+      sol.appendChild(step1);
+
+      // Step 2: Cost calculation
+      const step2 = document.createElement('div');
+      step2.style.marginBottom = '10px';
+      step2.innerHTML = `
+        <div style="font-weight:bold; color:#FFD700;">Step 2 — Cost</div>
+        <div>Cost = Energy × Rate</div>
+        <div>Substitute: Cost = ${totalEnergy.toFixed(3)} × ₱${costPerKwh.toFixed(2)} = ₱${totalCost.toFixed(2)}</div>
+      `;
+      sol.appendChild(step2);
+
+      // Time-based substituted values
+      if (extras) {
+        const times = document.createElement('div');
+        times.style.marginTop = '8px';
+        times.innerHTML = `
+          <div style="font-weight:bold; color:#00ffff;">Time-based Results</div>
+          <div>Daily: ${extras.dailyEnergy.toFixed(3)} kWh — ₱${extras.dailyCost.toFixed(2)}</div>
+          <div>Weekly (×7): ${extras.weeklyEnergy.toFixed(3)} kWh — ₱${extras.weeklyCost.toFixed(2)}</div>
+          <div>Monthly (×30): ${extras.monthlyEnergy.toFixed(3)} kWh — ₱${extras.monthlyCost.toFixed(2)}</div>
+          <div>Yearly (×365): ${extras.yearlyEnergy.toFixed(3)} kWh — ₱${extras.yearlyCost.toFixed(2)}</div>
+        `;
+        sol.appendChild(times);
+      }
+
+      // Optional: list per-device contributions (compact)
+      const deviceHeader = document.createElement('div');
+      deviceHeader.style.marginTop = '12px';
+      deviceHeader.style.borderTop = '1px dashed rgba(255,255,255,0.08)';
+      deviceHeader.style.paddingTop = '8px';
+      deviceHeader.innerHTML = `<div style="font-weight:bold; color:#00ffff;">Per-device breakdown</div>`;
+      sol.appendChild(deviceHeader);
+
+      activeDevices.forEach((d) => {
+        const h = (d.hours !== undefined && d.hours !== null) ? d.hours : usageTime;
+        const e = (d.power * h) / 1000;
+        const c = e * costPerKwh;
+        const r = document.createElement('div');
+        r.style.marginTop = '6px';
+        r.innerHTML = `${d.name}: ${d.power} W × ${h} h = ${e.toFixed(3)} kWh → ₱${c.toFixed(2)}`;
+        sol.appendChild(r);
+      });
+    }
+
+    // Wire solution & how-to toggles
+    const solutionToggleBtn = document.getElementById('solution-toggle');
+    const howtoToggleBtn = document.getElementById('howto-toggle');
+
+    if (solutionToggleBtn) {
+      // Toggle logic: clicking the button toggles the solution panel's
+      // `display` style between 'none' and 'block'. We update the button
+      // label accordingly. When opening, populateSolution() is called to
+      // render the step-by-step breakdown using current inputs. We do NOT
+      // reveal the panel automatically anywhere else—only a user click shows it.
+      solutionToggleBtn.addEventListener('click', () => {
+        const panel = document.getElementById('solution-panel');
+        if (!panel) return;
+        const isHidden = panel.style.display === 'none' || panel.style.display === '';
+        if (isHidden) {
+          panel.style.display = 'block';
+          solutionToggleBtn.textContent = 'Hide Solution';
+          const activeDevicesForSolution = devices[currentEnvironment].filter(d => d.active);
+          const totalPower = activeDevicesForSolution.reduce((s, d) => s + d.power, 0);
+          const totalEnergy = activeDevicesForSolution.reduce((s, d) => {
+            const h = (d.hours !== undefined && d.hours !== null) ? d.hours : usageTime;
+            return s + ((d.power * h) / 1000);
+          }, 0);
+          const totalCost = totalEnergy * costPerKwh;
+          populateSolution(activeDevicesForSolution, totalPower, totalEnergy, totalCost);
+        } else {
+          panel.style.display = 'none';
+          solutionToggleBtn.textContent = 'Show Solution';
+        }
+      });
+    }
+
+    if (howtoToggleBtn) {
+      // How-to toggle: simple collapse/expand using display style.
+      // Default state is hidden (display:none). Clicking toggles visibility
+      // and updates the button label accordingly.
+      howtoToggleBtn.addEventListener('click', () => {
+        const p = document.getElementById('howto-panel');
+        if (!p) return;
+        const isHidden = p.style.display === 'none' || p.style.display === '';
+        if (isHidden) {
+          p.style.display = 'block';
+          howtoToggleBtn.textContent = 'Hide How to';
+        } else {
+          p.style.display = 'none';
+          // use the requested default label with emoji when hidden
+          howtoToggleBtn.textContent = '❓ How to Use';
+        }
+      });
+    }
+
+    renderDevices();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c60276040a8d846',t:'MTc2OTc2NzU1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

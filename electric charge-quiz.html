@@ -1,0 +1,1303 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Electrical Energy Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&amp;family=Exo+2:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      font-family: 'Exo 2', sans-serif;
+    }
+    
+    .font-orbitron {
+      font-family: 'Orbitron', monospace;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(0, 212, 255, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.8), 0 0 60px rgba(0, 212, 255, 0.5); }
+    }
+    
+    @keyframes electric-flow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes spark {
+      0%, 100% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1); }
+    }
+    
+    @keyframes lightning-flash {
+      0%, 90%, 100% { opacity: 0; }
+      92%, 95% { opacity: 1; }
+    }
+    
+    @keyframes circuit-pulse {
+      0% { stroke-dashoffset: 1000; }
+      100% { stroke-dashoffset: 0; }
+    }
+    
+    @keyframes celebration {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+      100% { transform: scale(1) rotate(360deg); opacity: 1; }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
+    @keyframes intense-glow {
+      0%, 100% { 
+        box-shadow: 0 0 10px rgba(0, 212, 255, 0.4),
+                    0 0 20px rgba(0, 212, 255, 0.3),
+                    0 0 40px rgba(0, 212, 255, 0.2),
+                    inset 0 0 10px rgba(0, 212, 255, 0.1);
+      }
+      50% { 
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.8),
+                    0 0 40px rgba(0, 212, 255, 0.6),
+                    0 0 80px rgba(0, 212, 255, 0.4),
+                    inset 0 0 20px rgba(0, 212, 255, 0.2);
+      }
+    }
+    
+    @keyframes electric-pulse {
+      0%, 100% { 
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 60px rgba(0, 212, 255, 0.6);
+        transform: scale(1.02);
+      }
+    }
+    
+    @keyframes neon-flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.8), 
+                     0 0 20px rgba(0, 212, 255, 0.6),
+                     0 0 30px rgba(0, 212, 255, 0.4),
+                     0 0 40px rgba(0, 212, 255, 0.2);
+      }
+      20%, 24%, 55% {
+        text-shadow: 0 0 5px rgba(0, 212, 255, 0.4);
+      }
+    }
+    
+    @keyframes rainbow-sweep {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes pulse-ring {
+      0% { 
+        box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.7);
+      }
+      70% { 
+        box-shadow: 0 0 0 20px rgba(0, 212, 255, 0);
+      }
+      100% { 
+        box-shadow: 0 0 0 0 rgba(0, 212, 255, 0);
+      }
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes rotate-glow {
+      0% { 
+        transform: rotate(0deg);
+        filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.6));
+      }
+      50% { 
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+      }
+      100% { 
+        transform: rotate(360deg);
+        filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.6));
+      }
+    }
+    
+    @keyframes bounce-glow {
+      0%, 100% { 
+        transform: translateY(0);
+        filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5));
+      }
+      50% { 
+        transform: translateY(-10px);
+        filter: drop-shadow(0 0 25px rgba(0, 212, 255, 0.9));
+      }
+    }
+    
+    @keyframes slide-in-glow {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+        filter: drop-shadow(0 0 0px rgba(0, 212, 255, 0));
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+        filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.8));
+      }
+    }
+    
+    @keyframes correct-pulse {
+      0%, 100% { 
+        box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 0 0 30px rgba(0, 255, 136, 1);
+        transform: scale(1.05);
+      }
+    }
+    
+    @keyframes incorrect-pulse {
+      0%, 100% { 
+        box-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+        transform: scale(1);
+      }
+      25%, 75% { 
+        transform: translateX(-5px);
+      }
+      50% { 
+        box-shadow: 0 0 30px rgba(255, 71, 87, 1);
+        transform: translateX(5px);
+      }
+    }
+    
+    .intense-glow {
+      animation: intense-glow 2s ease-in-out infinite;
+    }
+    
+    .electric-pulse {
+      animation: electric-pulse 1.5s ease-in-out infinite;
+    }
+    
+    .neon-flicker {
+      animation: neon-flicker 3s ease-in-out infinite;
+    }
+    
+    .pulse-ring-animation {
+      animation: pulse-ring 2s ease-out;
+    }
+    
+    .shimmer-animation {
+      background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.5), transparent);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite;
+    }
+    
+    .rotate-glow-animation {
+      animation: rotate-glow 4s linear infinite;
+    }
+    
+    .bounce-glow-animation {
+      animation: bounce-glow 2s ease-in-out infinite;
+    }
+    
+    .slide-in-glow-animation {
+      animation: slide-in-glow 0.6s ease-out;
+    }
+    
+    .correct-pulse-animation {
+      animation: correct-pulse 0.6s ease-out;
+    }
+    
+    .incorrect-pulse-animation {
+      animation: incorrect-pulse 0.6s ease-out;
+    }
+    
+    .glow-button {
+      animation: pulse-glow 2s ease-in-out infinite;
+      transition: all 0.3s ease;
+    }
+    
+    .glow-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(0, 212, 255, 1), 0 0 80px rgba(0, 212, 255, 0.7);
+    }
+    
+    .glow-button:disabled {
+      animation: none;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .electric-gradient {
+      background: linear-gradient(90deg, #00d4ff, #7b2cbf, #00d4ff, #ffd700, #00d4ff);
+      background-size: 200% 100%;
+      animation: electric-flow 3s linear infinite;
+    }
+    
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #00d4ff, #00ff88, #ffd700);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.3);
+      transition: width 0.5s ease-out;
+    }
+    
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .spark {
+      animation: spark 1.5s ease-in-out infinite;
+    }
+    
+    .option-card {
+      transition: all 0.3s ease;
+      border: 2px solid rgba(0, 212, 255, 0.3);
+    }
+    
+    .option-card:hover:not(.selected):not(.correct):not(.incorrect) {
+      border-color: rgba(0, 212, 255, 0.8);
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+      transform: translateX(5px);
+    }
+    
+    .option-card.selected {
+      border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.1);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+    
+    .option-card.correct {
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.15);
+      box-shadow: 0 0 25px rgba(0, 255, 136, 0.6);
+    }
+    
+    .option-card.incorrect {
+      border-color: #ff4757;
+      background: rgba(255, 71, 87, 0.15);
+      box-shadow: 0 0 25px rgba(255, 71, 87, 0.6);
+    }
+    
+    .neon-text {
+      text-shadow: 0 0 10px rgba(0, 212, 255, 0.8), 0 0 20px rgba(0, 212, 255, 0.6), 0 0 30px rgba(0, 212, 255, 0.4);
+    }
+    
+    .yellow-neon {
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+    }
+    
+    .celebration-animation {
+      animation: celebration 0.8s ease-out forwards;
+    }
+    
+    .shake-animation {
+      animation: shake 0.5s ease-in-out;
+    }
+    
+    .circuit-bg {
+      background-image: 
+        radial-gradient(circle at 20% 30%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(123, 44, 191, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.05) 0%, transparent 70%);
+    }
+    
+    .input-glow:focus {
+      box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(0, 212, 255, 0.3);
+    }
+    
+    .screen-container {
+      min-height: 100%;
+      display: none;
+    }
+    
+    .screen-container.active {
+      display: flex;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #00d4ff;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    @keyframes particle-float {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-100px) scale(0); opacity: 0; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full bg-gradient-to-br from-slate-950 via-indigo-950 to-purple-950 text-white overflow-auto">
+    <button
+  onclick="window.parent.postMessage('closeQuiz','*')"
+  style="
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(145deg,#ff6b6b,#ff3b3b);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(255,0,0,0.5);
+  ">
+  ← Back
+</button>
+  <div id="app" class="h-full w-full circuit-bg relative"><!-- Audio Elements for Sound Effects -->
+   <audio id="sound-select" preload="auto"><source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj==" type="audio/wav">
+   </audio>
+   <audio id="sound-correct" preload="auto"><source src="data:audio/wav;base64,UklGRpYGAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBg==" type="audio/wav">
+   </audio>
+   <audio id="sound-incorrect" preload="auto"><source src="data:audio/wav;base64,UklGRj4GAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBg==" type="audio/wav">
+   </audio>
+   <audio id="sound-complete" preload="auto"><source src="data:audio/wav;base64,UklGRloHAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQoHAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBg==" type="audio/wav">
+   </audio>
+   <audio id="sound-start" preload="auto"><source src="data:audio/wav;base64,UklGRkYHAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQoHAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBg==" type="audio/wav">
+   </audio><!-- Sound Toggle Button --> <button id="music-toggle" onclick="toggleBackgroundMusic()" class="fixed top-4 right-4 z-50 w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full glow-button flex items-center justify-center font-bold text-lg hover:scale-110 transition-all" title="Toggle background music"> 🔊 </button> <!-- Animated Background Elements -->
+   <div class="fixed inset-0 pointer-events-none overflow-hidden">
+    <div class="absolute top-10 left-10 text-6xl floating opacity-20">
+     ⚡
+    </div>
+    <div class="absolute top-20 right-20 text-4xl floating opacity-15" style="animation-delay: 0.5s;">
+     🔋
+    </div>
+    <div class="absolute bottom-20 left-20 text-5xl floating opacity-20" style="animation-delay: 1s;">
+     🧲
+    </div>
+    <div class="absolute bottom-10 right-10 text-4xl floating opacity-15" style="animation-delay: 1.5s;">
+     🌩️
+    </div>
+    <div class="absolute top-1/2 left-5 text-3xl spark opacity-30">
+     ✨
+    </div>
+    <div class="absolute top-1/3 right-10 text-3xl spark opacity-30" style="animation-delay: 0.7s;">
+     ✨
+    </div>
+   </div><!-- START SCREEN -->
+   <div id="start-screen" class="screen-container active flex-col items-center justify-center p-4 md:p-8">
+    <div class="max-w-lg w-full mx-auto"><!-- Title -->
+     <div class="text-center mb-8">
+      <div class="text-6xl mb-4 floating rotate-glow-animation">
+       ⚡
+      </div>
+      <h1 id="main-title" class="font-orbitron text-3xl md:text-4xl font-bold neon-text mb-2 neon-flicker">ELECTRICAL ENERGY</h1>
+      <h2 class="font-orbitron text-xl md:text-2xl text-yellow-400 yellow-neon neon-flicker">QUIZ</h2>
+      <p class="text-cyan-300 mt-4 text-sm md:text-base">Electric Charge &amp; Electrostatics</p>
+     </div><!-- Form -->
+     <div class="bg-slate-900/70 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-cyan-500/30 shadow-2xl intense-glow">
+      <div class="space-y-6"><!-- Name Input -->
+       <div><label class="block text-cyan-300 text-sm font-medium mb-2"> <span class="mr-2">👤</span>Full Name </label> <input type="text" id="student-name" placeholder="Enter your full name" class="w-full px-4 py-3 bg-slate-800/80 border-2 border-cyan-500/30 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 input-glow transition-all shimmer-animation">
+       </div><!-- Section Dropdown -->
+       <div><label class="block text-cyan-300 text-sm font-medium mb-2"> <span class="mr-2">📚</span>Section </label> <select id="student-section" class="w-full px-4 py-3 bg-slate-800/80 border-2 border-cyan-500/30 rounded-xl text-white focus:outline-none focus:border-cyan-400 input-glow transition-all cursor-pointer shimmer-animation"> <option value="" disabled selected>Select your section</option> <option value="STEM 201">STEM 201</option> <option value="STEM 202">STEM 202</option> <option value="STEM 203">STEM 203</option> <option value="STEM 204">STEM 204</option> <option value="STEM 205">STEM 205</option> <option value="STEM 206">STEM 206</option> <option value="STEM 207">STEM 207</option> </select>
+       </div><!-- Start Button --> <button id="start-btn" onclick="startQuiz()" class="w-full py-4 mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-orbitron font-bold text-lg rounded-xl glow-button electric-pulse pulse-ring-animation disabled:opacity-50 transition-all" disabled> ⚡ START QUIZ ⚡ </button>
+      </div>
+      <p class="text-center text-slate-400 text-xs mt-6">15 questions • Multiple choice • 75% to pass</p>
+     </div>
+    </div>
+   </div><!-- QUIZ SCREEN -->
+   <div id="quiz-screen" class="screen-container flex-col p-4 md:p-6">
+    <div class="max-w-3xl w-full mx-auto flex flex-col h-full"><!-- Header -->
+     <div class="flex justify-between items-center mb-4 slide-in-glow-animation">
+      <div class="flex items-center space-x-2"><span class="text-2xl bounce-glow-animation">⚡</span> <span class="font-orbitron text-cyan-400 text-sm md:text-base neon-text">ELECTROSTATICS QUIZ</span>
+      </div>
+      <div class="text-right"><span id="question-counter" class="font-orbitron text-yellow-400 text-lg yellow-neon">1 / 15</span>
+      </div>
+     </div><!-- Progress Bar -->
+     <div class="mb-6">
+      <div class="h-3 bg-slate-800 rounded-full overflow-hidden border border-cyan-500/30 intense-glow">
+       <div id="progress-bar" class="h-full progress-bar-fill rounded-full" style="width: 0%"></div>
+      </div>
+      <p id="progress-text" class="text-center text-cyan-300 text-xs mt-2">Question 1 of 15</p>
+     </div><!-- Question Card -->
+     <div class="bg-slate-900/80 backdrop-blur-sm rounded-2xl p-5 md:p-8 border border-cyan-500/30 flex-grow flex flex-col intense-glow slide-in-glow-animation"><!-- Question -->
+      <div class="mb-6">
+       <div class="flex items-start space-x-3"><span class="text-2xl md:text-3xl">❓</span>
+        <p id="question-text" class="text-lg md:text-xl text-white leading-relaxed"></p>
+       </div>
+      </div><!-- Options -->
+      <div id="options-container" class="space-y-3 flex-grow"><!-- Options will be inserted here -->
+      </div><!-- Navigation -->
+      <div class="flex justify-between items-center mt-6 pt-4 border-t border-cyan-500/20"><button id="prev-btn" onclick="prevQuestion()" class="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition-all flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed" disabled> <span>◀</span> <span>PREVIOUS</span> </button> <button id="next-btn" onclick="nextQuestion()" class="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold rounded-xl glow-button flex items-center space-x-2 disabled:opacity-40" disabled> <span>NEXT</span> <span>▶</span> </button>
+      </div>
+     </div>
+    </div>
+   </div><!-- RESULT SCREEN -->
+   <div id="result-screen" class="screen-container flex-col items-center justify-center p-4 md:p-8">
+    <div class="max-w-lg w-full mx-auto text-center"><!-- Result Icon -->
+     <div id="result-icon" class="text-8xl mb-6 celebration-animation bounce-glow-animation"></div><!-- Result Title -->
+     <h1 id="result-title" class="font-orbitron text-3xl md:text-4xl font-bold mb-4 neon-flicker"></h1><!-- Score Display -->
+     <div class="bg-slate-900/80 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-cyan-500/30 mb-6 intense-glow slide-in-glow-animation">
+      <div class="grid grid-cols-2 gap-4 mb-6">
+       <div class="bg-slate-800/50 rounded-xl p-4 electric-pulse">
+        <p class="text-cyan-300 text-sm mb-1">Score</p>
+        <p id="score-display" class="font-orbitron text-3xl text-white neon-text"></p>
+       </div>
+       <div class="bg-slate-800/50 rounded-xl p-4 electric-pulse" style="animation-delay: 0.2s;">
+        <p class="text-cyan-300 text-sm mb-1">Percentage</p>
+        <p id="percentage-display" class="font-orbitron text-3xl text-white yellow-neon"></p>
+       </div>
+      </div>
+      <div class="h-2 bg-slate-700 rounded-full overflow-hidden mb-4 intense-glow">
+       <div id="result-progress" class="h-full rounded-full transition-all duration-1000"></div>
+      </div>
+      <p id="result-message" class="text-lg"></p>
+     </div><!-- Student Info -->
+     <div class="bg-slate-800/50 rounded-xl p-4 mb-6 text-left slide-in-glow-animation">
+      <p class="text-slate-400 text-sm"><span class="text-cyan-400">Student:</span> <span id="result-name"></span></p>
+      <p class="text-slate-400 text-sm"><span class="text-cyan-400">Section:</span> <span id="result-section"></span></p>
+     </div><!-- Buttons -->
+     <div class="flex flex-col sm:flex-row gap-4"><button onclick="retryQuiz()" class="flex-1 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-orbitron font-bold rounded-xl glow-button electric-pulse transition-all"> 🔄 RETRY QUIZ </button> <button onclick="exitQuiz()" class="flex-1 py-4 bg-slate-700 hover:bg-slate-600 text-white font-orbitron font-bold rounded-xl transition-all bounce-glow-animation"> 🚪 EXIT </button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Generate synthetic sounds using Web Audio API
+    function generateSound(frequency, duration, type = 'sine') {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.type = type;
+      oscillator.frequency.value = frequency;
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + duration);
+    }
+
+    // Generate ambient background sound
+    function generateAmbientSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator1 = audioContext.createOscillator();
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      oscillator1.connect(filter);
+      oscillator2.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator1.type = 'sine';
+      oscillator2.type = 'sine';
+      
+      oscillator1.frequency.value = 55;
+      oscillator2.frequency.value = 110;
+      
+      // Modulate frequencies for ambient effect
+      const lfo = audioContext.createOscillator();
+      const lfoGain = audioContext.createGain();
+      lfo.connect(lfoGain);
+      lfoGain.connect(oscillator1.frequency);
+      
+      lfo.frequency.value = 0.5;
+      lfoGain.gain.value = 5;
+      
+      filter.type = 'lowpass';
+      filter.frequency.value = 200;
+      
+      gainNode.gain.value = 0.1;
+      
+      oscillator1.start();
+      oscillator2.start();
+      lfo.start();
+      
+      return { oscillator1, oscillator2, lfo, audioContext, gainNode };
+    }
+
+    // Audio state
+    let backgroundMusicEnabled = false;
+    let backgroundAudio = null;
+    let soundInstances = {};
+
+    // Initialize sounds with Web Audio API
+    function initializeSounds() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      // Select sound - beep
+      const selectAudio = document.getElementById('sound-select');
+      if (selectAudio && selectAudio.src) {
+        selectAudio.volume = 0.3;
+      }
+      
+      // Correct sound - ascending beep
+      const correctAudio = document.getElementById('sound-correct');
+      if (correctAudio && correctAudio.src) {
+        correctAudio.volume = 0.4;
+      }
+      
+      // Incorrect sound - descending beep
+      const incorrectAudio = document.getElementById('sound-incorrect');
+      if (incorrectAudio && incorrectAudio.src) {
+        incorrectAudio.volume = 0.3;
+      }
+      
+      // Complete sound - victory chime
+      const completeAudio = document.getElementById('sound-complete');
+      if (completeAudio && completeAudio.src) {
+        completeAudio.volume = 0.4;
+      }
+      
+      // Start sound
+      const startAudio = document.getElementById('sound-start');
+      if (startAudio && startAudio.src) {
+        startAudio.volume = 0.3;
+      }
+    }
+
+    // Toggle background music
+    function toggleBackgroundMusic() {
+      const musicToggle = document.getElementById('music-toggle');
+      
+      if (backgroundMusicEnabled) {
+        // Stop music
+        backgroundMusicEnabled = false;
+        musicToggle.textContent = '🔇';
+        musicToggle.title = 'Turn music ON';
+        
+        if (backgroundAudio) {
+          if (backgroundAudio.audioContext && backgroundAudio.audioContext.state === 'running') {
+            backgroundAudio.audioContext.suspend();
+          }
+          if (backgroundAudio.oscillator1) backgroundAudio.oscillator1.stop();
+          if (backgroundAudio.oscillator2) backgroundAudio.oscillator2.stop();
+          if (backgroundAudio.lfo) backgroundAudio.lfo.stop();
+        }
+        
+        // Pause HTML audio if exists
+        const bgSound = document.getElementById('background-sound');
+        if (bgSound) {
+          bgSound.pause();
+        }
+      } else {
+        // Start music
+        backgroundMusicEnabled = true;
+        musicToggle.textContent = '🔊';
+        musicToggle.title = 'Turn music OFF';
+        
+        try {
+          // Try to generate ambient sound with Web Audio API
+          backgroundAudio = generateAmbientSound();
+        } catch (e) {
+          console.log('Web Audio ambient failed, trying HTML audio');
+          const bgSound = document.getElementById('background-sound');
+          if (bgSound) {
+            bgSound.volume = 0.15;
+            bgSound.loop = true;
+            bgSound.play().catch(err => console.log('Audio play failed:', err));
+          }
+        }
+      }
+    }
+
+    // Enhanced sound play function with Web Audio fallback
+    function playSound(soundId, frequency = null, duration = 0.2) {
+      try {
+        const soundElement = document.getElementById(soundId);
+        
+        // Try HTML audio first
+        if (soundElement) {
+          soundElement.currentTime = 0;
+          soundElement.play().catch(() => {
+            // Fallback to Web Audio API
+            if (frequency) {
+              generateSound(frequency, duration);
+            }
+          });
+        } else if (frequency) {
+          // Direct Web Audio generation
+          generateSound(frequency, duration);
+        }
+      } catch (e) {
+        console.log('Sound error:', e);
+      }
+    }
+
+    // Play specific sound effects
+    function playSoundEffect(type) {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      
+      switch(type) {
+        case 'select':
+          playSound('sound-select', 800, 0.1);
+          break;
+        case 'correct':
+          // Ascending beep pattern
+          generateSound(523, 0.1); // C
+          setTimeout(() => generateSound(659, 0.1), 100); // E
+          setTimeout(() => generateSound(784, 0.15), 200); // G
+          break;
+        case 'incorrect':
+          // Descending beep pattern
+          generateSound(784, 0.1); // G
+          setTimeout(() => generateSound(659, 0.1), 100); // E
+          setTimeout(() => generateSound(523, 0.15), 200); // C
+          break;
+        case 'complete':
+          // Victory chime - three ascending notes
+          generateSound(523, 0.15); // C
+          setTimeout(() => generateSound(659, 0.15), 150); // E
+          setTimeout(() => generateSound(784, 0.3), 300); // G
+          break;
+        case 'start':
+          // Startup sound - rising tone
+          generateSound(440, 0.3);
+          break;
+      }
+    }
+
+    // Configuration
+    const defaultConfig = {
+      quiz_title: 'ELECTRICAL ENERGY QUIZ',
+      passing_message: 'Excellent work! You have a solid understanding of Electric Charge and Electrostatics!',
+      failing_message: 'Review Electric Charge concepts and try again. You can do it!',
+      background_color: '#0f172a',
+      accent_color: '#00d4ff',
+      text_color: '#ffffff',
+      highlight_color: '#ffd700',
+      secondary_color: '#7c3aed'
+    };
+
+    let config = { ...defaultConfig };
+
+    // Quiz State
+    let studentName = '';
+    let studentSection = '';
+    let currentQuestionIndex = 0;
+    let selectedAnswers = [];
+    let score = 0;
+    let currentQuizQuestions = [];
+    let usedQuestionIndices = new Set();
+
+    // Create Floating Particles
+    function createFloatingParticles() {
+      const container = document.getElementById('app');
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = `${Math.random() * 100}%`;
+          particle.style.top = `${Math.random() * 100}%`;
+          particle.style.fontSize = '20px';
+          particle.style.background = 'transparent';
+          const particles = ['⚡', '✨', '🔋'];
+          particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+          particle.style.animation = `particle-float ${2 + Math.random()}s ease-out forwards`;
+          container.appendChild(particle);
+          
+          setTimeout(() => particle.remove(), 3000);
+        }, i * 200);
+      }
+    }
+
+    // All 30 Questions
+    const allQuestions = [
+      // Q1-10: Basic concepts (definitions & identification)
+      {
+        question: "What is the subatomic particle that carries a positive charge?",
+        options: ["Electron", "Proton", "Neutron", "Photon"],
+        correct: 1
+      },
+      {
+        question: "Which subatomic particle has no electrical charge?",
+        options: ["Proton", "Electron", "Neutron", "Ion"],
+        correct: 2
+      },
+      {
+        question: "An atom becomes a positive ion when it:",
+        options: ["Gains electrons", "Loses electrons", "Gains protons", "Loses neutrons"],
+        correct: 1
+      },
+      {
+        question: "What do we call an object that has an equal number of protons and electrons?",
+        options: ["Positive", "Negative", "Neutral", "Ionized"],
+        correct: 2
+      },
+      {
+        question: "According to the law of charges, unlike charges will:",
+        options: ["Repel each other", "Attract each other", "Have no effect", "Cancel out"],
+        correct: 1
+      },
+      {
+        question: "Which of the following is a good electrical conductor?",
+        options: ["Rubber", "Plastic", "Copper", "Glass"],
+        correct: 2
+      },
+      {
+        question: "What is the term for materials that do NOT allow electrons to flow freely?",
+        options: ["Conductors", "Semiconductors", "Insulators", "Capacitors"],
+        correct: 2
+      },
+      {
+        question: "In the triboelectric series, an object that is higher on the list will become _____ when rubbed with an object lower on the list.",
+        options: ["Negatively charged", "Positively charged", "Neutral", "Magnetized"],
+        correct: 1
+      },
+      {
+        question: "The Van de Graaff generator is used to demonstrate:",
+        options: ["Magnetic fields", "Sound waves", "Static electricity buildup", "Nuclear reactions"],
+        correct: 2
+      },
+      {
+        question: "What is the unit of electrical charge?",
+        options: ["Volt", "Ampere", "Coulomb", "Ohm"],
+        correct: 2
+      },
+
+      // Q11-20: Understanding & explanation (why / how)
+      {
+        question: "When you rub a balloon on your hair and it sticks to a wall, this is an example of:",
+        options: ["Magnetic attraction", "Gravitational pull", "Electrostatic attraction", "Chemical bonding"],
+        correct: 2
+      },
+      {
+        question: "Why does your hair stand up when touching a Van de Graaff generator?",
+        options: ["Magnetic force pushes hair up", "Hair strands gain the same charge and repel", "Hot air rises and lifts hair", "Gravity is reversed"],
+        correct: 1
+      },
+      {
+        question: "In charging by induction, what is the purpose of grounding?",
+        options: ["To add more electrons", "To heat the object", "To allow excess charge to escape", "To magnetize the object"],
+        correct: 2
+      },
+      {
+        question: "When a glass rod is rubbed with silk, the glass rod becomes positive because:",
+        options: ["It gains protons", "It loses electrons to the silk", "It gains neutrons", "Silk transfers protons to it"],
+        correct: 1
+      },
+      {
+        question: "Why are lightning rods made of metal and pointed at the top?",
+        options: ["Metal attracts clouds", "Pointed tips concentrate charge for safe discharge", "Metal is cheaper than plastic", "Points look more professional"],
+        correct: 1
+      },
+      {
+        question: "Charging by conduction requires:",
+        options: ["No physical contact", "Direct physical contact", "A magnetic field", "Ultraviolet light"],
+        correct: 1
+      },
+      {
+        question: "When a charged object is brought near a neutral conductor, the electrons in the conductor will:",
+        options: ["Disappear completely", "Redistribute themselves", "Turn into protons", "Stop moving entirely"],
+        correct: 1
+      },
+      {
+        question: "Why do wool sweaters often create static sparks in dry weather?",
+        options: ["Wool is magnetic", "Friction transfers electrons between wool and other materials", "Wool generates its own electricity", "Dry air is radioactive"],
+        correct: 1
+      },
+      {
+        question: "In the triboelectric series, cat fur is near the top. When rubbed with rubber, cat fur will:",
+        options: ["Remain neutral", "Become negatively charged", "Become positively charged", "Become magnetized"],
+        correct: 2
+      },
+      {
+        question: "The dome of a Van de Graaff generator is made of metal because:",
+        options: ["Metal is shiny", "Metal conducts charge and spreads it evenly", "Metal is heavy", "Metal repels air"],
+        correct: 1
+      },
+
+      // Q21-30: Real-life scenarios & reasoning
+      {
+        question: "Maria gets a shock when she touches a metal doorknob after walking across a carpet. This happens because:",
+        options: ["The doorknob is magnetic", "She accumulated static charge from the carpet", "The door is electrified", "Metal is always charged"],
+        correct: 1
+      },
+      {
+        question: "Why should you NOT seek shelter under a tree during a thunderstorm?",
+        options: ["Trees attract birds", "Trees are tall conductors and attract lightning", "Trees produce harmful gases", "Trees block emergency signals"],
+        correct: 1
+      },
+      {
+        question: "A plastic comb can pick up small pieces of paper after being run through dry hair because:",
+        options: ["The comb becomes magnetized", "The comb becomes charged and induces opposite charge in paper", "Paper is naturally sticky", "Hair produces glue"],
+        correct: 1
+      },
+      {
+        question: "Gasoline trucks have chains dragging on the ground to:",
+        options: ["Make noise for safety", "Ground the truck and prevent static sparks", "Slow down the truck", "Mark their route"],
+        correct: 1
+      },
+      {
+        question: "Juan notices that his synthetic shirt crackles when he takes it off in the dark. The tiny sparks he sees are caused by:",
+        options: ["Bioluminescence", "Discharge of accumulated static electricity", "Radioactive decay", "Reflection of moonlight"],
+        correct: 1
+      },
+      {
+        question: "Why do electronics workers often wear special wrist straps connected to the ground?",
+        options: ["To look professional", "To measure their heart rate", "To prevent static discharge that could damage components", "To improve their grip"],
+        correct: 2
+      },
+      {
+        question: "During a science demonstration, a student's long hair floats upward while touching a Van de Graaff generator. If another student nearby touches the first student, what would likely happen?",
+        options: ["Nothing at all", "Both students' hair would stand up", "Only the second student's hair would stand up", "An explosion would occur"],
+        correct: 1
+      },
+      {
+        question: "A photocopier uses static electricity to make copies. The toner powder sticks to the paper because:",
+        options: ["The paper is sticky", "Opposite charges attract the toner to charged areas", "The toner is magnetic", "Heat melts the toner onto paper first"],
+        correct: 1
+      },
+      {
+        question: "When removing clothes from a dryer, they often cling together. To reduce this static cling, you could:",
+        options: ["Dry clothes longer", "Use dryer sheets that reduce charge buildup", "Add more clothes", "Use hotter settings"],
+        correct: 1
+      },
+      {
+        question: "In a lightning strike, electrons flow from the cloud to the ground. This is similar to which charging method?",
+        options: ["Charging by rubbing", "Charging by induction only", "Charging by conduction", "Charging by magnetism"],
+        correct: 2
+      }
+    ];
+
+    // Initialize SDKs
+    async function initializeApp() {
+      // Initialize Element SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (newConfig) => {
+            config = { ...config, ...newConfig };
+            applyConfig();
+          },
+          mapToCapabilities: (cfg) => ({
+            recolorables: [
+              {
+                get: () => cfg.background_color || defaultConfig.background_color,
+                set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+              },
+              {
+                get: () => cfg.accent_color || defaultConfig.accent_color,
+                set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
+              },
+              {
+                get: () => cfg.text_color || defaultConfig.text_color,
+                set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+              },
+              {
+                get: () => cfg.highlight_color || defaultConfig.highlight_color,
+                set: (v) => { cfg.highlight_color = v; window.elementSdk.setConfig({ highlight_color: v }); }
+              },
+              {
+                get: () => cfg.secondary_color || defaultConfig.secondary_color,
+                set: (v) => { cfg.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
+              }
+            ],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (cfg) => new Map([
+            ['quiz_title', cfg.quiz_title || defaultConfig.quiz_title],
+            ['passing_message', cfg.passing_message || defaultConfig.passing_message],
+            ['failing_message', cfg.failing_message || defaultConfig.failing_message]
+          ])
+        });
+      }
+
+      // Initialize Data SDK
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init({
+          onDataChanged: (data) => {
+            // Quiz results are stored but we don't need to display them in this UI
+          }
+        });
+        if (!result.isOk) {
+          console.error('Failed to initialize Data SDK');
+        }
+      }
+
+      // Setup form validation
+      setupFormValidation();
+      applyConfig();
+    }
+
+    function applyConfig() {
+      const title = document.getElementById('main-title');
+      if (title) {
+        title.textContent = config.quiz_title || defaultConfig.quiz_title;
+      }
+    }
+
+    function setupFormValidation() {
+      const nameInput = document.getElementById('student-name');
+      const sectionSelect = document.getElementById('student-section');
+      const startBtn = document.getElementById('start-btn');
+
+      function validateForm() {
+        const isValid = nameInput.value.trim() !== '' && sectionSelect.value !== '';
+        startBtn.disabled = !isValid;
+      }
+
+      nameInput.addEventListener('input', validateForm);
+      sectionSelect.addEventListener('change', validateForm);
+    }
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function selectQuestions() {
+      // Get available questions (not used in previous attempts)
+      const availableIndices = [];
+      for (let i = 0; i < allQuestions.length; i++) {
+        if (!usedQuestionIndices.has(i)) {
+          availableIndices.push(i);
+        }
+      }
+
+      // If not enough unused questions, reset the pool
+      if (availableIndices.length < 15) {
+        usedQuestionIndices.clear();
+        for (let i = 0; i < allQuestions.length; i++) {
+          availableIndices.push(i);
+        }
+      }
+
+      // Shuffle and select 15 questions
+      const shuffledIndices = shuffleArray(availableIndices).slice(0, 15);
+      
+      // Mark these as used
+      shuffledIndices.forEach(idx => usedQuestionIndices.add(idx));
+
+      // Create quiz questions with shuffled options
+      return shuffledIndices.map(idx => {
+        const q = allQuestions[idx];
+        const optionIndices = [0, 1, 2, 3];
+        const shuffledOptionIndices = shuffleArray(optionIndices);
+        
+        return {
+          question: q.question,
+          options: shuffledOptionIndices.map(i => q.options[i]),
+          correct: shuffledOptionIndices.indexOf(q.correct)
+        };
+      });
+    }
+
+    function startQuiz() {
+      studentName = document.getElementById('student-name').value.trim();
+      studentSection = document.getElementById('student-section').value;
+
+      if (!studentName || !studentSection) return;
+
+      playSoundEffect('start');
+      createFloatingParticles();
+
+      // (removed early submission) - submission will occur when quiz finishes
+
+      // Initialize quiz
+      currentQuestionIndex = 0;
+      selectedAnswers = new Array(15).fill(null);
+      score = 0;
+      currentQuizQuestions = selectQuestions();
+
+      // Switch screens
+      showScreen('quiz-screen');
+      displayQuestion();
+    }
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen-container').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    function displayQuestion() {
+      const question = currentQuizQuestions[currentQuestionIndex];
+      
+      // Update counter and progress
+      document.getElementById('question-counter').textContent = `${currentQuestionIndex + 1} / 15`;
+      document.getElementById('progress-text').textContent = `Question ${currentQuestionIndex + 1} of 15`;
+      
+      const progress = ((currentQuestionIndex + 1) / 15) * 100;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+
+      // Display question
+      document.getElementById('question-text').textContent = question.question;
+
+      // Display options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      const optionLabels = ['A', 'B', 'C', 'D'];
+      question.options.forEach((option, index) => {
+        const isSelected = selectedAnswers[currentQuestionIndex] === index;
+        
+        const optionDiv = document.createElement('div');
+        optionDiv.className = `option-card p-4 rounded-xl cursor-pointer bg-slate-800/50 ${isSelected ? 'selected' : ''}`;
+        optionDiv.onclick = () => {
+          selectOption(index);
+          playSoundEffect('select');
+          optionDiv.classList.add('pulse-ring-animation');
+        };
+        
+        optionDiv.innerHTML = `
+          <div class="flex items-center space-x-4">
+            <span class="w-10 h-10 flex items-center justify-center rounded-lg bg-slate-700 font-orbitron font-bold text-cyan-400 electric-pulse">${optionLabels[index]}</span>
+            <span class="text-white flex-1">${option}</span>
+            ${isSelected ? '<span class="text-yellow-400 text-xl">✓</span>' : ''}
+          </div>
+        `;
+        
+        optionsContainer.appendChild(optionDiv);
+      });
+
+      // Update navigation buttons
+      document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+      
+      const nextBtn = document.getElementById('next-btn');
+      if (currentQuestionIndex === 14) {
+        nextBtn.innerHTML = '<span>FINISH</span><span>🏁</span>';
+      } else {
+        nextBtn.innerHTML = '<span>NEXT</span><span>▶</span>';
+      }
+      nextBtn.disabled = selectedAnswers[currentQuestionIndex] === null;
+    }
+
+    function selectOption(index) {
+      selectedAnswers[currentQuestionIndex] = index;
+      displayQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        displayQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (selectedAnswers[currentQuestionIndex] === null) return;
+
+      if (currentQuestionIndex < 14) {
+        currentQuestionIndex++;
+        displayQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    async function finishQuiz() {
+      // Calculate score
+      score = 0;
+      currentQuizQuestions.forEach((q, idx) => {
+        if (selectedAnswers[idx] === q.correct) {
+          score++;
+        }
+      });
+
+      const percentage = Math.round((score / 15) * 100);
+      const passed = percentage >= 75;
+      // Submit to Google Form (no UI changes) - call immediately after pass is determined
+      try {
+        submitScoreToGoogleForm({
+          studentName: studentName || '',
+          studentSection: studentSection || '',
+          quizName: 'Electric Charge',
+          score: score,
+          percentage: percentage,
+          passed: passed
+        });
+      } catch (e) { /* ignore */ }
+
+      // Play sound and create effects
+      if (passed) {
+
+  // 🔓 Tell parent page that ELECTRIC CHARGE quiz is passed
+  window.parent.postMessage(
+    { type: "QUIZ_PASSED", topic: "magnetism" },
+    "*"
+  );
+
+  playSoundEffect('complete');
+  createCelebration();
+} else {
+  playSoundEffect('incorrect');
+}
+
+      createFloatingParticles();
+
+      // Save result to Data SDK
+      if (window.dataSdk) {
+        const result = await window.dataSdk.create({
+          student_name: studentName,
+          section: studentSection,
+          score: score,
+          total_questions: 15,
+          percentage: percentage,
+          passed: passed,
+          completed_at: new Date().toISOString()
+        });
+        
+        if (!result.isOk) {
+          console.error('Failed to save quiz result');
+        }
+      }
+
+      // Display result
+      showResult(score, percentage, passed);
+    }
+
+    function showResult(score, percentage, passed) {
+      showScreen('result-screen');
+
+      const resultIcon = document.getElementById('result-icon');
+      const resultTitle = document.getElementById('result-title');
+      const resultMessage = document.getElementById('result-message');
+      const resultProgress = document.getElementById('result-progress');
+
+      if (passed) {
+        resultIcon.textContent = '🎉';
+        resultTitle.textContent = 'YOU PASSED!';
+        resultTitle.className = 'font-orbitron text-3xl md:text-4xl font-bold mb-4 text-green-400 neon-text';
+        resultMessage.textContent = config.passing_message || defaultConfig.passing_message;
+        resultMessage.className = 'text-lg text-green-300';
+        resultProgress.className = 'h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-green-500 to-cyan-500';
+        
+        // Add celebration particles
+        createCelebration();
+      } else {
+        resultIcon.textContent = '📚';
+        resultTitle.textContent = 'YOU DID NOT PASS';
+        resultTitle.className = 'font-orbitron text-3xl md:text-4xl font-bold mb-4 text-red-400';
+        resultMessage.textContent = config.failing_message || defaultConfig.failing_message;
+        resultMessage.className = 'text-lg text-yellow-300';
+        resultProgress.className = 'h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-red-500 to-orange-500';
+      }
+
+      document.getElementById('score-display').textContent = `${score} / 15`;
+      document.getElementById('percentage-display').textContent = `${percentage}%`;
+      document.getElementById('result-name').textContent = studentName;
+      document.getElementById('result-section').textContent = studentSection;
+
+      // Animate progress bar
+      setTimeout(() => {
+        resultProgress.style.width = `${percentage}%`;
+      }, 100);
+    }
+
+    function submitScoreToGoogleForm({ studentName, studentSection, quizName, score, percentage, passed }) {
+      try {
+        const endpoint = 'https://docs.google.com/forms/d/e/1FAIpQLSdFWHfgpJkW2lzPZCCayDi-rI7pDuIk90zNmqgAVkIXB7tuCw/formResponse';
+        const params = new URLSearchParams();
+        params.append('entry.1885112147', studentName || '');
+        params.append('entry.1789780298', studentSection || '');
+        params.append('entry.871712505', quizName || '');
+        params.append('entry.29929990', String(score || 0));
+        params.append('entry.1068313912', String(Math.round(percentage || 0)));
+        params.append('entry.1408703668', passed ? 'PASSED' : 'FAILED');
+
+        fetch(endpoint, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        }).catch(() => {});
+      } catch (e) {
+        /* ignore silently */
+      }
+    }
+
+    function createCelebration() {
+      const container = document.getElementById('result-screen');
+      const emojis = ['⚡', '✨', '🎉', '🌟', '💫', '🔋', '✓', '🏆'];
+      
+      for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+          const particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.left = `${Math.random() * 100}%`;
+          particle.style.top = `${Math.random() * 100}%`;
+          particle.style.fontSize = '32px';
+          particle.style.background = 'transparent';
+          particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          particle.style.animation = `particle-float ${2 + Math.random()}s ease-out forwards`;
+          particle.classList.add('celebration-animation');
+          container.appendChild(particle);
+          
+          setTimeout(() => particle.remove(), 3000);
+        }, i * 50);
+      }
+    }
+
+    function retryQuiz() {
+      playSoundEffect('start');
+      createFloatingParticles();
+
+      // Reset quiz
+      currentQuestionIndex = 0;
+      selectedAnswers = new Array(15).fill(null);
+      score = 0;
+      currentQuizQuestions = selectQuestions();
+
+      showScreen('quiz-screen');
+      displayQuestion();
+    }
+
+    function exitQuiz() {
+      playSoundEffect('select');
+
+      // Reset everything
+      document.getElementById('student-name').value = '';
+      document.getElementById('student-section').value = '';
+      document.getElementById('start-btn').disabled = true;
+      
+      currentQuestionIndex = 0;
+      selectedAnswers = [];
+      score = 0;
+      currentQuizQuestions = [];
+      studentName = '';
+      studentSection = '';
+
+      showScreen('start-screen');
+    }
+
+    // Initialize when ready
+    initializeApp();
+    window.addEventListener('message', (event) => {
+    if (event.data === 'closeQuiz') {
+        document.getElementById('quizArea').style.display = 'none';
+        document.getElementById('mainMenu').style.display = 'block';
+    }
+});
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9ca32a96f78dfed8',t:'MTc3MDQ3MDIzNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>
+function closeQuiz() {
+  // Tell the parent page to close the quiz
+  window.parent.postMessage('closeQuiz', '*');
+}
+</script>
+</body>
+</html>

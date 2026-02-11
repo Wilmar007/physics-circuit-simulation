@@ -1,0 +1,2540 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ohm's Law Learning Lab</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Orbitron', 'Trebuchet MS', 'Arial', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1034 50%, #0d1b2a 100%);
+      color: #00d9ff;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    /* Animated background */
+    .circuit-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .circuit-line {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, #00d9ff, transparent);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    .line1 {
+      width: 2px;
+      height: 40%;
+      left: 20%;
+      top: 10%;
+      animation-delay: 0s;
+    }
+
+    .line2 {
+      width: 50%;
+      height: 2px;
+      right: 10%;
+      top: 30%;
+      animation-delay: 1s;
+    }
+
+    .line3 {
+      width: 2px;
+      height: 30%;
+      right: 25%;
+      bottom: 15%;
+      animation-delay: 2s;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Circuit nodes */
+    .circuit-node {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #00d9ff;
+      border-radius: 50%;
+      box-shadow: 0 0 15px #00d9ff;
+      animation: nodePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes nodePulse {
+      0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 0 15px #00d9ff;
+      }
+      50% { 
+        transform: scale(1.5);
+        box-shadow: 0 0 25px #00d9ff, 0 0 40px #00d9ff;
+      }
+    }
+
+    /* Flowing electrons in background */
+    .bg-electron {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: #ffeb3b;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ffeb3b;
+      animation: flowElectron linear infinite;
+    }
+
+    @keyframes flowElectron {
+      0% {
+        transform: translateX(0) translateY(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(100vw) translateY(50px);
+        opacity: 0;
+      }
+    }
+
+    /* Panel background animations */
+    .panel {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: 
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 40px,
+          rgba(0, 217, 255, 0.03) 40px,
+          rgba(0, 217, 255, 0.03) 42px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 40px,
+          rgba(0, 217, 255, 0.03) 40px,
+          rgba(0, 217, 255, 0.03) 42px
+        );
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gridMove {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(40px, 40px);
+      }
+    }
+
+    .panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Circuit symbols floating animation */
+    .floating-symbol {
+      position: absolute;
+      opacity: 0.1;
+      animation: floatSymbol 15s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes floatSymbol {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-40px) rotate(5deg) translateX(10px);
+      }
+      50% {
+        transform: translateY(-30px) rotate(10deg) translateX(-5px);
+      }
+      75% {
+        transform: translateY(-50px) rotate(-5deg) translateX(15px);
+      }
+    }
+
+    /* Rotating gears animation */
+    .rotating-gear {
+      position: absolute;
+      opacity: 0.08;
+      animation: rotateGear 20s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes rotateGear {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Pulsing electric rings */
+    .electric-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid #00d9ff;
+      opacity: 0;
+      animation: expandRing 4s ease-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes expandRing {
+      0% {
+        transform: scale(0.5);
+        opacity: 0.6;
+      }
+      50% {
+        opacity: 0.3;
+      }
+      100% {
+        transform: scale(2.5);
+        opacity: 0;
+      }
+    }
+
+    /* Zigzag lightning bolts */
+    .lightning-bolt {
+      position: absolute;
+      opacity: 0;
+      animation: flashLightning 5s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes flashLightning {
+      0%, 90%, 100% {
+        opacity: 0;
+      }
+      92%, 94%, 96% {
+        opacity: 0.4;
+      }
+      93%, 95% {
+        opacity: 0;
+      }
+    }
+
+    /* Spark animation for circuit elements */
+    .spark {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: #ffeb3b;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ffeb3b;
+      animation: sparkTravel 3s linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes sparkTravel {
+      0% {
+        opacity: 0;
+        transform: translateX(0);
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(200px);
+      }
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 540px;
+      font-weight: 900;
+      color: #ffeb3b;
+      text-shadow: 0 0 90px rgba(255, 235, 59, 0.8), 0 0 180px rgba(255, 235, 59, 0.5);
+      margin-bottom: 10px;
+      letter-spacing: 9px;
+      animation: titlePulse 3s ease-in-out infinite, titleFloat 4s ease-in-out infinite;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    h1:hover {
+      transform: scale(1.05) rotate(2deg);
+      text-shadow: 0 0 120px rgba(255, 235, 59, 1), 0 0 200px rgba(255, 235, 59, 0.7);
+    }
+    
+    @keyframes titlePulse {
+      0%, 100% {
+        text-shadow: 0 0 30px rgba(255, 235, 59, 0.8), 0 0 60px rgba(255, 235, 59, 0.5);
+        transform: scale(1);
+      }
+      50% {
+        text-shadow: 0 0 50px rgba(255, 235, 59, 1), 0 0 100px rgba(255, 235, 59, 0.7), 0 0 150px rgba(255, 235, 59, 0.4);
+        transform: scale(1.05);
+      }
+    }
+    
+    @keyframes titleFloat {
+      0%, 100% {
+        transform: translateY(0px) scale(1);
+      }
+      50% {
+        transform: translateY(-10px) scale(1.05);
+      }
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: #00d9ff;
+      opacity: 0.9;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 968px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: rgba(13, 27, 42, 0.8);
+      border: 2px solid rgba(0, 217, 255, 0.3);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 217, 255, 0.2);
+      backdrop-filter: blur(10px);
+      transition: border-color 0.3s ease;
+    }
+
+    .panel:hover {
+      border-color: rgba(0, 217, 255, 0.6);
+    }
+
+    .panel-title {
+      font-size: 24px;
+      color: #ffeb3b;
+      margin-bottom: 20px;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      animation: titleShimmer 2s ease-in-out infinite;
+    }
+    
+    @keyframes titleShimmer {
+      0%, 100% {
+        text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(255, 235, 59, 0.8), 0 0 30px rgba(255, 235, 59, 0.4);
+      }
+    }
+
+    /* Circuit Visualization */
+    .circuit-container {
+      position: relative;
+      width: 100%;
+      height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .circuit-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Controls */
+    .control-group {
+      margin-bottom: 30px;
+    }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #00d9ff;
+      font-weight: 600;
+    }
+
+    .control-value {
+      color: #ffeb3b;
+      font-size: 20px;
+      text-shadow: 0 0 10px rgba(255, 235, 59, 0.5);
+    }
+
+    .slider-container {
+      position: relative;
+      height: 50px;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 8px;
+      background: rgba(0, 217, 255, 0.2);
+      border-radius: 10px;
+      outline: none;
+      -webkit-appearance: none;
+      position: relative;
+      transition: background 0.3s ease;
+    }
+
+    input[type="range"]:hover {
+      background: rgba(0, 217, 255, 0.3);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #ffeb3b;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 30px rgba(255, 235, 59, 1);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      background: #ffeb3b;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 20px rgba(255, 235, 59, 0.8);
+      transition: all 0.3s ease;
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 30px rgba(255, 235, 59, 1);
+    }
+
+    /* Formula Display */
+    .formula-section {
+      background: rgba(255, 235, 59, 0.1);
+      border: 2px solid #ffeb3b;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .formula-label {
+      font-size: 16px;
+      color: #00d9ff;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .formula {
+      font-size: 56px;
+      color: #ffeb3b;
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+      font-family: 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      min-height: 120px;
+    }
+
+    .formula-letter {
+      display: inline-block;
+      transition: all 0.3s ease;
+      text-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+    }
+
+    .formula-i {
+      color: #00d9ff;
+    }
+
+    .formula-v {
+      color: #ffeb3b;
+    }
+
+    .formula-r {
+      color: #ff6b6b;
+    }
+
+    /* Results Display */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .result-box {
+      background: rgba(0, 217, 255, 0.1);
+      border: 2px solid rgba(0, 217, 255, 0.4);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .result-box::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(0, 217, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .result-box:hover {
+      transform: translateY(-5px) scale(1.05);
+      border-color: rgba(0, 217, 255, 0.8);
+      box-shadow: 0 12px 30px rgba(0, 217, 255, 0.4);
+    }
+    
+    .result-box:hover::after {
+      width: 300px;
+      height: 300px;
+    }
+
+    .result-label {
+      font-size: 14px;
+      color: #00d9ff;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .result-value {
+      font-size: 28px;
+      color: #ffeb3b;
+      font-weight: 700;
+      text-shadow: 0 0 15px rgba(255, 235, 59, 0.5);
+    }
+
+    .result-unit {
+      font-size: 18px;
+      color: #00d9ff;
+      opacity: 0.8;
+    }
+
+    /* Discussion Section */
+    .discussion-toggle {
+      width: 100%;
+      background: rgba(0, 217, 255, 0.2);
+      border: 2px solid #00d9ff;
+      color: #00d9ff;
+      padding: 15px 30px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .discussion-toggle::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(0, 217, 255, 0.4);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s, height 0.5s;
+    }
+    
+    .discussion-toggle:hover::before {
+      width: 600px;
+      height: 600px;
+    }
+
+    .discussion-toggle:hover {
+      background: rgba(0, 217, 255, 0.3);
+      box-shadow: 0 0 30px rgba(0, 217, 255, 0.6);
+      transform: translateY(-3px) scale(1.02);
+    }
+    
+    .discussion-toggle:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .discussion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease;
+    }
+
+    .discussion-content.open {
+      max-height: 2000px;
+    }
+
+    .discussion-panel {
+      background: rgba(13, 27, 42, 0.9);
+      border: 2px solid rgba(255, 235, 59, 0.3);
+      border-radius: 15px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Animated background for discussion panel */
+    .discussion-panel::before {
+      content: '';
+      position: absolute;
+      top: -100%;
+      left: -100%;
+      width: 300%;
+      height: 300%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 235, 59, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 107, 107, 0.05) 0%, transparent 50%);
+      animation: rotateBg 30s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    @keyframes rotateBg {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .discussion-panel > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .discussion-title {
+      font-size: 24px;
+      color: #ffeb3b;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .discussion-text {
+      font-size: 16px;
+      line-height: 1.8;
+      color: #00d9ff;
+      margin-bottom: 15px;
+    }
+
+    .discussion-text strong {
+      color: #ffeb3b;
+    }
+
+    .example-box {
+      background: rgba(0, 217, 255, 0.1);
+      border-left: 4px solid #00d9ff;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .example-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
+      animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+    
+    .example-box:hover {
+      transform: translateX(10px);
+      background: rgba(0, 217, 255, 0.15);
+      border-left-width: 6px;
+      box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+    }
+
+    /* Electrons animation */
+    .electron {
+      animation: flow linear infinite;
+    }
+
+    @keyframes flow {
+      0% {
+        offset-distance: 0%;
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        offset-distance: 100%;
+        opacity: 0;
+      }
+    }
+
+    .charger-item:hover {
+      transform: scale(1.05);
+      border-color: #ffeb3b !important;
+      box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+    }
+
+    .car-component:hover {
+      transform: translateY(-3px);
+      border-color: #ffeb3b !important;
+      box-shadow: 0 8px 20px rgba(0, 217, 255, 0.4);
+    }
+
+    .car-component.active {
+      border-color: #27ae60 !important;
+      background: rgba(39, 174, 96, 0.2) !important;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 32px;
+      }
+
+      .results-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .formula {
+        font-size: 28px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="circuit-bg">
+   <div class="circuit-line line1"></div>
+   <div class="circuit-line line2"></div>
+   <div class="circuit-line line3"></div><!-- Additional circuit lines for more complexity -->
+   <div class="circuit-line" style="width: 2px; height: 35%; left: 60%; bottom: 20%; animation-delay: 1.5s;"></div>
+   <div class="circuit-line" style="width: 40%; height: 2px; left: 5%; top: 60%; animation-delay: 2.5s;"></div>
+   <div class="circuit-line" style="width: 2px; height: 25%; right: 40%; top: 25%; animation-delay: 0.7s;"></div>
+   <div class="circuit-line" style="width: 30%; height: 2px; right: 20%; bottom: 35%; animation-delay: 1.8s;"></div><!-- Circuit nodes at intersections -->
+   <div class="circuit-node" style="left: 20%; top: 10%; animation-delay: 0s;"></div>
+   <div class="circuit-node" style="right: 10%; top: 30%; animation-delay: 0.5s;"></div>
+   <div class="circuit-node" style="right: 25%; bottom: 15%; animation-delay: 1s;"></div>
+   <div class="circuit-node" style="left: 60%; bottom: 20%; animation-delay: 1.5s;"></div>
+   <div class="circuit-node" style="left: 5%; top: 60%; animation-delay: 2s;"></div>
+   <div class="circuit-node" style="right: 40%; top: 25%; animation-delay: 0.7s;"></div>
+   <div class="circuit-node" style="right: 20%; bottom: 35%; animation-delay: 1.8s;"></div><!-- Flowing electrons across screen -->
+   <div class="bg-electron" style="top: 15%; animation-duration: 8s; animation-delay: 0s;"></div>
+   <div class="bg-electron" style="top: 35%; animation-duration: 10s; animation-delay: 2s;"></div>
+   <div class="bg-electron" style="top: 55%; animation-duration: 9s; animation-delay: 4s;"></div>
+   <div class="bg-electron" style="top: 75%; animation-duration: 11s; animation-delay: 1s;"></div>
+   <div class="bg-electron" style="top: 25%; animation-duration: 7s; animation-delay: 3s;"></div>
+   <div class="bg-electron" style="top: 45%; animation-duration: 12s; animation-delay: 5s;"></div><!-- SVG circuit symbols floating in background -->
+   <svg class="floating-symbol" style="left: 10%; top: 20%; width: 60px; height: 60px;" viewbox="0 0 60 60"><circle cx="30" cy="30" r="20" fill="none" stroke="#00d9ff" stroke-width="2" /> <line x1="30" y1="10" x2="30" y2="25" stroke="#00d9ff" stroke-width="2" /> <line x1="30" y1="35" x2="30" y2="50" stroke="#00d9ff" stroke-width="2" />
+   </svg>
+   <svg class="floating-symbol" style="right: 15%; top: 40%; width: 70px; height: 70px; animation-delay: 2s;" viewbox="0 0 70 70"><path d="M 10 35 L 20 35 L 25 25 L 35 45 L 45 25 L 50 35 L 60 35" stroke="#ffeb3b" stroke-width="2" fill="none" />
+   </svg>
+   <svg class="floating-symbol" style="left: 70%; bottom: 30%; width: 50px; height: 50px; animation-delay: 4s;" viewbox="0 0 50 50"><rect x="15" y="15" width="20" height="20" fill="none" stroke="#00d9ff" stroke-width="2" /> <line x1="25" y1="5" x2="25" y2="15" stroke="#00d9ff" stroke-width="2" /> <line x1="25" y1="35" x2="25" y2="45" stroke="#00d9ff" stroke-width="2" />
+   </svg>
+   <svg class="floating-symbol" style="right: 35%; bottom: 20%; width: 55px; height: 55px; animation-delay: 1s;" viewbox="0 0 55 55"><line x1="10" y1="27.5" x2="20" y2="27.5" stroke="#ffeb3b" stroke-width="2" /> <line x1="20" y1="20" x2="20" y2="35" stroke="#ffeb3b" stroke-width="3" /> <line x1="25" y1="15" x2="25" y2="40" stroke="#ffeb3b" stroke-width="3" /> <line x1="25" y1="27.5" x2="45" y2="27.5" stroke="#ffeb3b" stroke-width="2" />
+   </svg><!-- Additional rotating gears -->
+   <svg class="rotating-gear" style="left: 5%; top: 50%; width: 80px; height: 80px;" viewbox="0 0 80 80"><circle cx="40" cy="40" r="25" fill="none" stroke="#00d9ff" stroke-width="2" /> <circle cx="40" cy="40" r="15" fill="none" stroke="#00d9ff" stroke-width="2" /> <rect x="38" y="10" width="4" height="10" fill="#00d9ff" /> <rect x="38" y="60" width="4" height="10" fill="#00d9ff" /> <rect x="10" y="38" width="10" height="4" fill="#00d9ff" /> <rect x="60" y="38" width="10" height="4" fill="#00d9ff" /> <rect x="18" y="18" width="8" height="4" fill="#00d9ff" transform="rotate(45 22 20)" /> <rect x="54" y="18" width="8" height="4" fill="#00d9ff" transform="rotate(-45 58 20)" /> <rect x="18" y="58" width="8" height="4" fill="#00d9ff" transform="rotate(-45 22 60)" /> <rect x="54" y="58" width="8" height="4" fill="#00d9ff" transform="rotate(45 58 60)" />
+   </svg>
+   <svg class="rotating-gear" style="right: 8%; bottom: 10%; width: 70px; height: 70px; animation-delay: 3s; animation-direction: reverse;" viewbox="0 0 80 80"><circle cx="40" cy="40" r="25" fill="none" stroke="#ffeb3b" stroke-width="2" /> <circle cx="40" cy="40" r="15" fill="none" stroke="#ffeb3b" stroke-width="2" /> <rect x="38" y="10" width="4" height="10" fill="#ffeb3b" /> <rect x="38" y="60" width="4" height="10" fill="#ffeb3b" /> <rect x="10" y="38" width="10" height="4" fill="#ffeb3b" /> <rect x="60" y="38" width="10" height="4" fill="#ffeb3b" />
+   </svg><!-- Pulsing electric rings -->
+   <div class="electric-ring" style="left: 30%; top: 20%; width: 100px; height: 100px; animation-delay: 0s;"></div>
+   <div class="electric-ring" style="left: 30%; top: 20%; width: 100px; height: 100px; animation-delay: 1.3s;"></div>
+   <div class="electric-ring" style="right: 25%; bottom: 25%; width: 120px; height: 120px; animation-delay: 2s;"></div>
+   <div class="electric-ring" style="right: 25%; bottom: 25%; width: 120px; height: 120px; animation-delay: 3.3s;"></div><!-- Lightning bolts -->
+   <svg class="lightning-bolt" style="left: 45%; top: 15%; width: 40px; height: 60px; animation-delay: 1s;" viewbox="0 0 40 60"><path d="M 20 0 L 10 25 L 20 25 L 15 60 L 35 20 L 23 20 Z" fill="#ffeb3b" opacity="0.6" />
+   </svg>
+   <svg class="lightning-bolt" style="right: 30%; bottom: 30%; width: 35px; height: 55px; animation-delay: 3.5s;" viewbox="0 0 40 60"><path d="M 20 0 L 10 25 L 20 25 L 15 60 L 35 20 L 23 20 Z" fill="#00d9ff" opacity="0.6" />
+   </svg><!-- More varied floating symbols -->
+   <svg class="floating-symbol" style="left: 50%; top: 70%; width: 50px; height: 50px; animation-delay: 5s;" viewbox="0 0 50 50"><path d="M 10 25 L 15 15 L 25 20 L 35 15 L 40 25 L 35 35 L 25 30 L 15 35 Z" stroke="#ff6b6b" stroke-width="2" fill="none" />
+   </svg>
+   <svg class="floating-symbol" style="right: 45%; top: 35%; width: 45px; height: 45px; animation-delay: 7s;" viewbox="0 0 50 50"><circle cx="25" cy="25" r="15" stroke="#00d9ff" stroke-width="2" fill="none" /> <line x1="25" y1="10" x2="25" y2="22" stroke="#00d9ff" stroke-width="2" /> <line x1="25" y1="28" x2="25" y2="40" stroke="#00d9ff" stroke-width="2" /> <circle cx="25" cy="25" r="3" fill="#00d9ff" />
+   </svg>
+  </div>
+  <div class="app-container">
+   <div class="content-wrapper">
+    <header>
+     <h1 id="main-title">Ohm's Law Learning Lab</h1>
+     <p class="subtitle">Interactive Physics Simulator for Senior High School</p>
+    </header>
+    <div class="main-grid"><!-- Circuit Visualization -->
+     <div class="panel">
+      <h2 class="panel-title">Circuit Simulation</h2>
+      <div class="circuit-container">
+       <svg class="circuit-svg" viewbox="0 0 500 500" id="circuit-svg"><defs>
+         <filter id="glow">
+          <fegaussianblur stddeviation="4" result="coloredBlur" />
+          <femerge>
+           <femergenode in="coloredBlur" />
+           <femergenode in="SourceGraphic" />
+          </femerge>
+         </filter>
+         <filter id="strong-glow">
+          <fegaussianblur stddeviation="8" result="coloredBlur" />
+          <femerge>
+           <femergenode in="coloredBlur" />
+           <femergenode in="SourceGraphic" />
+          </femerge>
+         </filter>
+        </defs> <path d="M 100 100 L 450 100 L 450 380 L 50 380 L 50 100 Z" stroke="#00d9ff" stroke-width="20" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.3" filter="url(#strong-glow)" /> <path id="circuit-path" d="M 100 100 L 450 100 L 450 380 L 50 380 L 50 100 Z" stroke="#00d9ff" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" /> <g id="battery">
+         <defs>
+          <lineargradient id="battery-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+           <stop offset="0%" style="stop-color:#2a4a1f;stop-opacity:1" />
+           <stop offset="30%" style="stop-color:#3d6b1f;stop-opacity:1" />
+           <stop offset="70%" style="stop-color:#2d5016;stop-opacity:1" />
+           <stop offset="100%" style="stop-color:#1a3010;stop-opacity:1" />
+          </lineargradient>
+          <lineargradient id="battery-label" x1="0%" y1="0%" x2="0%" y2="100%">
+           <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+           <stop offset="100%" style="stop-color:#ffaa00;stop-opacity:1" />
+          </lineargradient>
+          <radialgradient id="terminal-gradient">
+           <stop offset="0%" style="stop-color:#e0e0e0;stop-opacity:1" />
+           <stop offset="100%" style="stop-color:#909090;stop-opacity:1" />
+          </radialgradient>
+         </defs>
+         <rect id="battery-body" x="80" y="85" width="80" height="30" fill="url(#battery-gradient)" stroke="#1a3010" stroke-width="2" rx="15" />
+         <circle id="battery-pos-terminal" cx="160" cy="100" r="5" fill="url(#terminal-gradient)" stroke="#707070" stroke-width="1" />
+         <text id="battery-plus-sign" x="160" y="104" text-anchor="middle" fill="#d4af37" font-size="10" font-weight="bold">
+          +
+         </text>
+         <rect id="battery-neg-terminal" x="75" y="95" width="5" height="10" fill="#606060" stroke="#404040" stroke-width="1" />
+         <rect id="battery-label-bg" x="95" y="90" width="50" height="20" fill="url(#battery-label)" opacity="0.9" rx="3" />
+         <text id="battery-text" x="120" y="103" text-anchor="middle" fill="#000000" font-size="10" font-weight="bold" font-family="Arial, sans-serif">
+          POWER
+         </text>
+         <text id="battery-v-label" x="120" y="75" text-anchor="middle" fill="#ffeb3b" font-size="14" font-weight="bold">
+          V
+         </text>
+         <rect id="battery-shine" x="85" y="87" width="12" height="26" fill="#ffffff" opacity="0.2" rx="6" />
+        </g> <g id="switch" style="cursor: pointer;">
+         <rect id="switch-base" x="35" y="220" width="30" height="40" fill="#2c3e50" stroke="#1a252f" stroke-width="2" rx="5" />
+         <g id="switch-lever">
+          <circle cx="50" cy="240" r="4" fill="#34495e" stroke="#1a252f" stroke-width="1" />
+          <line id="switch-arm" x1="50" y1="240" x2="50" y2="220" stroke="#e74c3c" stroke-width="4" stroke-linecap="round" />
+          <circle id="switch-knob" cx="50" cy="220" r="6" fill="#e74c3c" stroke="#c0392b" stroke-width="2" />
+         </g>
+         <circle cx="50" cy="218" r="3" fill="#95a5a6" opacity="0.8" />
+         <circle cx="50" cy="262" r="3" fill="#95a5a6" opacity="0.8" />
+         <text id="switch-on-label" x="70" y="225" fill="#27ae60" font-size="10" font-weight="bold" opacity="1">
+          ON
+         </text>
+         <text id="switch-off-label" x="70" y="258" fill="#95a5a6" font-size="10" font-weight="bold" opacity="0.5">
+          OFF
+         </text>
+        </g> <g id="resistor">
+         <defs>
+          <lineargradient id="resistor-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+           <stop offset="0%" style="stop-color:#e8d4a0;stop-opacity:1" />
+           <stop offset="50%" style="stop-color:#d4b896;stop-opacity:1" />
+           <stop offset="100%" style="stop-color:#c4a57b;stop-opacity:1" />
+          </lineargradient>
+         </defs>
+         <rect id="resistor-body" x="195" y="365" width="60" height="30" fill="url(#resistor-gradient)" stroke="#9d8b6c" stroke-width="1.5" rx="15" />
+         <rect id="resistor-lead-left" x="185" y="377" width="15" height="6" fill="#b87333" stroke="#8b5a2b" stroke-width="0.5" />
+         <rect id="resistor-lead-right" x="250" y="377" width="15" height="6" fill="#b87333" stroke="#8b5a2b" stroke-width="0.5" />
+         <rect id="resistor-band1" x="205" y="369" width="5" height="22" fill="#8B4513" rx="1" />
+         <rect id="resistor-band2" x="214" y="369" width="5" height="22" fill="#000000" rx="1" />
+         <rect id="resistor-band3" x="232" y="369" width="5" height="22" fill="#FF0000" rx="1" />
+         <rect id="resistor-band4" x="241" y="369" width="5" height="22" fill="#FFD700" rx="1" />
+         <text id="resistor-r-label" x="225" y="355" text-anchor="middle" fill="#00d9ff" font-size="12" font-weight="bold">
+          R
+         </text>
+         <rect id="resistor-heat" x="195" y="365" width="60" height="30" fill="#ff4500" opacity="0" rx="15" filter="url(#strong-glow)">
+          <animate attributename="opacity" values="0;0.3;0" dur="2s" repeatcount="indefinite" />
+         </rect>
+        </g> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite" begin="0.25s">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite" begin="0.5s">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite" begin="0.75s">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite" begin="1s">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite" begin="1.25s">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite" begin="1.5s">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <circle class="electron" r="5" fill="#ff3333" filter="url(#glow)">
+         <animatemotion dur="2s" repeatcount="indefinite" begin="1.75s">
+          <mpath href="#circuit-path" />
+         </animatemotion>
+        </circle> <g opacity="0.7">
+         <circle cx="250" cy="50" r="3" fill="#ffeb3b">
+          <animate attributename="r" values="3;8;3" dur="1.5s" repeatcount="indefinite" />
+          <animate attributename="opacity" values="1;0.3;1" dur="1.5s" repeatcount="indefinite" />
+         </circle>
+         <circle cx="250" cy="50" r="3" fill="#ffeb3b">
+          <animate attributename="r" values="3;8;3" dur="1.5s" repeatcount="indefinite" begin="0.75s" />
+          <animate attributename="opacity" values="1;0.3;1" dur="1.5s" repeatcount="indefinite" begin="0.75s" />
+         </circle>
+        </g> <g id="schematic-symbols" opacity="0" style="pointer-events: none;">
+         <g id="schematic-battery">
+          <line x1="120" y1="85" x2="120" y2="115" stroke="#00d9ff" stroke-width="3" />
+          <line x1="115" y1="90" x2="125" y2="90" stroke="#00d9ff" stroke-width="3" />
+          <line x1="117" y1="110" x2="123" y2="110" stroke="#00d9ff" stroke-width="2" />
+          <text x="120" y="75" text-anchor="middle" fill="#ffeb3b" font-size="14" font-weight="bold">
+           +V
+          </text>
+         </g>
+         <g id="schematic-switch">
+          <circle cx="50" cy="218" r="4" fill="#00d9ff" stroke="#00d9ff" stroke-width="2" />
+          <circle cx="50" cy="262" r="4" fill="#00d9ff" stroke="#00d9ff" stroke-width="2" />
+          <line id="schematic-switch-arm" x1="50" y1="218" x2="50" y2="240" stroke="#e74c3c" stroke-width="3" stroke-linecap="round" />
+          <text x="70" y="243" fill="#00d9ff" font-size="10" font-weight="bold">
+           SW
+          </text>
+         </g>
+         <g id="schematic-resistor">
+          <path d="M 195 380 L 205 380 L 210 370 L 220 390 L 230 370 L 240 390 L 245 380 L 255 380" stroke="#00d9ff" stroke-width="3" fill="none" stroke-linejoin="miter" />
+          <text x="225" y="365" text-anchor="middle" fill="#ffeb3b" font-size="14" font-weight="bold">
+           R
+          </text>
+         </g>
+        </g>
+       </svg>
+      </div>
+     </div><!-- Controls -->
+     <div class="panel">
+      <h2 class="panel-title">Interactive Controls</h2>
+      <div class="control-group">
+       <div class="control-label"><span>Circuit Display Mode</span>
+       </div>
+       <div style="display: flex; gap: 10px; margin-bottom: 20px;"><button id="realistic-mode-btn" class="mode-button active" style="flex: 1; padding: 12px; background: rgba(0, 217, 255, 0.3); border: 2px solid #00d9ff; color: #00d9ff; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;"> 🔋 Realistic </button> <button id="schematic-mode-btn" class="mode-button" style="flex: 1; padding: 12px; background: rgba(0, 217, 255, 0.1); border: 2px solid rgba(0, 217, 255, 0.3); color: rgba(0, 217, 255, 0.6); border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s;"> 📐 Schematic </button>
+       </div>
+      </div>
+      <div class="control-group">
+       <div class="control-label"><span id="voltage-label">Voltage (V)</span> <span class="control-value" id="voltage-display">5.0 V</span>
+       </div>
+       <div class="slider-container"><input type="range" id="voltage-slider" min="0" max="12" step="0.5" value="5">
+       </div>
+      </div>
+      <div class="control-group">
+       <div class="control-label"><span id="resistance-label">Resistance (Ω)</span> <span class="control-value" id="resistance-display">10.0 Ω</span>
+       </div>
+       <div class="slider-container"><input type="range" id="resistance-slider" min="1" max="50" step="1" value="10">
+       </div>
+      </div>
+      <div class="control-group">
+       <div class="control-label"><span id="current-label">Current (A)</span> <span class="control-value" id="current-display">0.50 A</span>
+       </div>
+       <div class="slider-container"><input type="range" id="current-slider" min="0.1" max="12" step="0.1" value="0.5">
+       </div>
+      </div>
+      <div class="formula-section">
+       <div class="formula-label" id="formula-label">
+        Ohm's Law Formula
+       </div>
+       <div class="formula"><span class="formula-letter formula-i" id="formula-i">I</span> <span class="formula-letter">=</span> <span class="formula-letter formula-v" id="formula-v">V</span> <span class="formula-letter">/</span> <span class="formula-letter formula-r" id="formula-r">R</span>
+       </div>
+      </div>
+      <div class="results-grid">
+       <div class="result-box">
+        <div class="result-label">
+         Voltage
+        </div>
+        <div class="result-value" id="result-voltage">
+         5.0
+        </div>
+        <div class="result-unit">
+         V
+        </div>
+       </div>
+       <div class="result-box">
+        <div class="result-label">
+         Resistance
+        </div>
+        <div class="result-value" id="result-resistance">
+         10.0
+        </div>
+        <div class="result-unit">
+         Ω
+        </div>
+       </div>
+       <div class="result-box">
+        <div class="result-label">
+         Current
+        </div>
+        <div class="result-value" id="result-current">
+         0.50
+        </div>
+        <div class="result-unit">
+         A
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- Real-Life Simulators Section -->
+    <div style="margin-top: 50px;">
+     <h2 style="text-align: center; color: #ffeb3b; font-size: 36px; margin-bottom: 30px; text-shadow: 0 0 20px rgba(255, 235, 59, 0.6);">🌟 Real-Life Applications</h2><!-- Phone Charger Simulator -->
+     <div class="panel" style="margin-bottom: 30px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+       <h3 class="panel-title" style="margin: 0;">📱 Phone Charger Simulator</h3><button class="simulator-toggle-btn" data-target="phone-charger-content" style="background: rgba(0, 217, 255, 0.3); border: 2px solid #00d9ff; color: #00d9ff; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> Hide </button>
+      </div>
+      <div id="phone-charger-content" class="simulator-content">
+       <p style="text-align: center; color: #00d9ff; margin-bottom: 20px;">Adjust the charger voltage and phone resistance to see how they affect charging!</p>
+       <div style="background: rgba(255, 235, 59, 0.1); border: 2px solid #ffeb3b; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <h4 style="color: #ffeb3b; margin-bottom: 12px; text-align: center; font-size: 18px;">📋 How to Use</h4>
+        <ul style="color: #00d9ff; line-height: 1.8; padding-left: 25px; margin: 0;">
+         <li><strong>Click a charger preset button</strong> (USB, Fast, Super, or Ultra) to select a charger type</li>
+         <li><strong>Slide the voltage slider</strong> to adjust charger output voltage (3V - 20V)</li>
+         <li><strong>Slide the resistance slider</strong> to change phone's internal resistance (5Ω - 30Ω)</li>
+         <li><strong>Watch the phone charge!</strong> See current draw, charging speed, and battery percentage increase</li>
+         <li><strong>Notice:</strong> Higher voltage = faster charging, but real phones have built-in protection!</li>
+        </ul>
+       </div>
+       <div style="display: flex; flex-direction: column; gap: 30px;"><!-- Interactive Controls -->
+        <div style="background: rgba(0, 217, 255, 0.1); padding: 25px; border-radius: 15px; border: 2px solid #00d9ff;">
+         <h4 style="color: #ffeb3b; margin-bottom: 20px; text-align: center;">⚙️ Charger &amp; Phone Settings</h4>
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px;"><!-- Charger Voltage Control -->
+          <div>
+           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><span style="color: #00d9ff; font-weight: 600; font-size: 16px;">Charger Voltage</span> <span style="color: #ffeb3b; font-size: 22px; font-weight: 700;" id="phone-charger-voltage-display">5.0 V</span>
+           </div><input type="range" id="phone-charger-voltage-slider" min="3" max="20" step="0.5" value="5" style="width: 100%; height: 8px; background: rgba(0, 217, 255, 0.2); border-radius: 10px; outline: none; -webkit-appearance: none;">
+           <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span style="color: #00d9ff; font-size: 12px;">3V</span> <span style="color: #00d9ff; font-size: 12px;">20V</span>
+           </div>
+          </div><!-- Phone Resistance Control -->
+          <div>
+           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><span style="color: #00d9ff; font-weight: 600; font-size: 16px;">Phone Resistance</span> <span style="color: #ff6b6b; font-size: 22px; font-weight: 700;" id="phone-resistance-display">10.0 Ω</span>
+           </div><input type="range" id="phone-resistance-slider" min="5" max="30" step="0.5" value="10" style="width: 100%; height: 8px; background: rgba(255, 107, 107, 0.2); border-radius: 10px; outline: none; -webkit-appearance: none;">
+           <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span style="color: #00d9ff; font-size: 12px;">5Ω</span> <span style="color: #00d9ff; font-size: 12px;">30Ω</span>
+           </div>
+          </div>
+         </div><!-- Quick Preset Buttons -->
+         <div style="margin-top: 20px;">
+          <div style="color: #00d9ff; font-size: 14px; margin-bottom: 10px; text-align: center;">
+           ⚡ Quick Charger Presets:
+          </div>
+          <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;"><button class="charger-preset-btn" data-voltage="5" data-name="Standard USB" style="background: rgba(74, 144, 226, 0.3); border: 2px solid #4a90e2; color: #4a90e2; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> 🔌 USB (5V) </button> <button class="charger-preset-btn" data-voltage="9" data-name="Fast Charger" style="background: rgba(39, 174, 96, 0.3); border: 2px solid #27ae60; color: #27ae60; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> ⚡ Fast (9V) </button> <button class="charger-preset-btn" data-voltage="12" data-name="Super Fast" style="background: rgba(155, 89, 182, 0.3); border: 2px solid #9b59b6; color: #9b59b6; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> ⚡⚡ Super (12V) </button> <button class="charger-preset-btn" data-voltage="20" data-name="Ultra Fast" style="background: rgba(231, 76, 60, 0.3); border: 2px solid #e74c3c; color: #e74c3c; padding: 12px 25px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> ⚡⚡⚡ Ultra (20V) </button>
+          </div>
+         </div>
+        </div><!-- Main charging scene -->
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 40px; border-radius: 15px; position: relative; min-height: 500px;">
+         <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 30px; align-items: start; height: 100%;"><!-- Wall Socket Section -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding-top: 50px;">
+           <div style="color: #ffeb3b; font-weight: 700; font-size: 18px; text-align: center; margin-bottom: 10px;">
+            WALL SOCKET
+           </div>
+           <svg width="140" height="180" viewbox="0 0 140 180" id="wall-socket-svg"><!-- Wall plate --> <rect x="10" y="10" width="120" height="160" rx="10" fill="#e8e8e8" stroke="#a0a0a0" stroke-width="2" /> <circle cx="35" cy="35" r="5" fill="#b0b0b0" /> <circle cx="105" cy="35" r="5" fill="#b0b0b0" /> <circle cx="35" cy="145" r="5" fill="#b0b0b0" /> <circle cx="105" cy="145" r="5" fill="#b0b0b0" /> <!-- Outlet face --> <rect x="30" y="60" width="80" height="70" rx="6" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="1.5" /> <!-- Outlet slots --> <rect x="55" y="75" width="10" height="25" rx="2" fill="#1a1a1a" /> <rect x="75" y="75" width="10" height="25" rx="2" fill="#1a1a1a" /> <circle cx="70" cy="110" r="6" fill="#1a1a1a" /> <!-- Screws --> <circle cx="70" cy="45" r="4" fill="#808080" /> <line x1="67" y1="42" x2="73" y2="48" stroke="#606060" stroke-width="1.5" /> <circle cx="70" cy="135" r="4" fill="#808080" /> <line x1="67" y1="132" x2="73" y2="138" stroke="#606060" stroke-width="1.5" /> <!-- Plugged charger (hidden initially) --> <g id="plugged-charger" opacity="0" transform="translate(70, 90)"><!-- Plug prongs inserted into outlet -->
+             <rect x="-8" y="-10" width="5" height="10" rx="1" fill="#c0c0c0" stroke="#a0a0a0" stroke-width="0.5" />
+             <rect x="3" y="-10" width="5" height="10" rx="1" fill="#c0c0c0" stroke="#a0a0a0" stroke-width="0.5" />
+             <circle cx="0" cy="20" r="3" fill="#c0c0c0" stroke="#a0a0a0" stroke-width="0.5" /> <!-- Charger head body (visible part sticking out) -->
+             <rect x="-20" y="5" width="40" height="30" rx="5" fill="#4a90e2" id="charger-plug-body" stroke="#3a7ac2" stroke-width="2" /> <!-- Charger details -->
+             <rect x="-15" y="10" width="30" height="15" rx="2" fill="rgba(255,255,255,0.2)" />
+             <text x="0" y="20" text-anchor="middle" fill="white" font-size="9" font-weight="bold" id="charger-plug-text">
+              5V
+             </text> <!-- LED indicator -->
+             <circle cx="-8" cy="30" r="2" fill="#27ae60" opacity="0.9">
+              <animate attributename="opacity" values="0.9;0.3;0.9" dur="2s" repeatcount="indefinite" />
+             </circle> <!-- Cable coming out of charger -->
+             <rect x="-4" y="35" width="8" height="5" rx="2" fill="#4a90e2" />
+            </g>
+           </svg>
+           <div id="socket-status" style="color: #00d9ff; font-size: 14px; text-align: center; min-height: 40px;">
+            Select a charger
+           </div>
+          </div><!-- Cable and Connection -->
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; min-height: 400px;"><!-- Charging cable -->
+           <svg width="100%" height="400" viewbox="0 0 600 400" style="position: absolute; top: 0; left: 0;" id="charging-cable-svg"><defs>
+             <lineargradient id="cable-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.3" />
+              <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.8" />
+              <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.3" />
+             </lineargradient>
+             <lineargradient id="cable-shine" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0" />
+              <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.4" />
+              <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+             </lineargradient>
+            </defs> <!-- Cable path (hidden initially) - from wall socket charger to phone bottom --> <!-- Path starts from charger (left ~140,125) and goes to phone port (right ~490,355) --> <path id="cable-path" d="M 140 125 L 140 180 Q 140 220, 170 240 L 300 240 Q 340 240, 360 270 L 360 320 Q 360 340, 390 350 L 490 355" stroke="#4a90e2" stroke-width="8" fill="none" stroke-linecap="round" opacity="0" /> <!-- Cable shine overlay for realistic look --> <path id="cable-shine-path" d="M 140 125 L 140 180 Q 140 220, 170 240 L 300 240 Q 340 240, 360 270 L 360 320 Q 360 340, 390 350 L 490 355" stroke="url(#cable-shine)" stroke-width="5" fill="none" stroke-linecap="round" opacity="0" /> <!-- Shadow under cable for depth --> <path id="cable-shadow" d="M 142 127 L 142 182 Q 142 222, 172 242 L 302 242 Q 342 242, 362 272 L 362 322 Q 362 342, 392 352 L 492 357" stroke="#000000" stroke-width="8" fill="none" stroke-linecap="round" opacity="0" /> <!-- Energy flow particles --> <circle r="6" fill="#ffeb3b" opacity="0" id="energy-particle-1">
+             <animatemotion dur="1.5s" repeatcount="indefinite" id="particle-motion-1">
+              <mpath href="#cable-path" />
+             </animatemotion>
+            </circle> <circle r="6" fill="#ffeb3b" opacity="0" id="energy-particle-2">
+             <animatemotion dur="1.5s" repeatcount="indefinite" begin="0.5s" id="particle-motion-2">
+              <mpath href="#cable-path" />
+             </animatemotion>
+            </circle> <circle r="6" fill="#ffeb3b" opacity="0" id="energy-particle-3">
+             <animatemotion dur="1.5s" repeatcount="indefinite" begin="1s" id="particle-motion-3">
+              <mpath href="#cable-path" />
+             </animatemotion>
+            </circle>
+           </svg><!-- Stats overlay -->
+           <div style="background: rgba(0, 0, 0, 0.8); padding: 25px; border-radius: 15px; border: 2px solid #00d9ff; z-index: 10; margin-top: 120px;">
+            <div style="text-align: center; margin-bottom: 15px;">
+             <div style="color: #ffeb3b; font-size: 18px; font-weight: 700; margin-bottom: 10px;" id="charger-name-display">
+              No Charger Connected
+             </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+             <div style="text-align: center;">
+              <div style="color: #00d9ff; font-size: 12px; margin-bottom: 5px;">
+               Voltage
+              </div>
+              <div style="color: #ffeb3b; font-size: 24px; font-weight: 700;" id="phone-voltage">
+               0V
+              </div>
+             </div>
+             <div style="text-align: center;">
+              <div style="color: #00d9ff; font-size: 12px; margin-bottom: 5px;">
+               Current
+              </div>
+              <div style="color: #27ae60; font-size: 24px; font-weight: 700;" id="phone-current">
+               0.0A
+              </div>
+             </div>
+            </div>
+            <div style="margin-top: 15px; padding: 10px; background: rgba(255, 235, 59, 0.1); border-radius: 8px; text-align: center;">
+             <div style="color: #ffeb3b; font-size: 14px; font-weight: 600;" id="charging-status">
+              ⚪ Not Charging
+             </div>
+            </div>
+           </div>
+          </div><!-- Phone Section -->
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; padding-top: 50px;">
+           <div style="color: #ffeb3b; font-weight: 700; font-size: 18px; text-align: center; margin-bottom: 10px;">
+            SMARTPHONE
+           </div>
+           <svg width="180" height="360" viewbox="0 0 180 360" id="phone-svg"><defs>
+             <lineargradient id="phone-screen-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#0f0f1e;stop-opacity:1" />
+             </lineargradient>
+             <lineargradient id="phone-body-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#2a2a3e;stop-opacity:1" />
+              <stop offset="50%" style="stop-color:#3a3a4e;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#2a2a3e;stop-opacity:1" />
+             </lineargradient>
+             <filter id="screen-glow">
+              <fegaussianblur stddeviation="3" result="coloredBlur" />
+              <femerge>
+               <femergenode in="coloredBlur" />
+               <femergenode in="SourceGraphic" />
+              </femerge>
+             </filter>
+            </defs> <!-- Phone body --> <rect x="10" y="10" width="160" height="340" rx="25" fill="url(#phone-body-gradient)" stroke="#1a1a1a" stroke-width="3" /> <!-- Screen --> <rect x="20" y="30" width="140" height="280" rx="15" fill="url(#phone-screen-gradient)" stroke="#0a0a0a" stroke-width="2" /> <!-- Notch --> <rect x="60" y="30" width="60" height="15" rx="8" fill="#0a0a0a" /> <circle cx="75" cy="37" r="3" fill="#1a3a4a" /> <rect x="85" y="34" width="20" height="6" rx="3" fill="#1a1a2e" /> <!-- Battery indicator on screen --> <g id="phone-battery-indicator">
+             <rect x="130" y="50" width="25" height="12" rx="2" fill="none" stroke="#404040" stroke-width="1.5" />
+             <rect x="155" y="54" width="3" height="4" rx="1" fill="#404040" />
+             <rect x="132" y="52" width="0" height="8" rx="1" fill="#27ae60" id="battery-fill">
+              <animate attributename="width" from="0" to="21" dur="3s" fill="freeze" begin="indefinite" id="battery-charge-animation" />
+             </rect>
+            </g> <!-- Charging icon --> <g id="charging-bolt" opacity="0">
+             <circle cx="90" cy="180" r="40" fill="rgba(255, 235, 59, 0.2)" filter="url(#screen-glow)">
+              <animate attributename="r" values="35;45;35" dur="1.5s" repeatcount="indefinite" />
+              <animate attributename="opacity" values="0.3;0.6;0.3" dur="1.5s" repeatcount="indefinite" />
+             </circle>
+             <path d="M 90 150 L 75 180 L 90 180 L 85 210 L 110 175 L 95 175 Z" fill="#ffeb3b" filter="url(#screen-glow)" />
+            </g> <!-- Battery percentage text --> <text x="90" y="240" text-anchor="middle" fill="#00d9ff" font-size="32" font-weight="bold" id="battery-percentage">
+             0%
+            </text> <text x="90" y="260" text-anchor="middle" fill="#00d9ff" font-size="14" id="charging-speed-text">
+             Not Charging
+            </text> <!-- Home button --> <circle cx="90" cy="325" r="15" fill="none" stroke="#404040" stroke-width="2" /> <!-- Charging port --> <rect x="80" y="345" width="20" height="8" rx="2" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="1" /> <rect x="85" y="347" width="3" height="4" fill="#404040" /> <rect x="92" y="347" width="3" height="4" fill="#404040" /> <!-- Cable connector (hidden initially) --> <g id="cable-connector" opacity="0" transform="translate(90, 355)">
+             <rect x="-8" y="0" width="16" height="12" rx="3" fill="#4a90e2" id="connector-body" />
+             <rect x="-5" y="3" width="10" height="6" rx="1" fill="#c0c0c0" />
+            </g>
+           </svg>
+           <div style="background: rgba(0, 217, 255, 0.1); padding: 15px; border-radius: 10px; border: 2px solid #00d9ff; text-align: center;">
+            <div style="color: #00d9ff; font-size: 12px; margin-bottom: 5px;">
+             Phone Resistance
+            </div>
+            <div style="color: #ffeb3b; font-size: 18px; font-weight: 700;">
+             10Ω
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Light Dimmer Simulator -->
+     <div class="panel" style="margin-bottom: 30px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+       <h3 class="panel-title" style="margin: 0;">💡 Light Dimmer Simulator</h3><button class="simulator-toggle-btn" data-target="dimmer-content" style="background: rgba(0, 217, 255, 0.3); border: 2px solid #00d9ff; color: #00d9ff; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> Hide </button>
+      </div>
+      <div id="dimmer-content" class="simulator-content">
+       <p style="text-align: center; color: #00d9ff; margin-bottom: 20px;">Slide the dimmer to increase resistance and watch the bulb dim!</p>
+       <div style="background: rgba(255, 235, 59, 0.1); border: 2px solid #ffeb3b; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <h4 style="color: #ffeb3b; margin-bottom: 12px; text-align: center; font-size: 18px;">📋 How to Use</h4>
+        <ul style="color: #00d9ff; line-height: 1.8; padding-left: 25px; margin: 0;">
+         <li><strong>Slide the voltage supply slider</strong> to change the power source voltage (60V - 240V)</li>
+         <li><strong>Slide the dimmer resistance slider</strong> to control brightness (5Ω - 50Ω)</li>
+         <li><strong>Watch the bulb glow!</strong> Low resistance = bright light, high resistance = dim light</li>
+         <li><strong>Observe:</strong> Current, power consumption, and brightness percentage change together</li>
+         <li><strong>Learn:</strong> Dimmers work by adding resistance to reduce current and power to the bulb</li>
+        </ul>
+       </div>
+       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center;">
+        <div>
+         <div style="background: rgba(0, 217, 255, 0.1); padding: 30px; border-radius: 15px;">
+          <h4 style="color: #ffeb3b; margin-bottom: 20px; text-align: center;">⚙️ Dimmer Controls</h4>
+          <div style="margin-bottom: 25px;">
+           <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span style="color: #00d9ff; font-weight: 600;">Voltage Supply</span> <span style="color: #ffeb3b; font-size: 20px; font-weight: 700;" id="dimmer-voltage-display">120 V</span>
+           </div><input type="range" id="dimmer-voltage-slider" min="60" max="240" value="120" style="width: 100%; height: 8px; background: rgba(255, 235, 59, 0.2); border-radius: 10px; outline: none; -webkit-appearance: none;">
+           <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span style="color: #00d9ff; font-size: 12px;">60V</span> <span style="color: #00d9ff; font-size: 12px;">240V</span>
+           </div>
+          </div>
+          <div style="margin-bottom: 25px;">
+           <div style="display: flex; justify-content: space-between; margin-bottom: 10px;"><span style="color: #00d9ff; font-weight: 600;">Resistance (Dimmer)</span> <span style="color: #ff6b6b; font-size: 20px; font-weight: 700;" id="dimmer-resistance">5 Ω</span>
+           </div><input type="range" id="dimmer-slider" min="5" max="50" value="5" style="width: 100%; height: 8px; background: rgba(255, 107, 107, 0.2); border-radius: 10px; outline: none; -webkit-appearance: none;">
+           <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span style="color: #00d9ff; font-size: 12px;">5Ω (Bright)</span> <span style="color: #00d9ff; font-size: 12px;">50Ω (Dim)</span>
+           </div>
+          </div>
+          <div style="background: rgba(255, 235, 59, 0.1); padding: 20px; border-radius: 12px;">
+           <div style="color: #00d9ff; font-size: 14px; margin-bottom: 5px;">
+            Current:
+           </div>
+           <div style="color: #27ae60; font-size: 28px; font-weight: 700;" id="dimmer-current">
+            24.0 A
+           </div>
+           <div style="color: #00d9ff; font-size: 14px; margin-top: 15px; margin-bottom: 5px;">
+            Power:
+           </div>
+           <div style="color: #ff6b6b; font-size: 24px; font-weight: 700;" id="dimmer-power">
+            2880 W
+           </div>
+           <div style="color: #00d9ff; font-size: 14px; margin-top: 15px; margin-bottom: 5px;">
+            Brightness:
+           </div>
+           <div style="color: #ffeb3b; font-size: 20px; font-weight: 700;" id="dimmer-brightness">
+            100%
+           </div>
+          </div>
+         </div>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+         <div style="position: relative; width: 200px; height: 200px;">
+          <svg viewbox="0 0 200 200" style="width: 100%; height: 100%;"><defs>
+            <radialgradient id="bulb-glow">
+             <stop offset="0%" style="stop-color:#ffff00;stop-opacity:1" />
+             <stop offset="30%" style="stop-color:#ffeb3b;stop-opacity:0.9" />
+             <stop offset="70%" style="stop-color:#ffeb3b;stop-opacity:0.4" />
+             <stop offset="100%" style="stop-color:#ffeb3b;stop-opacity:0" />
+            </radialgradient>
+            <filter id="bulb-strong-glow">
+             <fegaussianblur stddeviation="12" result="coloredBlur" />
+             <femerge>
+              <femergenode in="coloredBlur" />
+              <femergenode in="coloredBlur" />
+              <femergenode in="SourceGraphic" />
+             </femerge>
+            </filter>
+           </defs> <circle id="bulb-glow-circle" cx="100" cy="80" r="80" fill="url(#bulb-glow)" opacity="1" filter="url(#bulb-strong-glow)" /> <ellipse cx="100" cy="80" rx="40" ry="50" fill="rgba(255, 255, 255, 0.3)" stroke="#e0e0e0" stroke-width="2" /> <path d="M 90 60 Q 100 70 110 60 Q 100 75 90 65" stroke="#ff6b00" stroke-width="3" fill="none" id="bulb-filament" opacity="1" /> <rect x="85" y="120" width="30" height="15" fill="#c0c0c0" stroke="#a0a0a0" stroke-width="1" /> <rect x="82" y="135" width="36" height="20" fill="#808080" stroke="#606060" stroke-width="1" /> <g id="bulb-rays" opacity="1">
+            <line x1="100" y1="20" x2="100" y2="5" stroke="#ffeb3b" stroke-width="4" stroke-linecap="round" opacity="1">
+             <animate attributename="opacity" values="1;0.6;1" dur="1s" repeatcount="indefinite" />
+            </line>
+            <line x1="145" y1="35" x2="160" y2="20" stroke="#ffeb3b" stroke-width="4" stroke-linecap="round" opacity="1">
+             <animate attributename="opacity" values="0.8;0.5;0.8" dur="1.2s" repeatcount="indefinite" />
+            </line>
+            <line x1="160" y1="80" x2="180" y2="80" stroke="#ffeb3b" stroke-width="4" stroke-linecap="round" opacity="1">
+             <animate attributename="opacity" values="0.9;0.4;0.9" dur="0.9s" repeatcount="indefinite" />
+            </line>
+            <line x1="55" y1="35" x2="40" y2="20" stroke="#ffeb3b" stroke-width="4" stroke-linecap="round" opacity="1">
+             <animate attributename="opacity" values="0.7;0.5;0.7" dur="1.1s" repeatcount="indefinite" />
+            </line>
+            <line x1="40" y1="80" x2="20" y2="80" stroke="#ffeb3b" stroke-width="4" stroke-linecap="round" opacity="1">
+             <animate attributename="opacity" values="1;0.5;1" dur="0.8s" repeatcount="indefinite" />
+            </line>
+            <line x1="145" y1="125" x2="160" y2="140" stroke="#ffeb3b" stroke-width="4" stroke-linecap="round" opacity="1">
+             <animate attributename="opacity" values="0.6;0.4;0.6" dur="1.3s" repeatcount="indefinite" />
+            </line>
+            <line x1="55" y1="125" x2="40" y2="140" stroke="#ffeb3b" stroke-width="4" stroke-linecap="round" opacity="1">
+             <animate attributename="opacity" values="0.8;0.6;0.8" dur="1s" repeatcount="indefinite" />
+            </line>
+           </g>
+          </svg>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Extension Cord Simulator -->
+     <div class="panel" style="margin-bottom: 30px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+       <h3 class="panel-title" style="margin: 0;">🔌 Extension Cord Simulator</h3><button class="simulator-toggle-btn" data-target="extension-content" style="background: rgba(0, 217, 255, 0.3); border: 2px solid #00d9ff; color: #00d9ff; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> Hide </button>
+      </div>
+      <div id="extension-content" class="simulator-content">
+       <p style="text-align: center; color: #00d9ff; margin-bottom: 20px;">Adjust settings and add extension cords to see how they affect device performance!</p>
+       <div style="background: rgba(255, 235, 59, 0.1); border: 2px solid #ffeb3b; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <h4 style="color: #ffeb3b; margin-bottom: 12px; text-align: center; font-size: 18px;">📋 How to Use</h4>
+        <ul style="color: #00d9ff; line-height: 1.8; padding-left: 25px; margin: 0;">
+         <li><strong>Set the outlet voltage</strong> using the voltage slider (100V - 240V)</li>
+         <li><strong>Set the device resistance</strong> with the resistance slider (5Ω - 30Ω)</li>
+         <li><strong>Click "Add Extension Cord"</strong> to add 10-meter cords (up to 10 cords / 100m)</li>
+         <li><strong>Click "Remove Last Cord"</strong> to remove extension cords one at a time</li>
+         <li><strong>Watch the stats!</strong> See how total length, wire resistance, and power loss increase</li>
+         <li><strong>Learn:</strong> Long extension cords add resistance and reduce efficiency!</li>
+        </ul>
+       </div>
+       <div style="display: flex; flex-direction: column; gap: 30px;"><!-- Control settings -->
+        <div style="background: rgba(0, 217, 255, 0.1); padding: 25px; border-radius: 15px; border: 2px solid #00d9ff;">
+         <h4 style="color: #ffeb3b; margin-bottom: 20px; text-align: center;">⚙️ System Settings</h4>
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 20px;"><!-- Outlet Voltage Control -->
+          <div>
+           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><span style="color: #00d9ff; font-weight: 600; font-size: 16px;">Outlet Voltage</span> <span style="color: #ffeb3b; font-size: 22px; font-weight: 700;" id="outlet-voltage-display">120 V</span>
+           </div><input type="range" id="outlet-voltage-slider" min="100" max="240" step="10" value="120" style="width: 100%; height: 8px; background: rgba(255, 235, 59, 0.2); border-radius: 10px; outline: none; -webkit-appearance: none;">
+           <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span style="color: #00d9ff; font-size: 12px;">100V</span> <span style="color: #00d9ff; font-size: 12px;">240V</span>
+           </div>
+          </div><!-- Device Resistance Control -->
+          <div>
+           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;"><span style="color: #00d9ff; font-weight: 600; font-size: 16px;">Device Resistance</span> <span style="color: #ff6b6b; font-size: 22px; font-weight: 700;" id="device-resistance-display">12.0 Ω</span>
+           </div><input type="range" id="device-resistance-slider" min="5" max="30" step="0.5" value="12" style="width: 100%; height: 8px; background: rgba(255, 107, 107, 0.2); border-radius: 10px; outline: none; -webkit-appearance: none;">
+           <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span style="color: #00d9ff; font-size: 12px;">5Ω</span> <span style="color: #00d9ff; font-size: 12px;">30Ω</span>
+           </div>
+          </div>
+         </div>
+        </div><!-- Control buttons -->
+        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;"><button id="add-cord-btn" style="background: rgba(0, 217, 255, 0.3); border: 2px solid #00d9ff; color: #00d9ff; padding: 15px 40px; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(0, 217, 255, 0.3);"> ➕ Add 10m Extension Cord </button> <button id="remove-cord-btn" style="background: rgba(255, 107, 107, 0.3); border: 2px solid #ff6b6b; color: #ff6b6b; padding: 15px 40px; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);"> ➖ Remove Last Cord </button>
+        </div><!-- Visual representation -->
+        <div style="background: rgba(0, 0, 0, 0.3); padding: 40px; border-radius: 15px; position: relative; min-height: 400px; display: flex; align-items: center; justify-content: space-between;"><!-- Wall outlet -->
+         <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+          <svg width="120" height="160" viewbox="0 0 120 160"><!-- Wall plate --> <rect x="10" y="10" width="100" height="140" rx="8" fill="#e8e8e8" stroke="#a0a0a0" stroke-width="2" /> <circle cx="30" cy="30" r="4" fill="#b0b0b0" /> <circle cx="90" cy="30" r="4" fill="#b0b0b0" /> <circle cx="30" cy="130" r="4" fill="#b0b0b0" /> <circle cx="90" cy="130" r="4" fill="#b0b0b0" /> <!-- Outlet face --> <rect x="25" y="50" width="70" height="60" rx="5" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="1" /> <!-- Outlet slots --> <rect x="45" y="65" width="8" height="20" rx="2" fill="#1a1a1a" /> <rect x="67" y="65" width="8" height="20" rx="2" fill="#1a1a1a" /> <circle cx="60" cy="95" r="5" fill="#1a1a1a" /> <!-- Screws --> <circle cx="60" cy="40" r="3" fill="#808080" /> <line x1="58" y1="38" x2="62" y2="42" stroke="#606060" stroke-width="1" /> <circle cx="60" cy="120" r="3" fill="#808080" /> <line x1="58" y1="118" x2="62" y2="122" stroke="#606060" stroke-width="1" />
+          </svg>
+          <div style="color: #ffeb3b; font-weight: 700; text-align: center; font-size: 16px;">
+           WALL OUTLET<br><span style="font-size: 14px; color: #00d9ff;">120V AC</span>
+          </div>
+         </div><!-- Extension cords area -->
+         <div id="cords-container" style="flex: 1; display: flex; align-items: center; justify-content: center; padding: 0 20px; position: relative; min-height: 200px;">
+          <div id="no-cords-message" style="color: #00d9ff; opacity: 0.5; font-size: 18px; text-align: center;">
+           Click "Add Extension Cord" to start
+          </div>
+          <div id="cord-chain" style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; justify-content: center; display: none;"><!-- Cords will be added here -->
+          </div>
+         </div><!-- Appliance -->
+         <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+          <svg width="140" height="140" viewbox="0 0 140 140" id="appliance-svg"><!-- Microwave body --> <defs>
+            <lineargradient id="microwave-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+             <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+             <stop offset="100%" style="stop-color:#c0c0c0;stop-opacity:1" />
+            </lineargradient>
+           </defs> <rect x="10" y="20" width="120" height="100" rx="5" fill="url(#microwave-gradient)" stroke="#808080" stroke-width="2" /> <!-- Door window --> <rect x="20" y="30" width="70" height="70" rx="3" fill="#1a1a1a" stroke="#606060" stroke-width="2" /> <circle cx="55" cy="65" r="25" fill="none" stroke="#404040" stroke-width="1" opacity="0.3" /> <circle cx="55" cy="65" r="15" fill="none" stroke="#404040" stroke-width="1" opacity="0.3" /> <!-- Control panel --> <rect x="95" y="35" width="30" height="60" rx="2" fill="#2a2a2a" stroke="#606060" stroke-width="1" /> <!-- Buttons --> <circle cx="105" cy="45" r="3" fill="#ff6b6b" /> <circle cx="115" cy="45" r="3" fill="#ffeb3b" /> <rect x="100" y="55" width="20" height="4" rx="1" fill="#00d9ff" opacity="0.7" id="power-indicator" /> <rect x="100" y="65" width="8" height="8" rx="1" fill="#606060" /> <rect x="112" y="65" width="8" height="8" rx="1" fill="#606060" /> <rect x="100" y="77" width="8" height="8" rx="1" fill="#606060" /> <rect x="112" y="77" width="8" height="8" rx="1" fill="#606060" /> <!-- Handle --> <rect x="90" y="105" width="35" height="8" rx="2" fill="#808080" stroke="#606060" stroke-width="1" /> <!-- Plug --> <g id="appliance-plug">
+            <rect x="60" y="125" width="20" height="12" rx="3" fill="#2a2a2a" stroke="#1a1a1a" stroke-width="1" />
+            <rect x="64" y="128" width="4" height="6" rx="1" fill="#c0c0c0" />
+            <rect x="72" y="128" width="4" height="6" rx="1" fill="#c0c0c0" />
+           </g>
+          </svg>
+          <div style="color: #ffeb3b; font-weight: 700; text-align: center; font-size: 16px;">
+           MICROWAVE<br><span style="font-size: 14px; color: #00d9ff;">1200W</span>
+          </div>
+         </div>
+        </div><!-- Stats panel -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+         <div style="background: rgba(255, 235, 59, 0.1); padding: 20px; border-radius: 12px; border: 2px solid #ffeb3b;">
+          <div style="color: #00d9ff; font-size: 14px; margin-bottom: 5px; text-align: center;">
+           Total Cord Length
+          </div>
+          <div style="color: #ffeb3b; font-size: 32px; font-weight: 700; text-align: center;" id="cord-length">
+           0 m
+          </div>
+         </div>
+         <div style="background: rgba(255, 107, 107, 0.1); padding: 20px; border-radius: 12px; border: 2px solid #ff6b6b;">
+          <div style="color: #00d9ff; font-size: 14px; margin-bottom: 5px; text-align: center;">
+           Wire Resistance
+          </div>
+          <div style="color: #ff6b6b; font-size: 32px; font-weight: 700; text-align: center;" id="cord-resistance">
+           0.0 Ω
+          </div>
+         </div>
+         <div style="background: rgba(39, 174, 96, 0.1); padding: 20px; border-radius: 12px; border: 2px solid #27ae60;">
+          <div style="color: #00d9ff; font-size: 14px; margin-bottom: 5px; text-align: center;">
+           Current to Device
+          </div>
+          <div style="color: #27ae60; font-size: 32px; font-weight: 700; text-align: center;" id="cord-current">
+           10.0 A
+          </div>
+         </div>
+         <div style="background: rgba(0, 217, 255, 0.1); padding: 20px; border-radius: 12px; border: 2px solid #00d9ff;" id="device-status">
+          <div style="color: #00d9ff; font-size: 14px; margin-bottom: 5px; text-align: center;">
+           Power Loss
+          </div>
+          <div style="color: #27ae60; font-size: 32px; font-weight: 700; text-align: center;" id="power-loss">
+           0%
+          </div>
+          <div style="color: #27ae60; font-size: 14px; margin-top: 5px; text-align: center; font-weight: 600;" id="efficiency-status">
+           ✓ Optimal
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- Car Battery Simulator -->
+     <div class="panel" style="margin-bottom: 30px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+       <h3 class="panel-title" style="margin: 0;">🚗 Car Battery Simulator</h3><button class="simulator-toggle-btn" data-target="car-content" style="background: rgba(0, 217, 255, 0.3); border: 2px solid #00d9ff; color: #00d9ff; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s;"> Hide </button>
+      </div>
+      <div id="car-content" class="simulator-content">
+       <p style="text-align: center; color: #00d9ff; margin-bottom: 20px;">Adjust battery voltage and component resistance, then click components to see current draw!</p>
+       <div style="background: rgba(255, 235, 59, 0.1); border: 2px solid #ffeb3b; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+        <h4 style="color: #ffeb3b; margin-bottom: 12px; text-align: center; font-size: 18px;">📋 How to Use</h4>
+        <ul style="color: #00d9ff; line-height: 1.8; padding-left: 25px; margin: 0;">
+         <li><strong>Click on any car component</strong> (Headlights, Radio, AC Blower, or Starter Motor) to activate it</li>
+         <li><strong>Adjust battery voltage</strong> using the voltage slider (6V - 24V)</li>
+         <li><strong>Change component resistance</strong> by sliding the resistance slider inside each component button</li>
+         <li><strong>Watch the current draw!</strong> See how much current (A) and power (W) each component uses</li>
+         <li><strong>Notice the warning:</strong> High current draws (&gt;50A) can drain the battery quickly</li>
+         <li><strong>Learn:</strong> Different car components have different resistances and power needs!</li>
+        </ul>
+       </div>
+       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <div>
+         <h4 style="color: #ffeb3b; margin-bottom: 15px; text-align: center;">Car Components</h4>
+         <div style="display: flex; flex-direction: column; gap: 12px;"><button class="car-component" data-name="Headlights" data-base-resistance="4.8" data-icon="💡" style="background: rgba(0, 217, 255, 0.2); padding: 20px; border-radius: 12px; border: 2px solid #00d9ff; cursor: pointer; text-align: left; transition: all 0.3s; display: flex; align-items: center; gap: 15px;"> <span style="font-size: 40px;">💡</span>
+           <div style="flex: 1;">
+            <div style="color: #00d9ff; font-weight: 600; font-size: 18px;">
+             Headlights
+            </div>
+            <div style="color: #ffeb3b; font-size: 14px;"><span>Base Resistance: 4.8Ω</span>
+             <div style="margin-top: 5px;"><input type="range" class="component-resistance-slider" data-component="Headlights" min="2" max="10" step="0.1" value="4.8" style="width: 100%; height: 4px;">
+             </div>
+            </div>
+           </div></button> <button class="car-component" data-name="Radio" data-base-resistance="24" data-icon="��" style="background: rgba(0, 217, 255, 0.2); padding: 20px; border-radius: 12px; border: 2px solid #00d9ff; cursor: pointer; text-align: left; transition: all 0.3s; display: flex; align-items: center; gap: 15px;"> <span style="font-size: 40px;">📻</span>
+           <div style="flex: 1;">
+            <div style="color: #00d9ff; font-weight: 600; font-size: 18px;">
+             Radio
+            </div>
+            <div style="color: #ffeb3b; font-size: 14px;"><span>Base Resistance: 24Ω</span>
+             <div style="margin-top: 5px;"><input type="range" class="component-resistance-slider" data-component="Radio" min="10" max="50" step="1" value="24" style="width: 100%; height: 4px;">
+             </div>
+            </div>
+           </div></button> <button class="car-component" data-name="AC Blower" data-base-resistance="2.4" data-icon="❄️" style="background: rgba(0, 217, 255, 0.2); padding: 20px; border-radius: 12px; border: 2px solid #00d9ff; cursor: pointer; text-align: left; transition: all 0.3s; display: flex; align-items: center; gap: 15px;"> <span style="font-size: 40px;">❄️</span>
+           <div style="flex: 1;">
+            <div style="color: #00d9ff; font-weight: 600; font-size: 18px;">
+             AC Blower
+            </div>
+            <div style="color: #ffeb3b; font-size: 14px;"><span>Base Resistance: 2.4Ω</span>
+             <div style="margin-top: 5px;"><input type="range" class="component-resistance-slider" data-component="AC Blower" min="1" max="5" step="0.1" value="2.4" style="width: 100%; height: 4px;">
+             </div>
+            </div>
+           </div></button> <button class="car-component" data-name="Starter Motor" data-base-resistance="0.12" data-icon="🔧" style="background: rgba(0, 217, 255, 0.2); padding: 20px; border-radius: 12px; border: 2px solid #00d9ff; cursor: pointer; text-align: left; transition: all 0.3s; display: flex; align-items: center; gap: 15px;"> <span style="font-size: 40px;">🔧</span>
+           <div style="flex: 1;">
+            <div style="color: #00d9ff; font-weight: 600; font-size: 18px;">
+             Starter Motor
+            </div>
+            <div style="color: #ffeb3b; font-size: 14px;"><span>Base Resistance: 0.12Ω</span>
+             <div style="margin-top: 5px;"><input type="range" class="component-resistance-slider" data-component="Starter Motor" min="0.05" max="0.5" step="0.01" value="0.12" style="width: 100%; height: 4px;">
+             </div>
+            </div>
+           </div></button>
+         </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 25px;">
+         <div style="font-size: 100px;">
+          🔋
+         </div>
+         <div style="text-align: center;">
+          <div style="color: #ffeb3b; font-size: 28px; font-weight: 700; margin-bottom: 10px;">
+           Car Battery
+          </div>
+          <div style="color: #00d9ff; font-size: 20px; font-weight: 600; margin-bottom: 15px;">
+           <span id="car-battery-voltage-display">12</span>V DC
+          </div><!-- Battery Voltage Control -->
+          <div style="background: rgba(255, 235, 59, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+           <div style="color: #00d9ff; font-size: 14px; margin-bottom: 8px;">
+            Battery Voltage
+           </div><input type="range" id="car-battery-voltage-slider" min="6" max="24" step="1" value="12" style="width: 100%; height: 6px; background: rgba(255, 235, 59, 0.2); border-radius: 10px; outline: none; -webkit-appearance: none;">
+           <div style="display: flex; justify-content: space-between; margin-top: 5px;"><span style="color: #00d9ff; font-size: 10px;">6V</span> <span style="color: #00d9ff; font-size: 10px;">24V</span>
+           </div>
+          </div>
+         </div>
+         <div id="car-display" style="background: rgba(0, 217, 255, 0.2); padding: 25px; border-radius: 15px; width: 100%; text-align: center;">
+          <div style="color: #ffeb3b; font-size: 18px; margin-bottom: 15px;" id="car-component-name">
+           Select a component
+          </div>
+          <div id="car-component-icon" style="font-size: 60px; margin-bottom: 15px;">
+           👆
+          </div>
+          <div style="background: rgba(0, 0, 0, 0.3); padding: 20px; border-radius: 12px;">
+           <div style="color: #00d9ff; font-size: 14px; margin-bottom: 5px;">
+            Current Draw:
+           </div>
+           <div style="color: #27ae60; font-size: 36px; font-weight: 700; margin-bottom: 15px;" id="car-current">
+            0.0 A
+           </div>
+           <div style="color: #00d9ff; font-size: 14px; margin-bottom: 5px;">
+            Power Consumption:
+           </div>
+           <div style="color: #ff6b6b; font-size: 24px; font-weight: 700;" id="car-power">
+            0 W
+           </div>
+          </div>
+          <div id="car-warning" style="margin-top: 15px; padding: 15px; background: rgba(255, 107, 107, 0.2); border: 2px solid #ff6b6b; border-radius: 8px; display: none;">
+           <div style="color: #ff6b6b; font-weight: 700; font-size: 16px;">
+            ⚠️ High Current Draw!
+           </div>
+           <div style="color: #ff6b6b; font-size: 12px; margin-top: 5px;">
+            Battery may drain quickly
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><button class="discussion-toggle" id="discussion-toggle"> ⚡ Show Discussion &amp; Explanations </button>
+    <div class="discussion-content" id="discussion-content">
+     <div class="discussion-panel">
+      <h3 class="discussion-title" id="discussion-header">Understanding Ohm's Law</h3>
+      <p class="discussion-text"><strong>What is Ohm's Law?</strong><br>
+        Ohm's Law describes the relationship between voltage (V), current (I), and resistance (R) in an electrical circuit. The formula <strong>I = V / R</strong> tells us that current is directly proportional to voltage and inversely proportional to resistance.</p>
+      <div class="example-box"><strong>🔋 Voltage (V) - The Driving Force</strong><br>
+        Voltage is the electrical potential difference that pushes electrons through a circuit. Think of it like water pressure in a pipe - higher pressure means more water flow. When you increase voltage, you're giving electrons more "push," which increases the current.
+      </div>
+      <div class="example-box"><strong>🛑 Resistance (R) - Opposition to Flow</strong><br>
+        Resistance is how much a material opposes the flow of electrons. It's like friction in a pipe that slows down water. Materials like rubber have high resistance (insulators), while copper has low resistance (conductors). Increasing resistance makes it harder for current to flow.
+      </div>
+      <div class="example-box"><strong>⚡ Current (I) - Flow of Electrons</strong><br>
+        Current is the rate at which electrons flow through the circuit, measured in Amperes (A). It depends on BOTH voltage and resistance. More voltage = more current. More resistance = less current.
+      </div>
+      <p class="discussion-text"><strong>Why does increasing resistance decrease current?</strong><br>
+        When resistance increases, it's like making the pipe narrower - the same pressure (voltage) can't push as much water (current) through. The electrons face more opposition, so fewer can flow per second.</p>
+      <p class="discussion-text"><strong>Why does increasing voltage increase current?</strong><br>
+        Increasing voltage is like increasing water pressure - you're giving electrons more energy to overcome the resistance. With more "push," more electrons can flow through the circuit per second.</p>
+      <div class="example-box"><strong>🏠 Real-Life Examples</strong><br>
+        • <strong>Phone Charger:</strong> Uses specific voltage (5V) and the phone's internal resistance determines charging current<br>
+        • <strong>Light Dimmer:</strong> Increases resistance to reduce current, making bulbs dimmer<br>
+        • <strong>Extension Cords:</strong> Long, thin wires have more resistance, which can reduce current and make devices work less efficiently<br>
+        • <strong>Car Battery:</strong> 12V battery delivers different currents depending on what you connect (headlights vs. starter motor)
+      </div>
+      <p class="discussion-text"><strong>Key Takeaway:</strong> Ohm's Law shows that current depends on the balance between voltage (driving force) and resistance (opposition). Change either one, and you change the current flowing through your circuit!</p>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      main_title: "Ohm's Law Learning Lab",
+      formula_label: "Ohm's Law Formula",
+      voltage_label: "Voltage (V)",
+      resistance_label: "Resistance (Ω)",
+      current_label: "Current (A)",
+      discussion_header: "Understanding Ohm's Law",
+      primary_color: "#0a0e27",
+      secondary_color: "#1a1034",
+      text_color: "#00d9ff",
+      accent_color: "#ffeb3b",
+      button_color: "#00d9ff"
+    };
+
+    let config = { ...defaultConfig };
+
+    // Main circuit elements
+    const voltageSlider = document.getElementById('voltage-slider');
+    const resistanceSlider = document.getElementById('resistance-slider');
+    const currentSlider = document.getElementById('current-slider');
+    const voltageDisplay = document.getElementById('voltage-display');
+    const resistanceDisplay = document.getElementById('resistance-display');
+    const currentDisplay = document.getElementById('current-display');
+    const resultVoltage = document.getElementById('result-voltage');
+    const resultResistance = document.getElementById('result-resistance');
+    const resultCurrent = document.getElementById('result-current');
+    const electrons = document.querySelectorAll('.electron');
+    const discussionToggle = document.getElementById('discussion-toggle');
+    const discussionContent = document.getElementById('discussion-content');
+    const formulaI = document.getElementById('formula-i');
+    const formulaV = document.getElementById('formula-v');
+    const formulaR = document.getElementById('formula-r');
+
+    let voltage = parseFloat(voltageSlider.value);
+    let resistance = parseFloat(resistanceSlider.value);
+    let current = parseFloat(currentSlider.value);
+    let isUpdating = false;
+    let switchOn = true;
+    let isSchematicMode = false;
+
+    function calculateCurrent() {
+      return voltage / resistance;
+    }
+
+    // Switch toggle functionality
+    const switchElement = document.getElementById('switch');
+    const switchArm = document.getElementById('switch-arm');
+    const switchKnob = document.getElementById('switch-knob');
+    const switchOnLabel = document.getElementById('switch-on-label');
+    const switchOffLabel = document.getElementById('switch-off-label');
+    const schematicSwitchArm = document.getElementById('schematic-switch-arm');
+
+    switchElement.addEventListener('click', () => {
+      switchOn = !switchOn;
+      
+      if (switchOn) {
+        switchArm.setAttribute('y2', '220');
+        switchKnob.setAttribute('cy', '220');
+        switchArm.setAttribute('stroke', '#27ae60');
+        switchKnob.setAttribute('fill', '#27ae60');
+        switchKnob.setAttribute('stroke', '#1e8449');
+        switchOnLabel.setAttribute('opacity', '1');
+        switchOffLabel.setAttribute('opacity', '0.5');
+        schematicSwitchArm.setAttribute('y2', '240');
+      } else {
+        switchArm.setAttribute('y2', '260');
+        switchKnob.setAttribute('cy', '260');
+        switchArm.setAttribute('stroke', '#e74c3c');
+        switchKnob.setAttribute('fill', '#e74c3c');
+        switchKnob.setAttribute('stroke', '#c0392b');
+        switchOnLabel.setAttribute('opacity', '0.5');
+        switchOffLabel.setAttribute('opacity', '1');
+        schematicSwitchArm.setAttribute('y2', '262');
+      }
+      
+      updateDisplay();
+    });
+
+    // Mode toggle functionality
+    const realisticBtn = document.getElementById('realistic-mode-btn');
+    const schematicBtn = document.getElementById('schematic-mode-btn');
+    const realisticSymbols = [
+      document.getElementById('battery'),
+      document.getElementById('switch'),
+      document.getElementById('resistor')
+    ];
+    const schematicSymbols = document.getElementById('schematic-symbols');
+
+    realisticBtn.addEventListener('click', () => {
+      isSchematicMode = false;
+      realisticBtn.style.background = 'rgba(0, 217, 255, 0.3)';
+      realisticBtn.style.borderColor = '#00d9ff';
+      realisticBtn.style.color = '#00d9ff';
+      schematicBtn.style.background = 'rgba(0, 217, 255, 0.1)';
+      schematicBtn.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+      schematicBtn.style.color = 'rgba(0, 217, 255, 0.6)';
+      
+      realisticSymbols.forEach(el => el.setAttribute('opacity', '1'));
+      schematicSymbols.setAttribute('opacity', '0');
+    });
+
+    schematicBtn.addEventListener('click', () => {
+      isSchematicMode = true;
+      schematicBtn.style.background = 'rgba(0, 217, 255, 0.3)';
+      schematicBtn.style.borderColor = '#00d9ff';
+      schematicBtn.style.color = '#00d9ff';
+      realisticBtn.style.background = 'rgba(0, 217, 255, 0.1)';
+      realisticBtn.style.borderColor = 'rgba(0, 217, 255, 0.3)';
+      realisticBtn.style.color = 'rgba(0, 217, 255, 0.6)';
+      
+      realisticSymbols.forEach(el => el.setAttribute('opacity', '0'));
+      schematicSymbols.setAttribute('opacity', '1');
+    });
+
+    function updateDisplay() {
+      if (isUpdating) return;
+      isUpdating = true;
+      
+      voltageDisplay.textContent = `${voltage.toFixed(1)} V`;
+      resistanceDisplay.textContent = `${resistance.toFixed(1)} Ω`;
+      currentDisplay.textContent = `${switchOn ? current.toFixed(2) : '0.00'} A`;
+      resultVoltage.textContent = voltage.toFixed(1);
+      resultResistance.textContent = resistance.toFixed(1);
+      resultCurrent.textContent = switchOn ? current.toFixed(2) : '0.00';
+      
+      voltageSlider.value = voltage;
+      resistanceSlider.value = resistance;
+      currentSlider.value = current;
+
+      const currentScale = 1 + (current * 0.8);
+      formulaI.style.fontSize = `${56 * Math.min(currentScale, 3.5)}px`;
+      formulaI.style.textShadow = `0 0 ${30 * currentScale}px rgba(0, 217, 255, 0.9)`;
+
+      const voltageScale = 1 + (voltage / 6);
+      formulaV.style.fontSize = `${56 * voltageScale}px`;
+      formulaV.style.textShadow = `0 0 ${30 * voltageScale}px rgba(255, 235, 59, 0.9)`;
+
+      const resistanceScale = 1 + (resistance / 25);
+      formulaR.style.fontSize = `${56 * resistanceScale}px`;
+      formulaR.style.textShadow = `0 0 ${30 * resistanceScale}px rgba(255, 107, 107, 0.9)`;
+
+      const baseSpeed = 2;
+      const speedFactor = Math.max(0.3, Math.min(3, baseSpeed / current));
+      electrons.forEach((electron, index) => {
+        const animation = electron.querySelector('animateMotion');
+        animation.setAttribute('dur', `${speedFactor}s`);
+        electron.setAttribute('opacity', switchOn ? '1' : '0');
+      });
+
+      // Update battery size
+      const baseBatteryWidth = 80;
+      const baseBatteryHeight = 30;
+      const batterySizeFactor = 0.7 + (voltage / 12) * 0.6;
+      const newBatteryWidth = baseBatteryWidth * batterySizeFactor;
+      const newBatteryHeight = baseBatteryHeight * batterySizeFactor;
+      
+      const batteryBody = document.getElementById('battery-body');
+      batteryBody.setAttribute('width', newBatteryWidth);
+      batteryBody.setAttribute('height', newBatteryHeight);
+      batteryBody.setAttribute('x', 120 - newBatteryWidth / 2);
+      batteryBody.setAttribute('y', 100 - newBatteryHeight / 2);
+      batteryBody.setAttribute('rx', newBatteryHeight / 2);
+      
+      const posTerminal = document.getElementById('battery-pos-terminal');
+      const terminalRadius = 5 * batterySizeFactor;
+      posTerminal.setAttribute('cx', 120 + newBatteryWidth / 2);
+      posTerminal.setAttribute('cy', 100);
+      posTerminal.setAttribute('r', terminalRadius);
+      
+      const plusSign = document.getElementById('battery-plus-sign');
+      plusSign.setAttribute('x', 120 + newBatteryWidth / 2);
+      plusSign.setAttribute('y', 100 + 4 * batterySizeFactor);
+      plusSign.setAttribute('font-size', 10 * batterySizeFactor);
+      
+      const negTerminal = document.getElementById('battery-neg-terminal');
+      negTerminal.setAttribute('x', 120 - newBatteryWidth / 2 - 5 * batterySizeFactor);
+      negTerminal.setAttribute('y', 100 - 5 * batterySizeFactor);
+      negTerminal.setAttribute('width', 5 * batterySizeFactor);
+      negTerminal.setAttribute('height', 10 * batterySizeFactor);
+      
+      const batteryLabelBg = document.getElementById('battery-label-bg');
+      const labelWidth = newBatteryWidth * 0.625;
+      const labelHeight = newBatteryHeight * 0.67;
+      batteryLabelBg.setAttribute('width', labelWidth);
+      batteryLabelBg.setAttribute('height', labelHeight);
+      batteryLabelBg.setAttribute('x', 120 - labelWidth / 2);
+      batteryLabelBg.setAttribute('y', 100 - labelHeight / 2);
+      batteryLabelBg.setAttribute('rx', 3 * batterySizeFactor);
+      
+      const batteryText = document.getElementById('battery-text');
+      batteryText.setAttribute('x', 120);
+      batteryText.setAttribute('y', 100 + 3 * batterySizeFactor);
+      batteryText.setAttribute('font-size', 10 * batterySizeFactor);
+      
+      const batteryVLabel = document.getElementById('battery-v-label');
+      batteryVLabel.setAttribute('x', 120);
+      batteryVLabel.setAttribute('y', 100 - newBatteryHeight / 2 - 10);
+      batteryVLabel.setAttribute('font-size', 14 * batterySizeFactor);
+      
+      const batteryShine = document.getElementById('battery-shine');
+      batteryShine.setAttribute('width', newBatteryWidth * 0.15);
+      batteryShine.setAttribute('height', newBatteryHeight * 0.87);
+      batteryShine.setAttribute('x', 120 - newBatteryWidth / 2 + 5);
+      batteryShine.setAttribute('y', 100 - newBatteryHeight / 2 + 2);
+      batteryShine.setAttribute('rx', newBatteryHeight / 4);
+
+      // Update resistor size
+      const baseResistorWidth = 60;
+      const baseResistorHeight = 30;
+      const resistorSizeFactor = 0.8 + (resistance / 50) * 0.6;
+      const newResistorWidth = baseResistorWidth * resistorSizeFactor;
+      const newResistorHeight = baseResistorHeight * resistorSizeFactor;
+      
+      const resistorBody = document.getElementById('resistor-body');
+      resistorBody.setAttribute('width', newResistorWidth);
+      resistorBody.setAttribute('height', newResistorHeight);
+      resistorBody.setAttribute('x', 225 - newResistorWidth / 2);
+      resistorBody.setAttribute('y', 380 - newResistorHeight / 2);
+      resistorBody.setAttribute('rx', newResistorHeight / 2);
+      
+      const leadLeft = document.getElementById('resistor-lead-left');
+      const leadRight = document.getElementById('resistor-lead-right');
+      const leadHeight = newResistorHeight * 0.2;
+      const leadWidth = 15 * resistorSizeFactor;
+      leadLeft.setAttribute('width', leadWidth);
+      leadLeft.setAttribute('height', leadHeight);
+      leadLeft.setAttribute('x', 225 - newResistorWidth / 2 - leadWidth + 5);
+      leadLeft.setAttribute('y', 380 - leadHeight / 2);
+      leadRight.setAttribute('width', leadWidth);
+      leadRight.setAttribute('height', leadHeight);
+      leadRight.setAttribute('x', 225 + newResistorWidth / 2 - 5);
+      leadRight.setAttribute('y', 380 - leadHeight / 2);
+      
+      const bandWidth = 5 * resistorSizeFactor;
+      const bandHeight = newResistorHeight * 0.73;
+      const bandY = 380 - newResistorHeight / 2 + newResistorHeight * 0.13;
+      
+      const band1 = document.getElementById('resistor-band1');
+      const band2 = document.getElementById('resistor-band2');
+      const band3 = document.getElementById('resistor-band3');
+      const band4 = document.getElementById('resistor-band4');
+      
+      const bandSpacing = newResistorWidth * 0.15;
+      const startX = 225 - newResistorWidth * 0.3;
+      
+      band1.setAttribute('width', bandWidth);
+      band1.setAttribute('height', bandHeight);
+      band1.setAttribute('x', startX);
+      band1.setAttribute('y', bandY);
+      
+      band2.setAttribute('width', bandWidth);
+      band2.setAttribute('height', bandHeight);
+      band2.setAttribute('x', startX + bandSpacing);
+      band2.setAttribute('y', bandY);
+      
+      band3.setAttribute('width', bandWidth);
+      band3.setAttribute('height', bandHeight);
+      band3.setAttribute('x', startX + bandSpacing * 3);
+      band3.setAttribute('y', bandY);
+      
+      band4.setAttribute('width', bandWidth);
+      band4.setAttribute('height', bandHeight);
+      band4.setAttribute('x', startX + bandSpacing * 4);
+      band4.setAttribute('y', bandY);
+      
+      const resistorRLabel = document.getElementById('resistor-r-label');
+      resistorRLabel.setAttribute('y', 380 - newResistorHeight / 2 - 10);
+      resistorRLabel.setAttribute('x', 225);
+      
+      const resistorHeat = document.getElementById('resistor-heat');
+      if (resistorHeat) {
+        resistorHeat.setAttribute('width', newResistorWidth);
+        resistorHeat.setAttribute('height', newResistorHeight);
+        resistorHeat.setAttribute('x', 225 - newResistorWidth / 2);
+        resistorHeat.setAttribute('y', 380 - newResistorHeight / 2);
+        resistorHeat.setAttribute('rx', newResistorHeight / 2);
+      }
+      
+      isUpdating = false;
+    }
+
+    voltageSlider.addEventListener('input', (e) => {
+      voltage = parseFloat(e.target.value);
+      current = calculateCurrent();
+      updateDisplay();
+    });
+
+    resistanceSlider.addEventListener('input', (e) => {
+      resistance = parseFloat(e.target.value);
+      current = calculateCurrent();
+      updateDisplay();
+    });
+
+    currentSlider.addEventListener('input', (e) => {
+      current = parseFloat(e.target.value);
+      if (current > 0) {
+        resistance = voltage / current;
+        resistance = Math.max(1, Math.min(50, resistance));
+      }
+      updateDisplay();
+    });
+
+    discussionToggle.addEventListener('click', () => {
+      discussionContent.classList.toggle('open');
+      if (discussionContent.classList.contains('open')) {
+        discussionToggle.textContent = '⚡ Hide Discussion & Explanations';
+      } else {
+        discussionToggle.textContent = '⚡ Show Discussion & Explanations';
+      }
+    });
+
+    // Phone Charger Simulator
+    const phoneChargerVoltageSlider = document.getElementById('phone-charger-voltage-slider');
+    const phoneResistanceSlider = document.getElementById('phone-resistance-slider');
+    const phoneChargerVoltageDisplay = document.getElementById('phone-charger-voltage-display');
+    const phoneResistanceDisplay = document.getElementById('phone-resistance-display');
+    const chargerPresetBtns = document.querySelectorAll('.charger-preset-btn');
+    const pluggedCharger = document.getElementById('plugged-charger');
+    const chargerPlugBody = document.getElementById('charger-plug-body');
+    const chargerPlugText = document.getElementById('charger-plug-text');
+    const cablePath = document.getElementById('cable-path');
+    const energyParticle1 = document.getElementById('energy-particle-1');
+    const energyParticle2 = document.getElementById('energy-particle-2');
+    const energyParticle3 = document.getElementById('energy-particle-3');
+    const chargingBolt = document.getElementById('charging-bolt');
+    const batteryFill = document.getElementById('battery-fill');
+    const batteryPercentage = document.getElementById('battery-percentage');
+    const chargingSpeedText = document.getElementById('charging-speed-text');
+    const cableConnector = document.getElementById('cable-connector');
+    const connectorBody = document.getElementById('connector-body');
+    const socketStatus = document.getElementById('socket-status');
+    const chargerNameDisplay = document.getElementById('charger-name-display');
+    const phoneVoltage = document.getElementById('phone-voltage');
+    const phoneCurrent = document.getElementById('phone-current');
+    const chargingStatus = document.getElementById('charging-status');
+    const batteryChargeAnimation = document.getElementById('battery-charge-animation');
+
+    let currentCharging = false;
+    let chargingInterval = null;
+    let phoneChargerVoltage = 5;
+    let phoneResistance = 10;
+
+    function updatePhoneCharging() {
+      const voltage = phoneChargerVoltage;
+      const current = voltage / phoneResistance;
+      
+      // Determine color based on voltage
+      let color = '#4a90e2';
+      let name = 'Custom Charger';
+      if (voltage <= 6) {
+        color = '#4a90e2';
+        name = 'Standard USB';
+      } else if (voltage <= 10) {
+        color = '#27ae60';
+        name = 'Fast Charger';
+      } else if (voltage <= 15) {
+        color = '#9b59b6';
+        name = 'Super Fast';
+      } else {
+        color = '#e74c3c';
+        name = 'Ultra Fast';
+      }
+      
+      // Update displays
+      phoneChargerVoltageDisplay.textContent = `${voltage.toFixed(1)} V`;
+      phoneResistanceDisplay.textContent = `${phoneResistance.toFixed(1)} Ω`;
+      
+      // Show charger plugged into wall socket
+      pluggedCharger.setAttribute('opacity', '1');
+      chargerPlugBody.setAttribute('fill', color);
+      chargerPlugText.textContent = `${voltage.toFixed(1)}V`;
+      
+      // Show cable and connector
+      cablePath.setAttribute('stroke', color);
+      cablePath.setAttribute('opacity', '1');
+      document.getElementById('cable-shine-path').setAttribute('opacity', '0.6');
+      document.getElementById('cable-shadow').setAttribute('opacity', '0.15');
+      cableConnector.setAttribute('opacity', '1');
+      connectorBody.setAttribute('fill', color);
+      
+      // Animate energy particles based on charging speed
+      let particleSpeed = Math.max(0.5, 2 - (current * 0.5));
+      
+      energyParticle1.setAttribute('opacity', '1');
+      energyParticle2.setAttribute('opacity', '1');
+      energyParticle3.setAttribute('opacity', '1');
+      
+      document.getElementById('particle-motion-1').setAttribute('dur', `${particleSpeed}s`);
+      document.getElementById('particle-motion-2').setAttribute('dur', `${particleSpeed}s`);
+      document.getElementById('particle-motion-3').setAttribute('dur', `${particleSpeed}s`);
+      
+      // Show charging bolt on phone screen
+      chargingBolt.setAttribute('opacity', '1');
+      
+      // Update stats
+      socketStatus.textContent = `⚡ ${name} Connected`;
+      socketStatus.style.color = '#27ae60';
+      chargerNameDisplay.textContent = `${name} (${voltage.toFixed(1)}V)`;
+      phoneVoltage.textContent = `${voltage.toFixed(1)}V`;
+      phoneCurrent.textContent = `${current.toFixed(2)}A`;
+      
+      // Update charging status
+      if (current < 0.7) {
+        chargingStatus.textContent = '🔴 Slow Charging';
+        chargingStatus.style.color = '#ff6b6b';
+        chargingSpeedText.textContent = 'Slow Charging';
+        chargingSpeedText.style.fill = '#ff6b6b';
+      } else if (current < 1.2) {
+        chargingStatus.textContent = '⚡ Fast Charging';
+        chargingStatus.style.color = '#27ae60';
+        chargingSpeedText.textContent = 'Fast Charging';
+        chargingSpeedText.style.fill = '#27ae60';
+      } else {
+        chargingStatus.textContent = '⚡⚡ Super Fast Charging!';
+        chargingStatus.style.color = '#ffeb3b';
+        chargingSpeedText.textContent = 'Super Fast Charging!';
+        chargingSpeedText.style.fill = '#ffeb3b';
+      }
+      
+      // Start battery charging animation
+      if (chargingInterval) {
+        clearInterval(chargingInterval);
+      }
+      
+      let batteryPercent = 0;
+      batteryChargeAnimation.beginElement();
+      
+      chargingInterval = setInterval(() => {
+        batteryPercent += current * 3;
+        if (batteryPercent >= 100) {
+          batteryPercent = 100;
+          clearInterval(chargingInterval);
+          chargingStatus.textContent = '✅ Fully Charged';
+          chargingStatus.style.color = '#27ae60';
+          chargingSpeedText.textContent = 'Fully Charged';
+          chargingSpeedText.style.fill = '#27ae60';
+          chargingBolt.setAttribute('opacity', '0');
+        }
+        batteryPercentage.textContent = `${Math.round(batteryPercent)}%`;
+      }, 100);
+    }
+    
+    // Voltage slider
+    phoneChargerVoltageSlider.addEventListener('input', () => {
+      phoneChargerVoltage = parseFloat(phoneChargerVoltageSlider.value);
+      updatePhoneCharging();
+    });
+    
+    // Resistance slider
+    phoneResistanceSlider.addEventListener('input', () => {
+      phoneResistance = parseFloat(phoneResistanceSlider.value);
+      updatePhoneCharging();
+    });
+    
+    // Preset buttons
+    chargerPresetBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        phoneChargerVoltage = parseFloat(btn.dataset.voltage);
+        phoneChargerVoltageSlider.value = phoneChargerVoltage;
+        updatePhoneCharging();
+      });
+    });
+
+    // Light Dimmer Simulator
+    const dimmerVoltageSlider = document.getElementById('dimmer-voltage-slider');
+    const dimmerSlider = document.getElementById('dimmer-slider');
+    const dimmerVoltageDisplay = document.getElementById('dimmer-voltage-display');
+    const dimmerResistance = document.getElementById('dimmer-resistance');
+    const dimmerCurrent = document.getElementById('dimmer-current');
+    const dimmerPower = document.getElementById('dimmer-power');
+    const dimmerBrightness = document.getElementById('dimmer-brightness');
+    const bulbGlowCircle = document.getElementById('bulb-glow-circle');
+    const bulbFilament = document.getElementById('bulb-filament');
+    const bulbRays = document.getElementById('bulb-rays');
+
+    let dimmerVoltage = 120;
+    let dimmerResistanceValue = 5;
+
+    function updateDimmer() {
+      const voltage = dimmerVoltage;
+      const resistance = dimmerResistanceValue;
+      const current = voltage / resistance;
+      const power = voltage * current;
+      
+      // Calculate brightness based on power
+      const maxPower = 240 * 240 / 5; // Max possible power (240V, 5Ω)
+      const minPower = 60 * 60 / 50; // Min possible power (60V, 50Ω)
+      const brightness = ((power - minPower) / (maxPower - minPower)) * 100;
+      const clampedBrightness = Math.max(0, Math.min(100, brightness));
+      
+      dimmerVoltageDisplay.textContent = `${voltage.toFixed(0)} V`;
+      dimmerResistance.textContent = `${resistance.toFixed(0)} Ω`;
+      dimmerCurrent.textContent = `${current.toFixed(1)} A`;
+      dimmerPower.textContent = `${power.toFixed(0)} W`;
+      dimmerBrightness.textContent = `${Math.round(clampedBrightness)}%`;
+      
+      const opacity = clampedBrightness / 100;
+      bulbGlowCircle.setAttribute('opacity', opacity);
+      bulbFilament.setAttribute('opacity', opacity);
+      bulbRays.setAttribute('opacity', opacity);
+    }
+
+    dimmerVoltageSlider.addEventListener('input', () => {
+      dimmerVoltage = parseFloat(dimmerVoltageSlider.value);
+      updateDimmer();
+    });
+
+    dimmerSlider.addEventListener('input', () => {
+      dimmerResistanceValue = parseFloat(dimmerSlider.value);
+      updateDimmer();
+    });
+
+    // Initialize dimmer
+    updateDimmer();
+
+    // Extension Cord Simulator
+    let cordCount = 0;
+    let outletVoltage = 120;
+    let deviceResistance = 12;
+    
+    const outletVoltageSlider = document.getElementById('outlet-voltage-slider');
+    const deviceResistanceSlider = document.getElementById('device-resistance-slider');
+    const outletVoltageDisplay = document.getElementById('outlet-voltage-display');
+    const deviceResistanceDisplay = document.getElementById('device-resistance-display');
+    const addCordBtn = document.getElementById('add-cord-btn');
+    const removeCordBtn = document.getElementById('remove-cord-btn');
+    const cordLength = document.getElementById('cord-length');
+    const cordResistance = document.getElementById('cord-resistance');
+    const powerLoss = document.getElementById('power-loss');
+    const cordCurrent = document.getElementById('cord-current');
+    const cordsContainer = document.getElementById('cord-chain');
+    const noCordsMessage = document.getElementById('no-cords-message');
+    const efficiencyStatus = document.getElementById('efficiency-status');
+    const powerIndicator = document.getElementById('power-indicator');
+
+    function updateCordDisplay() {
+      const resistancePerMeter = 0.1; // Ohms per meter
+      const totalLength = cordCount * 10; // meters
+      const totalResistance = totalLength * resistancePerMeter;
+      const totalCircuitResistance = deviceResistance + totalResistance;
+      const current = outletVoltage / totalCircuitResistance;
+      const idealCurrent = outletVoltage / deviceResistance;
+      const loss = ((idealCurrent - current) / idealCurrent) * 100;
+      
+      outletVoltageDisplay.textContent = `${outletVoltage} V`;
+      deviceResistanceDisplay.textContent = `${deviceResistance.toFixed(1)} Ω`;
+      cordLength.textContent = `${totalLength} m`;
+      cordResistance.textContent = `${totalResistance.toFixed(1)} Ω`;
+      cordCurrent.textContent = `${current.toFixed(2)} A`;
+      powerLoss.textContent = `${loss.toFixed(1)}%`;
+      
+      // Update power indicator and efficiency status
+      if (loss < 10) {
+        powerLoss.style.color = '#27ae60';
+        efficiencyStatus.style.color = '#27ae60';
+        efficiencyStatus.textContent = '✓ Optimal';
+        powerIndicator.setAttribute('opacity', '0.9');
+      } else if (loss < 25) {
+        powerLoss.style.color = '#ffeb3b';
+        efficiencyStatus.style.color = '#ffeb3b';
+        efficiencyStatus.textContent = '⚠ Reduced';
+        powerIndicator.setAttribute('opacity', '0.5');
+      } else {
+        powerLoss.style.color = '#ff6b6b';
+        efficiencyStatus.style.color = '#ff6b6b';
+        efficiencyStatus.textContent = '���� Poor';
+        powerIndicator.setAttribute('opacity', '0.2');
+      }
+      
+      // Update visual cord chain
+      if (cordCount === 0) {
+        noCordsMessage.style.display = 'block';
+        cordsContainer.style.display = 'none';
+      } else {
+        noCordsMessage.style.display = 'none';
+        cordsContainer.style.display = 'flex';
+        cordsContainer.innerHTML = '';
+        
+        for (let i = 0; i < cordCount; i++) {
+          // Create extension cord visual
+          const cordSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          cordSvg.setAttribute('width', '100');
+          cordSvg.setAttribute('height', '60');
+          cordSvg.setAttribute('viewBox', '0 0 100 60');
+          
+          // Cord cable (wavy line)
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', 'M 10 30 Q 20 20, 30 30 T 50 30 T 70 30 T 90 30');
+          path.setAttribute('stroke', '#ff6b6b');
+          path.setAttribute('stroke-width', '6');
+          path.setAttribute('fill', 'none');
+          path.setAttribute('stroke-linecap', 'round');
+          
+          // Female socket (left side)
+          const socket = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          socket.setAttribute('x', '0');
+          socket.setAttribute('y', '20');
+          socket.setAttribute('width', '15');
+          socket.setAttribute('height', '20');
+          socket.setAttribute('rx', '3');
+          socket.setAttribute('fill', '#2a2a2a');
+          socket.setAttribute('stroke', '#1a1a1a');
+          socket.setAttribute('stroke-width', '1');
+          
+          const slot1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          slot1.setAttribute('x', '4');
+          slot1.setAttribute('y', '25');
+          slot1.setAttribute('width', '2');
+          slot1.setAttribute('height', '4');
+          slot1.setAttribute('fill', '#1a1a1a');
+          
+          const slot2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          slot2.setAttribute('x', '9');
+          slot2.setAttribute('y', '25');
+          slot2.setAttribute('width', '2');
+          slot2.setAttribute('height', '4');
+          slot2.setAttribute('fill', '#1a1a1a');
+          
+          const ground = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          ground.setAttribute('cx', '7.5');
+          ground.setAttribute('cy', '33');
+          ground.setAttribute('r', '1.5');
+          ground.setAttribute('fill', '#1a1a1a');
+          
+          // Male plug (right side)
+          const plugBody = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          plugBody.setAttribute('x', '85');
+          plugBody.setAttribute('y', '22');
+          plugBody.setAttribute('width', '15');
+          plugBody.setAttribute('height', '16');
+          plugBody.setAttribute('rx', '3');
+          plugBody.setAttribute('fill', '#2a2a2a');
+          plugBody.setAttribute('stroke', '#1a1a1a');
+          plugBody.setAttribute('stroke-width', '1');
+          
+          const prong1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          prong1.setAttribute('x', '89');
+          prong1.setAttribute('y', '26');
+          prong1.setAttribute('width', '2');
+          prong1.setAttribute('height', '4');
+          prong1.setAttribute('fill', '#c0c0c0');
+          
+          const prong2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+          prong2.setAttribute('x', '94');
+          prong2.setAttribute('y', '26');
+          prong2.setAttribute('width', '2');
+          prong2.setAttribute('height', '4');
+          prong2.setAttribute('fill', '#c0c0c0');
+          
+          // Length label
+          const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          label.setAttribute('x', '50');
+          label.setAttribute('y', '50');
+          label.setAttribute('text-anchor', 'middle');
+          label.setAttribute('fill', '#00d9ff');
+          label.setAttribute('font-size', '10');
+          label.setAttribute('font-weight', '600');
+          label.textContent = '10m';
+          
+          cordSvg.appendChild(path);
+          cordSvg.appendChild(socket);
+          cordSvg.appendChild(slot1);
+          cordSvg.appendChild(slot2);
+          cordSvg.appendChild(ground);
+          cordSvg.appendChild(plugBody);
+          cordSvg.appendChild(prong1);
+          cordSvg.appendChild(prong2);
+          cordSvg.appendChild(label);
+          
+          cordsContainer.appendChild(cordSvg);
+        }
+      }
+    }
+
+    outletVoltageSlider.addEventListener('input', () => {
+      outletVoltage = parseFloat(outletVoltageSlider.value);
+      updateCordDisplay();
+    });
+
+    deviceResistanceSlider.addEventListener('input', () => {
+      deviceResistance = parseFloat(deviceResistanceSlider.value);
+      updateCordDisplay();
+    });
+
+    addCordBtn.addEventListener('click', () => {
+      if (cordCount < 10) {
+        cordCount++;
+        updateCordDisplay();
+      }
+    });
+
+    removeCordBtn.addEventListener('click', () => {
+      if (cordCount > 0) {
+        cordCount--;
+        updateCordDisplay();
+      }
+    });
+
+    // Car Battery Simulator
+    let carBatteryVoltage = 12;
+    const componentResistances = {
+      'Headlights': 4.8,
+      'Radio': 24,
+      'AC Blower': 2.4,
+      'Starter Motor': 0.12
+    };
+    let selectedComponent = null;
+    
+    const carBatteryVoltageSlider = document.getElementById('car-battery-voltage-slider');
+    const carBatteryVoltageDisplay = document.getElementById('car-battery-voltage-display');
+    const carComponents = document.querySelectorAll('.car-component');
+    const componentResistanceSliders = document.querySelectorAll('.component-resistance-slider');
+    const carComponentName = document.getElementById('car-component-name');
+    const carComponentIcon = document.getElementById('car-component-icon');
+    const carCurrent = document.getElementById('car-current');
+    const carPower = document.getElementById('car-power');
+    const carWarning = document.getElementById('car-warning');
+
+    function updateCarDisplay() {
+      if (selectedComponent) {
+        const resistance = componentResistances[selectedComponent];
+        const current = carBatteryVoltage / resistance;
+        const power = carBatteryVoltage * current;
+        
+        carCurrent.textContent = `${current.toFixed(1)} A`;
+        carPower.textContent = `${power.toFixed(0)} W`;
+        
+        if (current > 50) {
+          carWarning.style.display = 'block';
+        } else {
+          carWarning.style.display = 'none';
+        }
+      }
+    }
+
+    carBatteryVoltageSlider.addEventListener('input', () => {
+      carBatteryVoltage = parseFloat(carBatteryVoltageSlider.value);
+      carBatteryVoltageDisplay.textContent = carBatteryVoltage;
+      updateCarDisplay();
+    });
+
+    componentResistanceSliders.forEach(slider => {
+      slider.addEventListener('input', (e) => {
+        e.stopPropagation();
+        const componentName = slider.dataset.component;
+        const newResistance = parseFloat(slider.value);
+        componentResistances[componentName] = newResistance;
+        
+        // Update display text
+        const button = slider.closest('.car-component');
+        const resistanceText = button.querySelector('.color\\:#ffeb3b span') || button.querySelector('[style*="color: #ffeb3b"] span');
+        if (resistanceText) {
+          resistanceText.textContent = `Base Resistance: ${newResistance.toFixed(2)}Ω`;
+        }
+        
+        // Update if this component is selected
+        if (selectedComponent === componentName) {
+          updateCarDisplay();
+        }
+      });
+      
+      // Prevent button click when sliding
+      slider.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    });
+
+    carComponents.forEach(component => {
+      component.addEventListener('click', (e) => {
+        // Don't trigger if clicking on slider
+        if (e.target.classList.contains('component-resistance-slider')) {
+          return;
+        }
+        
+        // Remove active class from all
+        carComponents.forEach(c => c.classList.remove('active'));
+        component.classList.add('active');
+        
+        const name = component.dataset.name;
+        const icon = component.dataset.icon;
+        selectedComponent = name;
+        
+        const resistance = componentResistances[name];
+        const current = carBatteryVoltage / resistance;
+        const power = carBatteryVoltage * current;
+        
+        carComponentName.textContent = name;
+        carComponentIcon.textContent = icon;
+        carCurrent.textContent = `${current.toFixed(1)} A`;
+        carPower.textContent = `${power.toFixed(0)} W`;
+        
+        if (current > 50) {
+          carWarning.style.display = 'block';
+        } else {
+          carWarning.style.display = 'none';
+        }
+      });
+    });
+
+    // Simulator toggle functionality
+    const simulatorToggleBtns = document.querySelectorAll('.simulator-toggle-btn');
+    
+    simulatorToggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetId = btn.dataset.target;
+        const targetContent = document.getElementById(targetId);
+        
+        if (targetContent.style.display === 'none') {
+          targetContent.style.display = 'block';
+          btn.textContent = 'Hide';
+          btn.style.background = 'rgba(0, 217, 255, 0.3)';
+        } else {
+          targetContent.style.display = 'none';
+          btn.textContent = 'Show';
+          btn.style.background = 'rgba(255, 107, 107, 0.3)';
+          btn.style.borderColor = '#ff6b6b';
+          btn.style.color = '#ff6b6b';
+        }
+      });
+      
+      btn.addEventListener('mouseenter', () => {
+        btn.style.transform = 'translateY(-2px)';
+        btn.style.boxShadow = '0 6px 20px rgba(0, 217, 255, 0.4)';
+      });
+      
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = 'translateY(0)';
+        btn.style.boxShadow = 'none';
+      });
+    });
+
+    // Initialize displays
+    updateDisplay();
+    updateCordDisplay();
+
+    // Element SDK integration
+    async function onConfigChange(newConfig) {
+      config = { ...config, ...newConfig };
+      
+      const mainTitle = document.getElementById('main-title');
+      const formulaLabel = document.getElementById('formula-label');
+      const voltageLabel = document.getElementById('voltage-label');
+      const resistanceLabel = document.getElementById('resistance-label');
+      const currentLabel = document.getElementById('current-label');
+      const discussionHeader = document.getElementById('discussion-header');
+
+      mainTitle.textContent = config.main_title || defaultConfig.main_title;
+      formulaLabel.textContent = config.formula_label || defaultConfig.formula_label;
+      voltageLabel.textContent = config.voltage_label || defaultConfig.voltage_label;
+      resistanceLabel.textContent = config.resistance_label || defaultConfig.resistance_label;
+      currentLabel.textContent = config.current_label || defaultConfig.current_label;
+      discussionHeader.textContent = config.discussion_header || defaultConfig.discussion_header;
+
+      const bgColor = config.primary_color || defaultConfig.primary_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const accentColor = config.accent_color || defaultConfig.accent_color;
+      
+      document.body.style.background = `linear-gradient(135deg, ${bgColor} 0%, ${config.secondary_color || defaultConfig.secondary_color} 50%, ${bgColor} 100%)`;
+      document.documentElement.style.setProperty('--text-color', textColor);
+      document.documentElement.style.setProperty('--accent-color', accentColor);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            },
+            {
+              get: () => config.button_color || defaultConfig.button_color,
+              set: (value) => {
+                config.button_color = value;
+                window.elementSdk.setConfig({ button_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["main_title", config.main_title || defaultConfig.main_title],
+          ["formula_label", config.formula_label || defaultConfig.formula_label],
+          ["voltage_label", config.voltage_label || defaultConfig.voltage_label],
+          ["resistance_label", config.resistance_label || defaultConfig.resistance_label],
+          ["current_label", config.current_label || defaultConfig.current_label],
+          ["discussion_header", config.discussion_header || defaultConfig.discussion_header]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c5ff911b530c6f3',t:'MTc2OTc2NTY2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

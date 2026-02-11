@@ -1,0 +1,1248 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electric Power, Energy &amp; Cost Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&amp;family=Rajdhani:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --cyan: #00f5ff;
+      --electric-blue: #0066ff;
+      --yellow: #ffea00;
+      --dark-bg: #0a0a1a;
+      --navy: #0d1b2a;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: 'Rajdhani', sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #0d1b2a 50%, #1a1a3e 100%);
+      overflow-x: hidden;
+    }
+    
+    .font-orbitron {
+      font-family: 'Orbitron', monospace;
+    }
+    
+    /* Electric grid background */
+    .electric-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    /* Floating electrons */
+    .electron {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan);
+      animation: float-electron 8s infinite ease-in-out;
+      pointer-events: none;
+    }
+    
+    @keyframes float-electron {
+      0%, 100% { transform: translateY(0) translateX(0); opacity: 0.6; }
+      25% { transform: translateY(-30px) translateX(20px); opacity: 1; }
+      50% { transform: translateY(-10px) translateX(-15px); opacity: 0.8; }
+      75% { transform: translateY(-40px) translateX(10px); opacity: 1; }
+    }
+    
+    /* Glow text effects */
+    .glow-text {
+      text-shadow: 0 0 10px var(--cyan), 0 0 20px var(--cyan), 0 0 30px var(--cyan);
+    }
+    
+    .glow-yellow {
+      text-shadow: 0 0 10px var(--yellow), 0 0 20px var(--yellow), 0 0 30px var(--yellow);
+    }
+    
+    /* Neon button */
+    .neon-btn {
+      position: relative;
+      padding: 15px 40px;
+      font-family: 'Orbitron', monospace;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(0, 102, 255, 0.3) 0%, rgba(0, 245, 255, 0.3) 100%);
+      border: 2px solid var(--cyan);
+      border-radius: 8px;
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3), inset 0 0 20px rgba(0, 245, 255, 0.1);
+    }
+    
+    .neon-btn:hover {
+      background: linear-gradient(135deg, rgba(0, 102, 255, 0.5) 0%, rgba(0, 245, 255, 0.5) 100%);
+      box-shadow: 0 0 40px rgba(0, 245, 255, 0.6), inset 0 0 30px rgba(0, 245, 255, 0.2);
+      transform: translateY(-2px);
+      animation: button-charge 1.5s ease-in-out;
+    }
+    
+    .neon-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .neon-btn::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, var(--cyan), var(--electric-blue), var(--yellow), var(--cyan));
+      border-radius: 10px;
+      z-index: -1;
+      animation: border-glow 3s linear infinite;
+      background-size: 400%;
+    }
+    
+    @keyframes border-glow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    /* Input styling */
+    .electric-input {
+      width: 100%;
+      padding: 15px 20px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #fff;
+      background: rgba(0, 20, 40, 0.8);
+      border: 2px solid rgba(0, 245, 255, 0.3);
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .electric-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3), inset 0 0 10px rgba(0, 245, 255, 0.1);
+      animation: input-focus-glow 1.5s ease-in-out;
+    }
+    
+    .electric-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    /* Select styling */
+    .electric-select {
+      width: 100%;
+      padding: 15px 20px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #fff;
+      background: rgba(0, 20, 40, 0.8);
+      border: 2px solid rgba(0, 245, 255, 0.3);
+      border-radius: 8px;
+      outline: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2300f5ff' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      background-size: 24px;
+      padding-right: 50px;
+    }
+    
+    .electric-select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+      animation: input-focus-glow 1.5s ease-in-out;
+    }
+    
+    .electric-select option {
+      background: #0d1b2a;
+      color: #fff;
+    }
+    
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      height: 12px;
+      background: rgba(0, 20, 40, 0.8);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 245, 255, 0.3);
+      position: relative;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--electric-blue), var(--cyan), var(--yellow));
+      background-size: 200% 100%;
+      border-radius: 6px;
+      transition: width 0.5s ease;
+      animation: progress-glow 2s linear infinite, energy-surge 1.5s ease-in-out infinite;
+      box-shadow: 0 0 10px var(--cyan), inset 0 0 5px rgba(255, 255, 255, 0.3);
+    }
+    
+    @keyframes progress-glow {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    
+    @keyframes energy-surge {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+    
+    /* Answer option */
+    .answer-option {
+      position: relative;
+      padding: 18px 25px;
+      background: rgba(0, 20, 40, 0.6);
+      border: 2px solid rgba(0, 245, 255, 0.2);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    
+    .answer-option.option-animate {
+      opacity: 1;
+      transform: translateX(0);
+      animation: option-slide-in 0.5s ease-out forwards;
+    }
+    
+    .answer-option:hover {
+      background: rgba(0, 40, 80, 0.6);
+      border-color: rgba(0, 245, 255, 0.5);
+      transform: translateX(5px);
+      box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+    }
+    
+    .answer-option.selected {
+      background: rgba(0, 102, 255, 0.3);
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.3), inset 0 0 15px rgba(0, 245, 255, 0.1);
+      animation: selection-pulse 0.6s ease-out;
+    }
+    
+    @keyframes selection-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .answer-option::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 4px;
+      background: var(--cyan);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .answer-option:hover::before,
+    .answer-option.selected::before {
+      transform: scaleY(1);
+    }
+    
+    /* Card container */
+    .electric-card {
+      background: rgba(13, 27, 42, 0.9);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+      border-radius: 20px;
+      box-shadow: 0 0 40px rgba(0, 102, 255, 0.2), inset 0 0 30px rgba(0, 20, 40, 0.5);
+      backdrop-filter: blur(10px);
+    }
+    
+    /* Circuit lines decoration */
+    .circuit-line {
+      position: absolute;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      height: 2px;
+      animation: circuit-pulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes circuit-pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 0.8; }
+    }
+    
+    /* Spark particles */
+    .spark {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: var(--yellow);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--yellow), 0 0 20px var(--yellow);
+      pointer-events: none;
+    }
+    
+    @keyframes spark-fly {
+      0% { transform: translate(0, 0) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+    
+    /* Energy pulse wave animation */
+    @keyframes energy-pulse {
+      0% { transform: scale(0.8); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+    
+    .energy-pulse {
+      position: absolute;
+      border: 2px solid var(--cyan);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    /* Button charge effect */
+    @keyframes button-charge {
+      0% { box-shadow: 0 0 0px rgba(0, 245, 255, 0); }
+      50% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.8), 0 0 40px rgba(0, 102, 255, 0.6); }
+      100% { box-shadow: 0 0 0px rgba(0, 245, 255, 0); }
+    }
+    
+    /* Option slide in */
+    @keyframes option-slide-in {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* Electric arc animation */
+    @keyframes electric-arc {
+      0%, 100% { opacity: 0; }
+      25% { opacity: 1; }
+      50% { opacity: 0; }
+      75% { opacity: 0.8; }
+    }
+    
+    .electric-arc {
+      animation: electric-arc 0.4s ease-in-out;
+    }
+    
+    /* Shimmer effect */
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+    
+    .shimmer-effect {
+      background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.3), transparent);
+      background-size: 1000px 100%;
+      animation: shimmer 2s infinite;
+    }
+    
+    /* Float up animation */
+    @keyframes float-up {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-50px) scale(0); opacity: 0; }
+    }
+    
+    .float-particle {
+      animation: float-up 1.5s ease-out forwards;
+      position: absolute;
+      pointer-events: none;
+    }
+    
+    /* Pulse ring */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+    
+    .pulse-ring {
+      animation: pulse-ring 0.8s ease-out forwards;
+    }
+    
+    /* Rotate spin */
+    @keyframes spin-rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .spin-rotate {
+      animation: spin-rotate 1s linear;
+    }
+    
+    /* Text glow pulse */
+    @keyframes text-glow-pulse {
+      0%, 100% { text-shadow: 0 0 5px var(--cyan), 0 0 10px var(--cyan); }
+      50% { text-shadow: 0 0 20px var(--cyan), 0 0 40px var(--cyan), 0 0 60px var(--electric-blue); }
+    }
+    
+    .text-glow-pulse {
+      animation: text-glow-pulse 2s ease-in-out infinite;
+    }
+    
+    /* Input focus glow */
+    @keyframes input-focus-glow {
+      0% { box-shadow: 0 0 10px rgba(0, 245, 255, 0.3); }
+      50% { box-shadow: 0 0 30px rgba(0, 245, 255, 0.6), 0 0 50px rgba(0, 102, 255, 0.4); }
+      100% { box-shadow: 0 0 10px rgba(0, 245, 255, 0.3); }
+    }
+    
+    /* Pulse animation for icons */
+    @keyframes pulse-glow {
+      0%, 100% { filter: drop-shadow(0 0 10px var(--cyan)); }
+      50% { filter: drop-shadow(0 0 30px var(--cyan)) drop-shadow(0 0 50px var(--electric-blue)); }
+    }
+    
+    .pulse-glow {
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+    
+    /* Screen transitions */
+    .screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+      overflow-y: auto;
+      z-index: 10;
+    }
+    
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Question fade in */
+    @keyframes question-enter {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .question-enter {
+      animation: question-enter 0.5s ease-out forwards;
+    }
+    
+    /* Navigation buttons */
+    .nav-btn {
+      padding: 12px 30px;
+      font-family: 'Orbitron', monospace;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #fff;
+      background: rgba(0, 40, 80, 0.5);
+      border: 2px solid rgba(0, 245, 255, 0.4);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .nav-btn:hover:not(:disabled) {
+      background: rgba(0, 102, 255, 0.4);
+      border-color: var(--cyan);
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+      transform: translateY(-1px);
+      animation: nav-pulse 0.8s ease-out;
+    }
+    
+    @keyframes nav-pulse {
+      0%, 100% { transform: scale(1) translateY(-1px); }
+      50% { transform: scale(1.05) translateY(-1px); }
+    }
+    
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+    
+    .nav-btn.primary {
+      background: linear-gradient(135deg, rgba(0, 102, 255, 0.4) 0%, rgba(0, 245, 255, 0.4) 100%);
+      border-color: var(--cyan);
+    }
+    
+    /* Result overlay */
+    .result-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.5s ease;
+    }
+    
+    .result-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Celebration animation */
+    @keyframes celebrate {
+      0% { transform: scale(0) rotate(0deg); opacity: 0; }
+      50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+      100% { transform: scale(1) rotate(360deg) translateY(-10px); opacity: 1; }
+    }
+    
+    .celebrate {
+      animation: celebrate 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    /* Power down animation */
+    @keyframes power-down {
+      0% { opacity: 1; filter: brightness(1); }
+      25% { opacity: 0.5; filter: brightness(0.5); }
+      50% { opacity: 0.8; filter: brightness(0.8); }
+      75% { opacity: 0.3; filter: brightness(0.3); }
+      100% { opacity: 0.6; filter: brightness(0.6); }
+    }
+    
+    .power-down {
+      animation: power-down 1s ease-out forwards;
+    }
+    
+    /* Fade in scale */
+    @keyframes fade-in-scale {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .fade-in-scale {
+      animation: fade-in-scale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    
+    /* Number counter flip */
+    @keyframes number-flip {
+      0% { transform: rotateY(90deg); opacity: 0; }
+      100% { transform: rotateY(0); opacity: 1; }
+    }
+    
+    .number-flip {
+      animation: number-flip 0.6s ease-out;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 20, 40, 0.5);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--cyan);
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--electric-blue);
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Progress counter animation */
+    @keyframes counter-bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    
+    .counter-bounce {
+      animation: counter-bounce 0.5s ease-out;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full"><!-- Electric Grid Background -->
+   <div class="electric-grid"></div><!-- Floating Electrons -->
+   <div id="electrons"></div><!-- Animated Circuit Lines Decoration -->
+   <div class="circuit-line" style="top: 20%; left: 0; width: 30%;"></div>
+   <div class="circuit-line" style="top: 40%; right: 0; width: 25%;"></div>
+   <div class="circuit-line" style="bottom: 30%; left: 0; width: 20%;"></div>
+   <div class="circuit-line" style="bottom: 15%; right: 0; width: 35%;"></div><!-- START SCREEN -->
+   <div id="start-screen" class="screen active">
+    <div class="flex items-center justify-center min-h-full p-4 md:p-8">
+     <div class="electric-card w-full max-w-lg p-8 md:p-12 relative z-10 fade-in-scale"><!-- Lightning Bolt Icon -->
+      <div class="flex justify-center mb-6">
+       <svg class="w-20 h-20 pulse-glow" viewbox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="url(#lightning-gradient)" stroke="#00f5ff" stroke-width="1" /> <defs>
+         <lineargradient id="lightning-gradient" x1="3" y1="2" x2="21" y2="22" gradientunits="userSpaceOnUse">
+          <stop stop-color="#ffea00" />
+          <stop offset="0.5" stop-color="#00f5ff" />
+          <stop offset="1" stop-color="#0066ff" />
+         </lineargradient>
+        </defs>
+       </svg>
+      </div><!-- Title -->
+      <h1 id="main-title" class="font-orbitron text-2xl md:text-3xl font-bold text-center mb-2 text-glow-pulse" style="color: #00f5ff;">Power, Energy &amp;</h1>
+      <h2 class="font-orbitron text-xl md:text-2xl font-semibold text-center mb-8 text-glow-pulse" style="color: #ffea00;">Electricity Cost Quiz</h2><!-- Form -->
+      <div class="space-y-6">
+       <div><label class="block text-cyan-400 font-semibold mb-2 text-sm uppercase tracking-wider">Full Name</label> <input type="text" id="student-name" class="electric-input" placeholder="Enter your full name" autocomplete="off">
+       </div>
+       <div><label class="block text-cyan-400 font-semibold mb-2 text-sm uppercase tracking-wider">Section</label> <select id="student-section" class="electric-select"> <option value="" disabled selected>Select your section</option> <option value="STEM 201">STEM 201</option> <option value="STEM 202">STEM 202</option> <option value="STEM 203">STEM 203</option> <option value="STEM 204">STEM 204</option> <option value="STEM 205">STEM 205</option> <option value="STEM 206">STEM 206</option> <option value="STEM 207">STEM 207</option> </select>
+       </div>
+       <div class="pt-4"><button id="start-btn" class="neon-btn w-full" onclick="startQuiz()"> ⚡ Start Quiz </button>
+       </div>
+      </div><!-- Info -->
+      <div class="mt-8 text-center">
+       <p class="text-gray-400 text-sm">15 Questions • 75% to Pass</p>
+       <p class="text-cyan-500 text-xs mt-1">Electric Power, Energy &amp; Cost</p>
+      </div>
+     </div>
+    </div>
+   </div><!-- QUIZ SCREEN -->
+   <div id="quiz-screen" class="screen">
+    <div class="flex flex-col h-full p-4 md:p-6"><!-- Header -->
+     <div class="electric-card p-4 md:p-6 mb-4 flex-shrink-0 fade-in-scale">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+       <div>
+        <p class="text-cyan-400 text-sm font-semibold uppercase tracking-wider">Student</p>
+        <p id="display-name" class="text-white font-orbitron text-lg">-</p>
+       </div>
+       <div class="text-left md:text-right">
+        <p class="text-cyan-400 text-sm font-semibold uppercase tracking-wider">Section</p>
+        <p id="display-section" class="text-white font-orbitron text-lg">-</p>
+       </div>
+      </div><!-- Progress Section -->
+      <div class="mt-6">
+       <div class="flex justify-between items-center mb-2"><span id="question-counter" class="text-cyan-400 font-orbitron text-sm counter-bounce">Question 1 of 15</span> <span id="progress-percent" class="text-yellow-400 font-orbitron text-sm">0%</span>
+       </div>
+       <div class="progress-container">
+        <div id="progress-bar" class="progress-bar" style="width: 0%"></div>
+       </div>
+      </div>
+     </div><!-- Question Card -->
+     <div class="electric-card p-6 md:p-8 flex-grow overflow-y-auto question-enter mb-4" id="question-card">
+      <div class="mb-6"><span class="inline-block px-3 py-1 bg-cyan-900/50 text-cyan-400 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 pulse-glow"> Power &amp; Energy </span>
+       <h3 id="question-text" class="text-white text-lg md:text-xl font-semibold leading-relaxed">Loading question...</h3>
+      </div><!-- Answer Options -->
+      <div id="answers-container" class="space-y-3"><!-- Answers will be dynamically inserted -->
+      </div>
+     </div><!-- Navigation -->
+     <div class="electric-card p-4 flex-shrink-0 fade-in-scale">
+      <div class="flex justify-between items-center gap-4"><button id="prev-btn" class="nav-btn flex-1 md:flex-none" onclick="prevQuestion()" disabled> ← Previous </button> <button id="next-btn" class="nav-btn primary flex-1 md:flex-none" onclick="nextQuestion()"> Next → </button>
+      </div>
+     </div>
+    </div>
+   </div><!-- RESULT OVERLAY -->
+   <div id="result-overlay" class="result-overlay">
+    <div class="electric-card p-8 md:p-12 max-w-lg w-full mx-4 text-center relative overflow-hidden fade-in-scale"><!-- Result Icon -->
+     <div id="result-icon" class="mb-6"><!-- Will be dynamically set -->
+     </div><!-- Result Status -->
+     <h2 id="result-status" class="font-orbitron text-3xl md:text-4xl font-bold mb-4"><!-- Will be dynamically set --></h2><!-- Score Display -->
+     <div class="bg-black/40 rounded-xl p-6 mb-6 pulse-scale">
+      <p class="text-gray-400 text-sm uppercase tracking-wider mb-2">Your Score</p>
+      <p id="result-score" class="font-orbitron text-5xl md:text-6xl font-bold glow-text number-flip" style="color: #00f5ff;">0%</p>
+      <p id="result-correct" class="text-gray-300 mt-2">0 out of 15 correct</p>
+     </div><!-- Motivational Message -->
+     <p id="result-message" class="text-gray-300 text-lg mb-8"><!-- Will be dynamically set --></p><!-- Action Buttons -->
+     <div class="flex flex-col md:flex-row gap-4"><button class="neon-btn flex-1" onclick="retryQuiz()"> 🔄 Retry Quiz </button> <button class="nav-btn flex-1" onclick="exitQuiz()"> Exit </button>
+     </div><!-- Celebration Particles Container -->
+     <div id="particles-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Configuration
+    const defaultConfig = {
+      quiz_title: "Power, Energy & Electricity Cost Quiz",
+      passing_message: "Excellent work! You've mastered electric power, energy calculations, and electricity cost concepts!",
+      failing_message: "Don't give up! Review the P = V × I, E = P × t, and cost formulas, then try again!"
+    };
+    
+    let config = { ...defaultConfig };
+    
+    // Question Bank - 30 questions on Power, Energy, and Electricity Cost
+    const questionBank = [
+      {
+        question: "What is the formula for calculating electrical power?",
+        options: ["P = V + I", "P = V × I", "P = V - I", "P = V ÷ I"],
+        correct: 1
+      },
+      {
+        question: "A light bulb has a voltage of 240V and current of 0.5A. What is its power?",
+        options: ["120 W", "240 W", "480 W", "240.5 W"],
+        correct: 0
+      },
+      {
+        question: "What is the SI unit of electrical energy?",
+        options: ["Watt", "Joule", "Ampere", "Volt"],
+        correct: 1
+      },
+      {
+        question: "How is electrical energy calculated from power and time?",
+        options: ["E = P + t", "E = P × t", "E = P ÷ t", "E = t ÷ P"],
+        correct: 1
+      },
+      {
+        question: "A 1500W heater runs for 2 hours. How much energy is consumed in joules?",
+        options: ["3000 J", "750 J", "2,700,000 J", "10,800,000 J"],
+        correct: 3
+      },
+      {
+        question: "What does 1 kWh (kilowatt-hour) equal in joules?",
+        options: ["1000 J", "3,600,000 J", "100,000 J", "36,000 J"],
+        correct: 1
+      },
+      {
+        question: "A 60W light bulb operates for 5 hours. What is the energy consumed in kWh?",
+        options: ["0.3 kWh", "300 kWh", "12 kWh", "0.05 kWh"],
+        correct: 0
+      },
+      {
+        question: "If electricity costs ₱8 per kWh, how much does it cost to run a 1000W appliance for 3 hours?",
+        options: ["₱24", "₱240", "₱2400", "₱8000"],
+        correct: 1
+      },
+      {
+        question: "Which appliance typically has the highest power rating?",
+        options: ["Light bulb (60W)", "Laptop (100W)", "Air conditioner (3000W)", "Ceiling fan (75W)"],
+        correct: 2
+      },
+      {
+        question: "A refrigerator rated at 500W operates 8 hours daily. Monthly energy consumption?",
+        options: ["4 kWh", "40 kWh", "120 kWh", "240 kWh"],
+        correct: 2
+      },
+      {
+        question: "How much energy does a 2.5kW microwave consume in 30 minutes?",
+        options: ["5 kWh", "75 kWh", "1.25 kWh", "2.5 kWh"],
+        correct: 2
+      },
+      {
+        question: "If 1 kWh costs ₱9, what is the monthly cost of using a 120W fan for 10 hours daily?",
+        options: ["₱32.40", "₱324", "₱3240", "₱10.80"],
+        correct: 1
+      },
+      {
+        question: "What is the relationship between watt (W) and kilowatt (kW)?",
+        options: ["1 kW = 10 W", "1 kW = 100 W", "1 kW = 1000 W", "1 kW = 0.1 W"],
+        correct: 2
+      },
+      {
+        question: "A television rated at 150W runs 4 hours daily. Annual energy consumption?",
+        options: ["600 kWh", "219 kWh", "150 kWh", "2.2 kWh"],
+        correct: 1
+      },
+      {
+        question: "How much does it cost to run a 100W device for 24 hours at ₱7.50/kWh?",
+        options: ["₱18", "₱18,000", "₱100", "₱750"],
+        correct: 0
+      },
+      {
+        question: "Which formula represents the electricity cost?",
+        options: ["Cost = Energy × Rate", "Cost = Power × Time", "Cost = Voltage × Current", "Cost = Rate ÷ Energy"],
+        correct: 0
+      },
+      {
+        question: "A 240V appliance draws 5A of current. What is its power consumption?",
+        options: ["48 W", "235 W", "1200 W", "1205 W"],
+        correct: 2
+      },
+      {
+        question: "If a water heater uses 4 kWh daily at ₱8/kWh, what is the daily cost?",
+        options: ["₱4", "₱32", "₱0.50", "₱320"],
+        correct: 1
+      },
+      {
+        question: "What does the unit 'watt-hour' (Wh) represent?",
+        options: ["Power", "Energy", "Voltage", "Current"],
+        correct: 1
+      },
+      {
+        question: "A 2000W air conditioner runs 6 hours daily. Monthly energy usage?",
+        options: ["12 kWh", "360 kWh", "2000 kWh", "120 kWh"],
+        correct: 1
+      },
+      {
+        question: "How many hours would a 500W heater run to consume 10 kWh?",
+        options: ["5 hours", "10 hours", "20 hours", "50 hours"],
+        correct: 2
+      },
+      {
+        question: "If a device consumes 2.4 kWh at ₱6/kWh, what is the cost?",
+        options: ["₱2.40", "₱14.40", "₱60", "₱144"],
+        correct: 1
+      },
+      {
+        question: "Which has higher energy consumption: 100W device for 10 hours or 50W device for 25 hours?",
+        options: ["100W for 10 hours", "50W for 25 hours", "Both are equal", "Cannot determine"],
+        correct: 1
+      },
+      {
+        question: "What is the power of a device if 500J of work is done in 5 seconds?",
+        options: ["5 W", "100 W", "500 W", "2500 W"],
+        correct: 1
+      },
+      {
+        question: "A light fixture uses 4 bulbs of 20W each. Total power rating?",
+        options: ["4 W", "20 W", "80 W", "100 W"],
+        correct: 2
+      },
+      {
+        question: "If ₱1,200 is spent on electricity at ₱10/kWh, how much energy was consumed?",
+        options: ["120 kWh", "1200 kWh", "100 kWh", "10,000 kWh"],
+        correct: 0
+      },
+      {
+        question: "A home uses 300 kWh monthly at ₱8.50/kWh. What is the monthly bill?",
+        options: ["₱255", "₱2,550", "₱850", "₱8,500"],
+        correct: 1
+      },
+      {
+        question: "How does doubling the voltage affect power if current stays constant?",
+        options: ["Power stays the same", "Power is halved", "Power is doubled", "Power is quadrupled"],
+        correct: 2
+      },
+      {
+        question: "A 10A circuit with 220V supply. What appliances could run safely at 1800W max?",
+        options: ["Yes, 10A × 220V = 2200W (safe)", "No, 2200W is too high", "Cannot determine", "Yes, exactly matched"],
+        correct: 0
+      },
+      {
+        question: "Monthly electricity consumption is 250 kWh. Daily average usage?",
+        options: ["8.3 kWh", "25 kWh", "83 kWh", "0.83 kWh"],
+        correct: 0
+      }
+    ];
+    
+    // Quiz State
+    let currentQuestionIndex = 0;
+    let selectedQuestions = [];
+    let userAnswers = [];
+    let studentName = '';
+    let studentSection = '';
+    
+    // Initialize floating electrons
+    function createElectrons() {
+      const container = document.getElementById('electrons');
+      container.innerHTML = '';
+      for (let i = 0; i < 15; i++) {
+        const electron = document.createElement('div');
+        electron.className = 'electron';
+        electron.style.left = Math.random() * 100 + '%';
+        electron.style.top = Math.random() * 100 + '%';
+        electron.style.animationDelay = Math.random() * 8 + 's';
+        electron.style.animationDuration = (6 + Math.random() * 4) + 's';
+        container.appendChild(electron);
+      }
+    }
+    
+    // Shuffle array using Fisher-Yates algorithm
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+    
+    // Select 15 random questions
+    function selectQuestions() {
+      const shuffled = shuffleArray(questionBank);
+      selectedQuestions = shuffled.slice(0, 15).map(q => {
+        const originalOptions = [...q.options];
+        const correctAnswer = originalOptions[q.correct];
+        const shuffledOptions = shuffleArray(originalOptions);
+        const newCorrectIndex = shuffledOptions.indexOf(correctAnswer);
+        
+        return {
+          question: q.question,
+          options: shuffledOptions,
+          correct: newCorrectIndex
+        };
+      });
+      userAnswers = new Array(15).fill(null);
+    }
+    
+    // Start Quiz
+    function startQuiz() {
+      const nameInput = document.getElementById('student-name');
+      const sectionSelect = document.getElementById('student-section');
+      
+      studentName = nameInput.value.trim();
+      studentSection = sectionSelect.value;
+      
+      if (!studentName) {
+        nameInput.style.borderColor = '#ff4444';
+        nameInput.style.boxShadow = '0 0 20px rgba(255, 68, 68, 0.3)';
+        nameInput.classList.add('electric-arc');
+        nameInput.focus();
+        setTimeout(() => {
+          nameInput.style.borderColor = '';
+          nameInput.style.boxShadow = '';
+          nameInput.classList.remove('electric-arc');
+        }, 2000);
+        return;
+      }
+      
+      if (!studentSection) {
+        sectionSelect.style.borderColor = '#ff4444';
+        sectionSelect.style.boxShadow = '0 0 20px rgba(255, 68, 68, 0.3)';
+        sectionSelect.classList.add('electric-arc');
+        sectionSelect.focus();
+        setTimeout(() => {
+          sectionSelect.style.borderColor = '';
+          sectionSelect.style.boxShadow = '';
+          sectionSelect.classList.remove('electric-arc');
+        }, 2000);
+        return;
+      }
+      
+      document.getElementById('display-name').textContent = studentName;
+      document.getElementById('display-section').textContent = studentSection;
+      
+      selectQuestions();
+      currentQuestionIndex = 0;
+      
+      document.getElementById('start-screen').classList.remove('active');
+      document.getElementById('quiz-screen').classList.add('active');
+      
+      displayQuestion();
+    }
+    
+    // Display current question
+    function displayQuestion() {
+      const question = selectedQuestions[currentQuestionIndex];
+      
+      const questionNum = currentQuestionIndex + 1;
+      const counterEl = document.getElementById('question-counter');
+      counterEl.classList.add('counter-bounce');
+      setTimeout(() => counterEl.classList.remove('counter-bounce'), 500);
+      
+      counterEl.textContent = `Question ${questionNum} of 15`;
+      const progressPercent = Math.round((questionNum / 15) * 100);
+      document.getElementById('progress-percent').textContent = `${progressPercent}%`;
+      document.getElementById('progress-bar').style.width = `${(questionNum / 15) * 100}%`;
+      
+      document.getElementById('question-text').textContent = question.question;
+      
+      const container = document.getElementById('answers-container');
+      container.innerHTML = '';
+      
+      const labels = ['A', 'B', 'C', 'D'];
+      question.options.forEach((option, index) => {
+        const div = document.createElement('div');
+        div.className = 'answer-option';
+        if (userAnswers[currentQuestionIndex] === index) {
+          div.classList.add('selected');
+        }
+        div.onclick = () => selectAnswer(index, div);
+        div.innerHTML = `
+          <div class="flex items-start gap-4">
+            <span class="font-orbitron text-cyan-400 font-bold text-lg">${labels[index]}.</span>
+            <span class="text-white text-base md:text-lg">${option}</span>
+          </div>
+        `;
+        container.appendChild(div);
+        
+        // Stagger animation for options
+        setTimeout(() => {
+          div.classList.add('option-animate');
+        }, index * 100);
+      });
+      
+      document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+      
+      const nextBtn = document.getElementById('next-btn');
+      if (currentQuestionIndex === 14) {
+        nextBtn.textContent = '✓ Submit Quiz';
+      } else {
+        nextBtn.textContent = 'Next →';
+      }
+      
+      const card = document.getElementById('question-card');
+      card.classList.remove('question-enter');
+      void card.offsetWidth;
+      card.classList.add('question-enter');
+    }
+    
+    // Select answer
+    function selectAnswer(index, element) {
+      userAnswers[currentQuestionIndex] = index;
+      
+      // Create energy pulse effect
+      const rect = element.getBoundingClientRect();
+      const pulse = document.createElement('div');
+      pulse.className = 'energy-pulse';
+      pulse.style.left = rect.left + rect.width / 2 + 'px';
+      pulse.style.top = rect.top + rect.height / 2 + 'px';
+      pulse.style.width = '40px';
+      pulse.style.height = '40px';
+      pulse.style.marginLeft = '-20px';
+      pulse.style.marginTop = '-20px';
+      pulse.style.animation = 'energy-pulse 0.8s ease-out forwards';
+      document.body.appendChild(pulse);
+      
+      setTimeout(() => pulse.remove(), 800);
+      
+      // Update visual selection
+      const options = document.querySelectorAll('.answer-option');
+      options.forEach((opt, i) => {
+        if (i === index) {
+          opt.classList.add('selected');
+        } else {
+          opt.classList.remove('selected');
+        }
+      });
+    }
+    
+    // Navigate to previous question
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        displayQuestion();
+      }
+    }
+    
+    // Navigate to next question or submit
+    function nextQuestion() {
+      if (currentQuestionIndex < 14) {
+        currentQuestionIndex++;
+        displayQuestion();
+      } else {
+        submitQuiz();
+      }
+    }
+    
+    // Submit quiz and show results
+    function submitQuiz() {
+      let correctCount = 0;
+      for (let i = 0; i < 15; i++) {
+        if (userAnswers[i] === selectedQuestions[i].correct) {
+          correctCount++;
+        }
+      }
+      
+      const percentage = Math.round((correctCount / 15) * 100);
+      const passed = percentage >= 75;
+      // Submit to Google Form (no UI changes)
+      try {
+        submitScoreToGoogleForm({
+          studentName: studentName || '',
+          studentSection: studentSection || '',
+          quizName: 'Power and Energy',
+          score: correctCount,
+          percentage: percentage,
+          passed: passed
+        });
+      } catch (e) { /* ignore */ }
+      
+      const resultIcon = document.getElementById('result-icon');
+      const resultStatus = document.getElementById('result-status');
+      const resultScore = document.getElementById('result-score');
+      const resultCorrect = document.getElementById('result-correct');
+      const resultMessage = document.getElementById('result-message');
+
+      if (passed) {
+        // 🔓 Tell parent page that POWER quiz is passed
+        window.parent.postMessage(
+          { type: "QUIZ_PASSED", topic: "energy" },
+          "*"
+        );
+
+        resultIcon.innerHTML = `
+          <div class="celebrate">
+            <svg class="w-24 h-24 mx-auto" viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="45" stroke="#00f5ff" stroke-width="3" fill="rgba(0, 245, 255, 0.1)"/>
+              <path d="M30 50 L45 65 L70 35" stroke="#00f5ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        `;
+        resultStatus.innerHTML = '<span class="glow-text" style="color: #00f5ff;">🎉 YOU PASSED! 🎉</span>';
+        resultMessage.textContent = config.passing_message;
+        resultScore.style.color = '#00f5ff';
+
+        // Submit to Google Form (only inside passed branch)
+        try {
+          submitScoreToGoogleForm({
+            studentName: studentName || '',
+            studentSection: studentSection || '',
+            quizName: 'Power and Energy',
+            score: correctCount,
+            percentage: percentage,
+            passed: passed
+          });
+        } catch (e) { /* ignore */ }
+
+        createCelebrationParticles();
+      } else {
+        resultIcon.innerHTML = `
+          <div class="power-down">
+            <svg class="w-24 h-24 mx-auto" viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="45" stroke="#ff4444" stroke-width="3" fill="rgba(255, 68, 68, 0.1)"/>
+              <path d="M35 35 L65 65 M65 35 L35 65" stroke="#ff4444" stroke-width="6" stroke-linecap="round"/>
+            </svg>
+          </div>
+        `;
+        resultStatus.innerHTML = '<span style="color: #ff4444;">❌ YOU DID NOT PASS</span>';
+        resultMessage.textContent = config.failing_message;
+        resultScore.style.color = '#ff4444';
+      }
+      
+      resultScore.classList.add('number-flip');
+      resultScore.textContent = `${percentage}%`;
+      resultCorrect.textContent = `${correctCount} out of 15 correct`;
+      
+      document.getElementById('result-overlay').classList.add('active');
+    }
+    
+    // Create celebration particles
+    function createCelebrationParticles() {
+      const container = document.getElementById('particles-container');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < 80; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'spark';
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        particle.style.setProperty('--tx', (Math.random() - 0.5) * 500 + 'px');
+        particle.style.setProperty('--ty', (Math.random() - 0.5) * 500 + 'px');
+        particle.style.animation = `spark-fly ${0.6 + Math.random() * 1.2}s ease-out forwards`;
+        particle.style.animationDelay = Math.random() * 0.8 + 's';
+        particle.style.background = ['#00f5ff', '#ffea00', '#0066ff'][Math.floor(Math.random() * 3)];
+        container.appendChild(particle);
+      }
+    }
+    
+    // Retry quiz
+    function retryQuiz() {
+      document.getElementById('result-overlay').classList.remove('active');
+      
+      selectQuestions();
+      currentQuestionIndex = 0;
+      
+      displayQuestion();
+    }
+    
+    // Exit quiz
+    function exitQuiz() {
+      document.getElementById('result-overlay').classList.remove('active');
+      
+      document.getElementById('quiz-screen').classList.remove('active');
+      document.getElementById('start-screen').classList.add('active');
+      
+      document.getElementById('student-name').value = '';
+      document.getElementById('student-section').value = '';
+    }
+
+    function submitScoreToGoogleForm({ studentName, studentSection, quizName, score, percentage, passed }) {
+      try {
+        const endpoint = 'https://docs.google.com/forms/d/e/1FAIpQLSdFWHfgpJkW2lzPZCCayDi-rI7pDuIk90zNmqgAVkIXB7tuCw/formResponse';
+        const params = new URLSearchParams();
+        params.append('entry.1885112147', studentName || '');
+        params.append('entry.1789780298', studentSection || '');
+        params.append('entry.871712505', quizName || '');
+        params.append('entry.29929990', String(score || 0));
+        params.append('entry.1068313912', String(Math.round(percentage || 0)));
+        params.append('entry.1408703668', passed ? 'PASSED' : 'FAILED');
+
+        fetch(endpoint, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params.toString()
+        }).catch(() => {});
+      } catch (e) {
+        /* ignore silently */
+      }
+    }
+    
+    // Initialize SDK
+    const elementApi = {
+      defaultConfig,
+      onConfigChange: async (newConfig) => {
+        config = { ...defaultConfig, ...newConfig };
+        document.getElementById('main-title').textContent = config.quiz_title.split('&')[0];
+      },
+      mapToCapabilities: (cfg) => ({
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (cfg) => new Map([
+        ['quiz_title', cfg.quiz_title || defaultConfig.quiz_title],
+        ['passing_message', cfg.passing_message || defaultConfig.passing_message],
+        ['failing_message', cfg.failing_message || defaultConfig.failing_message]
+      ])
+    };    fetch(endpoint, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).catch(() => {});
+    
+    if (window.elementSdk) {
+      window.elementSdk.init(elementApi);
+      config = { ...defaultConfig, ...window.elementSdk.config };
+    }
+    
+    createElectrons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c90e5f3d0441e0f',t:'MTc3MDI3ODY3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

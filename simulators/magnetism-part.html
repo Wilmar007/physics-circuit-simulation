@@ -1,0 +1,3877 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magnetism Lab</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    .main-wrapper {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 2rem;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      animation: slideInUp 0.6s ease-out backwards;
+    }
+
+    .section:nth-child(2) { animation-delay: 0.1s; }
+    .section:nth-child(3) { animation-delay: 0.2s; }
+    .section:nth-child(4) { animation-delay: 0.3s; }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .section-header h2 {
+      font-size: 1.5rem;
+      margin: 0;
+    }
+
+    .toggle-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .discussion {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .discussion.hidden {
+      display: none;
+    }
+
+    .discussion h3 {
+      margin-top: 0;
+      font-size: 1.1rem;
+    }
+
+    .simulation-area {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 8px;
+      background: #f8f9fa;
+      cursor: grab;
+      width: 100%;
+      height: 400px;
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.8);
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .btn.clicked::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    @keyframes sparkle {
+      0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+      50% { opacity: 1; transform: scale(1) rotate(180deg); }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px) rotate(-2deg); }
+      75% { transform: translateX(5px) rotate(2deg); }
+    }
+
+    @keyframes magneticPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.7); }
+      50% { box-shadow: 0 0 0 20px rgba(52, 152, 219, 0); }
+    }
+
+    .magnet-attracting {
+      animation: magneticPulse 1s infinite;
+    }
+
+    .slider-control {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .slider-control label {
+      font-weight: 600;
+      min-width: 100px;
+    }
+
+    .slider {
+      flex: 1;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #667eea;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .value-display {
+      font-weight: bold;
+      min-width: 40px;
+      text-align: right;
+    }
+
+    .info-display {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .how-to-use {
+      background: rgba(100, 200, 255, 0.15);
+      border-left: 4px solid rgba(52, 152, 219, 0.8);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .how-to-use.hidden {
+      display: none;
+    }
+
+    .how-to-use h4 {
+      margin: 0 0 0.75rem 0;
+      font-size: 1rem;
+      color: #ffffff;
+    }
+
+    .how-to-use ul {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+
+    .how-to-use li {
+      margin: 0.4rem 0;
+    }
+
+    .how-to-btn {
+      background: rgba(52, 152, 219, 0.3);
+      color: white;
+      border: 2px solid rgba(52, 152, 219, 0.6);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.3s;
+      margin-bottom: 1rem;
+    }
+
+    .how-to-btn:hover {
+      background: rgba(52, 152, 219, 0.5);
+      border-color: rgba(52, 152, 219, 0.9);
+    }
+
+    .explanation-popup {
+      position: fixed;
+      top: 1rem;
+      right: -320px;
+      transform: translateX(0);
+      background: linear-gradient(135deg, rgba(52, 152, 219, 0.75) 0%, rgba(41, 128, 185, 0.75) 100%);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+      padding: 1rem;
+      max-width: 300px;
+      width: 300px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      pointer-events: none;
+      transition: right 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .explanation-popup.show {
+      right: 1rem;
+      pointer-events: auto;
+    }
+
+    .explanation-popup h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+
+    .explanation-popup p {
+      margin: 0.3rem 0;
+      line-height: 1.5;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+
+    .explanation-popup .close-btn {
+      background: rgba(255, 255, 255, 0.9);
+      color: #2c3e50;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.75rem;
+      width: 100%;
+      transition: all 0.3s;
+    }
+
+    .explanation-popup .close-btn:hover {
+      background: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup-overlay {
+      display: none;
+    }
+
+    .checkbox-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .checkbox-control input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+
+    select {
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      font-size: 0.95rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .main-wrapper {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.8rem;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .slider-control {
+        width: 100%;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="main-wrapper">
+   <div class="header">
+    <h1 id="main-title">Magnetism Lab — Interactive Manipulatives</h1>
+   </div><!-- Section 1: Magnetic Poles Interaction -->
+   <div class="section">
+    <div class="section-header" onclick="toggleDiscussion('discussion1')">
+     <h2 id="section1-title">1) Interaction Between Magnetic Poles</h2><button class="toggle-btn" id="toggle1">Hide Discussion</button>
+    </div>
+    <div class="discussion" id="discussion1">
+     <h3>Concept:</h3>
+     <p>Two bar magnets interact via opposite poles attracting and like poles repelling. This model shows pole-pair interactions; poles always come in N��S pairs.</p>
+     <h3>Observations:</h3>
+     <p>Drag magnets, flip orientation, change separation and watch forces and motion. Force magnitude increases as distance decreases.</p>
+     <h3>Applications:</h3>
+     <p>Compass alignment, electric motors, magnetic clamps.</p>
+    </div><button class="how-to-btn" onclick="toggleHowTo('howto1')">📖 How to Use This Simulator</button>
+    <div class="how-to-use" id="howto1">
+     <h4>🎯 Interactive Controls:</h4>
+     <ul>
+      <li><strong>Drag magnets:</strong> Click and drag any magnet to move it around</li>
+      <li><strong>Select magnet:</strong> Click once to select (shows orange outline)</li>
+      <li><strong>Add/Remove:</strong> Use buttons to add new magnets or remove selected ones</li>
+      <li><strong>Flip Selected:</strong> Reverses the poles (N↔S) of the selected magnet</li>
+      <li><strong>Rotate Selected:</strong> Changes orientation from vertical to horizontal</li>
+      <li><strong>Pole Strength:</strong> Adjust the slider to change magnetic force intensity</li>
+     </ul>
+     <p><strong>💡 Watch for:</strong> Animated force lines showing attraction (blue) or repulsion (red) between magnets!</p>
+    </div>
+    <div class="simulation-area">
+     <canvas id="polesCanvas"></canvas>
+    </div>
+    <div class="controls"><button class="btn" id="addMagnet">Add Magnet</button> <button class="btn" id="removeMagnet">Remove Magnet</button> <button class="btn" id="resetMagnets">Reset All</button> <button class="btn" id="flipSelected">Flip Selected</button> <button class="btn" id="rotateSelected">Rotate Selected</button>
+     <div class="slider-control"><label>Pole Strength:</label> <input type="range" class="slider" id="poleStrength" min="1" max="10" value="5"> <span class="value-display" id="poleStrengthValue">5</span>
+     </div>
+    </div>
+    <div class="info-display">
+     Magnets: <span id="magnetCount">2</span> | Click a magnet to select it
+    </div>
+   </div><!-- Section 2: Magnetization & Demagnetization -->
+   <div class="section">
+    <div class="section-header" onclick="toggleDiscussion('discussion2')">
+     <h2 id="section2-title">2) Magnetization &amp; Demagnetization (Domains)</h2><button class="toggle-btn" id="toggle2">Hide Discussion</button>
+    </div>
+    <div class="discussion" id="discussion2">
+     <h3>Concept:</h3>
+     <p>Materials contain magnetic domains — tiny regions with aligned magnetic moments. Net magnetization is the vector sum of domains.</p>
+     <h3>Note:</h3>
+     <p>This simulator models domain behavior conceptually (no atomic-scale conduction simulated).</p>
+    </div><button class="how-to-btn" onclick="toggleHowTo('howto2')">📖 How to Use This Simulator</button>
+    <div class="how-to-use" id="howto2">
+     <h4>🎯 Interactive Controls:</h4>
+     <ul>
+      <li><strong>Material Selection:</strong> Choose different magnetic materials (Iron, Steel, Alnico, Neodymium)</li>
+      <li><strong>Magnetization Methods:</strong>
+       <ul>
+        <li><strong>Stroking:</strong> Simulates rubbing a magnet across the material</li>
+        <li><strong>Induction:</strong> Places a strong magnet nearby</li>
+        <li><strong>Coil (Current):</strong> Uses electromagnetic field from electric current</li>
+       </ul></li>
+      <li><strong>Demagnetization Methods:</strong>
+       <ul>
+        <li><strong>Heat:</strong> Raises temperature above Curie point</li>
+        <li><strong>Hammer:</strong> Mechanical shock disrupts alignment</li>
+        <li><strong>AC:</strong> Alternating current randomizes domains</li>
+       </ul></li>
+     </ul>
+     <p><strong>💡 Watch:</strong> The colored arrows represent magnetic domains aligning or randomizing!</p>
+    </div>
+    <div class="simulation-area">
+     <canvas id="domainsCanvas"></canvas>
+    </div>
+    <div class="controls"><label>Material:</label> <select id="materialType"> <option value="iron">Iron (Fe) - Soft Magnetic</option> <option value="steel">Steel - Medium Hard</option> <option value="alnico">Alnico - Hard Magnetic</option> <option value="neodymium">Neodymium (NdFeB) - Very Hard</option> </select> <button class="btn" id="strokeMagnetize">Stroking Magnetize</button> <button class="btn" id="inductionMagnetize">Induction Magnetize</button> <button class="btn" id="coilMagnetize">Coil (Current)</button> <button class="btn" id="heatDemagnetize">Heat Demagnetize</button> <button class="btn" id="hammerDemagnetize">Hammer Demagnetize</button> <button class="btn" id="acDemagnetize">AC Demagnetize</button> <button class="btn" id="resetDomains">Reset Domains</button>
+    </div>
+    <div class="info-display">
+     Alignment: <span id="alignmentValue">0</span>% | Material: <span id="currentMaterial">Iron</span> | Curie Temp: <span id="curieTemp">770°C</span> | Coercivity: <span id="coercivity">Low</span>
+    </div>
+   </div><!-- Section 3: Compass & Magnet Interaction -->
+   <div class="section">
+    <div class="section-header" onclick="toggleDiscussion('discussion3')">
+     <h2 id="section3-title">3) Compass &amp; Magnet Interaction</h2><button class="toggle-btn" id="toggle3">Hide Discussion</button>
+    </div>
+    <div class="discussion" id="discussion3">
+     <h3>Concept:</h3>
+     <p>A compass needle is a small magnetized pointer free to rotate. It aligns with the resultant magnetic field at its location. Earth's magnetic field normally points North, but nearby magnets create stronger local fields that dominate the needle's orientation.</p>
+     <h3>Observations:</h3>
+     <p>Move the magnet around the compass and watch the needle respond in real-time. The needle always points from South to North of the resultant field. Closer magnets exert stronger influence.</p>
+     <h3>Applications:</h3>
+     <p>Navigation compasses, magnetic field mapping, detecting magnetic materials, understanding Earth's magnetic field.</p>
+    </div><button class="how-to-btn" onclick="toggleHowTo('howto3')">📖 How to Use This Simulator</button>
+    <div class="how-to-use" id="howto3">
+     <h4>🎯 Interactive Controls:</h4>
+     <ul>
+      <li><strong>Drag magnet:</strong> Click and drag the bar magnet to move it around the compass</li>
+      <li><strong>Flip magnet:</strong> Click the "Flip Magnet" button to reverse the poles (N↔S)</li>
+      <li><strong>Rotate magnet:</strong> Click "Rotate Magnet" to change the magnet's orientation</li>
+      <li><strong>Show Earth's Field:</strong> Toggle to see the background Earth magnetic field influence</li>
+      <li><strong>Magnet Strength:</strong> Adjust how strongly the magnet affects the compass needle</li>
+     </ul>
+     <p><strong>💡 Physics:</strong> The compass needle (itself a tiny magnet) rotates to align with the total magnetic field - the vector sum of Earth's field and the bar magnet's field. The North pole of the needle points toward the South pole of nearby magnets!</p>
+    </div>
+    <div class="simulation-area">
+     <canvas id="compassCanvas"></canvas>
+    </div>
+    <div class="controls"><button class="btn" id="flipCompassMagnet">Flip Magnet</button> <button class="btn" id="rotateCompassMagnet">Rotate Magnet</button> <button class="btn" id="resetCompass">Reset Position</button> <label class="checkbox-control"> <input type="checkbox" id="showEarthField" checked> <span>Show Earth's Field</span> </label>
+     <div class="slider-control"><label>Magnet Strength:</label> <input type="range" class="slider" id="compassMagnetStrength" min="1" max="10" value="6"> <span class="value-display" id="compassMagnetStrengthValue">6</span>
+     </div>
+    </div>
+    <div class="info-display">
+     Needle Angle: <span id="needleAngle">0°</span> | Distance to Magnet: <span id="magnetDistance">0</span>px
+    </div>
+   </div><!-- Section 4: Magnetic Field Patterns -->
+   <div class="section">
+    <div class="section-header" onclick="toggleDiscussion('discussion4')">
+     <h2 id="section4-title">4) Magnetic Field Patterns</h2><button class="toggle-btn" id="toggle4">Hide Discussion</button>
+    </div>
+    <div class="discussion" id="discussion4">
+     <h3>Concept:</h3>
+     <p>Magnetic field lines form closed loops from the North end to the South end of magnets. Lines never cross; field density shows strength.</p>
+    </div><button class="how-to-btn" onclick="toggleHowTo('howto4')">📖 How to Use This Simulator</button>
+    <div class="how-to-use" id="howto4">
+     <h4>🎯 Interactive Controls:</h4>
+     <ul>
+      <li><strong>Drag magnets:</strong> Click and drag any magnet to reposition it</li>
+      <li><strong>Double-click magnet:</strong> Flip the magnet's poles (N↔S)</li>
+      <li><strong>Configuration:</strong> Choose 1, 2, or 3 bar magnets to visualize different patterns</li>
+      <li><strong>Show Field Lines:</strong> Toggle checkbox to show/hide magnetic field lines</li>
+      <li><strong>Density Slider:</strong> Adjust how many field lines are displayed (4-24 lines)</li>
+     </ul>
+     <p><strong>💡 Observe:</strong> Field lines flow from North (blue) to South (red) poles. Notice how they form complete loops and never cross!</p>
+    </div>
+    <div class="simulation-area">
+     <canvas id="fieldCanvas"></canvas>
+    </div>
+    <div class="controls"><label>Configuration:</label> <select id="magnetConfig"> <option value="1">1 Bar Magnet</option> <option value="2">2 Bar Magnets</option> <option value="3">3 Bar Magnets</option> </select> <label class="checkbox-control"> <input type="checkbox" id="showFieldLines" checked> <span>Show Field Lines</span> </label>
+     <div class="slider-control"><label>Density:</label> <input type="range" class="slider" id="fieldDensity" min="4" max="24" value="12"> <span class="value-display" id="fieldDensityValue">12</span>
+     </div>
+    </div>
+   </div><!-- Section 5: Electromagnet Simulator -->
+   <div class="section">
+    <div class="section-header" onclick="toggleDiscussion('discussion5')">
+     <h2 id="section5-title">5) Electromagnet (Coil, Battery, Nail, Paper Clips)</h2><button class="toggle-btn" id="toggle5">Hide Discussion</button>
+    </div>
+    <div class="discussion" id="discussion5">
+     <h3>Concept:</h3>
+     <p>An electromagnet is created when electric current flows through a wire coil. The moving charges generate a magnetic field (Ampère's Law). Wrapping the coil around an iron core (nail) concentrates and amplifies the magnetic field because iron domains align with the field.</p>
+     <h3>Observations:</h3>
+     <p>When the switch is ON, current flows, creating a magnetic field. The iron nail becomes temporarily magnetized and attracts paper clips. When the switch is OFF, the current stops, the magnetic field disappears, and the paper clips fall. Field strength increases with more coil turns and higher voltage (current).</p>
+     <h3>Applications:</h3>
+     <p>Electric motors, generators, relays, solenoids, magnetic locks, MRI machines, scrap metal cranes, electric bells, loudspeakers, and magnetic levitation trains.</p>
+    </div><button class="how-to-btn" onclick="toggleHowTo('howto5')">📖 How to Use This Simulator</button>
+    <div class="how-to-use" id="howto5">
+     <h4>🎯 Interactive Controls:</h4>
+     <ul>
+      <li><strong>Power Switch:</strong> Click to turn the electromagnet ON or OFF. Watch the current flow animation and see paper clips respond!</li>
+      <li><strong>Coil Turns Slider:</strong> Adjust the number of wire loops around the nail (10-100 turns). More turns = stronger magnetic field.</li>
+      <li><strong>Battery Voltage Slider:</strong> Change the voltage (1.5V - 12V). Higher voltage = more current = stronger field.</li>
+      <li><strong>Reverse Current:</strong> Flip the current direction to reverse the magnetic poles (North ↔ South).</li>
+      <li><strong>Reset:</strong> Return all settings to default values.</li>
+     </ul>
+     <p><strong>💡 Physics:</strong> The magnetic field strength is proportional to (current × number of turns). The iron nail amplifies the field by ~1000×!</p>
+    </div>
+    <div class="simulation-area">
+     <canvas id="electromagnetCanvas"></canvas>
+    </div>
+    <div class="controls"><button class="btn" id="togglePower">Power: OFF</button> <button class="btn" id="reverseCurrent">Reverse Current</button> <button class="btn" id="resetElectromagnet">Reset</button>
+     <div class="slider-control"><label>Coil Turns:</label> <input type="range" class="slider" id="coilTurns" min="10" max="100" value="40" step="10"> <span class="value-display" id="coilTurnsValue">40</span>
+     </div>
+     <div class="slider-control"><label>Voltage:</label> <input type="range" class="slider" id="batteryVoltage" min="1.5" max="12" value="6" step="0.5"> <span class="value-display" id="batteryVoltageValue">6V</span>
+     </div>
+    </div>
+    <div class="info-display">
+     Power: <span id="powerStatus">OFF</span> | Field Strength: <span id="fieldStrength">0</span> | Paper Clips Attached: <span id="clipsAttached">0/8</span>
+    </div>
+   </div>
+  </div><!-- Popup Overlay and Explanation Popup -->
+  <div class="popup-overlay" id="popupOverlay"></div>
+  <div class="explanation-popup" id="explanationPopup">
+   <h3 id="popupTitle">Magnetization Process</h3>
+   <p id="popupContent">Explanation text will appear here...</p><button class="close-btn" id="closePopup">Got it!</button>
+  </div>
+  <script>
+    // ===== Configuration =====
+    const defaultConfig = {
+      main_title: "Magnetism Lab — Interactive Manipulatives",
+      section1_title: "1) Interaction Between Magnetic Poles",
+      section2_title: "2) Magnetization & Demagnetization (Domains)",
+      section3_title: "3) Compass & Magnet Interaction",
+      section4_title: "4) Magnetic Field Patterns",
+      section5_title: "5) Electromagnet (Coil, Battery, Nail, Paper Clips)"
+    };
+
+    // ===== SDK Initialization =====
+    async function onConfigChange(config) {
+      document.getElementById('main-title').textContent = config.main_title || defaultConfig.main_title;
+      document.getElementById('section1-title').textContent = config.section1_title || defaultConfig.section1_title;
+      document.getElementById('section2-title').textContent = config.section2_title || defaultConfig.section2_title;
+      document.getElementById('section3-title').textContent = config.section3_title || defaultConfig.section3_title;
+      document.getElementById('section4-title').textContent = config.section4_title || defaultConfig.section4_title;
+      document.getElementById('section5-title').textContent = config.section5_title || defaultConfig.section5_title;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["main_title", config.main_title || defaultConfig.main_title],
+        ["section1_title", config.section1_title || defaultConfig.section1_title],
+        ["section2_title", config.section2_title || defaultConfig.section2_title],
+        ["section3_title", config.section3_title || defaultConfig.section3_title],
+        ["section4_title", config.section4_title || defaultConfig.section4_title],
+        ["section5_title", config.section5_title || defaultConfig.section5_title]
+      ]);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // ===== Sound Effects System =====
+    const SoundFX = {
+      context: null,
+      enabled: true,
+      
+      init() {
+        this.context = new (window.AudioContext || window.webkitAudioContext)();
+      },
+      
+      playClick() {
+        if (!this.enabled || !this.context) {
+          if (!this.context) this.init();
+          if (!this.enabled) return;
+        }
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.15;
+        
+        oscillator.start(this.context.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.1);
+        oscillator.stop(this.context.currentTime + 0.1);
+      },
+      
+      playMagnetSnap() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.frequency.value = 400;
+        gainNode.gain.value = 0.25;
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(120, this.context.currentTime + 0.12);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.12);
+        oscillator.stop(this.context.currentTime + 0.12);
+      },
+      
+      playWhoosh() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        const filter = this.context.createBiquadFilter();
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.value = 500;
+        filter.frequency.value = 1200;
+        gainNode.gain.value = 0.2;
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(200, this.context.currentTime + 0.25);
+        filter.frequency.exponentialRampToValueAtTime(200, this.context.currentTime + 0.25);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.25);
+        oscillator.stop(this.context.currentTime + 0.25);
+      },
+      
+      playMagnetize() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        const filter = this.context.createBiquadFilter();
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 250;
+        filter.type = 'lowpass';
+        filter.frequency.value = 800;
+        gainNode.gain.value = 0.18;
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(700, this.context.currentTime + 0.35);
+        filter.frequency.exponentialRampToValueAtTime(2000, this.context.currentTime + 0.35);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.35);
+        oscillator.stop(this.context.currentTime + 0.35);
+      },
+      
+      playDemagnetize() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.value = 900;
+        gainNode.gain.value = 0.15;
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(120, this.context.currentTime + 0.45);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.45);
+        oscillator.stop(this.context.currentTime + 0.45);
+      },
+      
+      playHammer() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        
+        // Create impact sound with noise and bass
+        const duration = 0.2;
+        const bufferSize = this.context.sampleRate * duration;
+        const buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.1));
+        }
+        
+        const noise = this.context.createBufferSource();
+        noise.buffer = buffer;
+        
+        const filter = this.context.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 300;
+        
+        const gainNode = this.context.createGain();
+        gainNode.gain.value = 0.4;
+        
+        noise.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        noise.start(this.context.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + duration);
+      },
+      
+      playHeat() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        
+        // Create crackling fire sound
+        const duration = 0.4;
+        const bufferSize = this.context.sampleRate * duration;
+        const buffer = this.context.createBuffer(1, bufferSize, this.context.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+          const envelope = Math.sin((i / bufferSize) * Math.PI);
+          data[i] = (Math.random() * 2 - 1) * envelope * 0.5;
+        }
+        
+        const noise = this.context.createBufferSource();
+        noise.buffer = buffer;
+        
+        const filter = this.context.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = 800;
+        
+        const gainNode = this.context.createGain();
+        gainNode.gain.value = 0.2;
+        
+        noise.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        noise.start(this.context.currentTime);
+      },
+      
+      playElectric() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        
+        // Create electric buzzing sound
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        const filter = this.context.createBiquadFilter();
+        
+        oscillator.type = 'square';
+        oscillator.frequency.value = 120;
+        filter.type = 'bandpass';
+        filter.frequency.value = 800;
+        filter.Q.value = 5;
+        gainNode.gain.value = 0.15;
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.start(this.context.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.3);
+        oscillator.stop(this.context.currentTime + 0.3);
+      },
+      
+      playAttract() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        
+        // Gentle magnetic pull sound
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 300;
+        gainNode.gain.value = 0.08;
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(450, this.context.currentTime + 0.15);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.15);
+        oscillator.stop(this.context.currentTime + 0.15);
+      },
+      
+      playRepel() {
+        if (!this.enabled) return;
+        if (!this.context) this.init();
+        
+        // Sharp repulsion sound
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.value = 600;
+        gainNode.gain.value = 0.1;
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(this.context.destination);
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.frequency.linearRampToValueAtTime(300, this.context.currentTime + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, this.context.currentTime + 0.1);
+        oscillator.stop(this.context.currentTime + 0.1);
+      },
+      
+      toggle() {
+        this.enabled = !this.enabled;
+        return this.enabled;
+      }
+    };
+
+    // ===== Utility Functions =====
+    function addButtonClickEffect(button) {
+      button.addEventListener('click', function() {
+        SoundFX.playClick();
+        this.classList.add('clicked');
+        setTimeout(() => this.classList.remove('clicked'), 600);
+      });
+    }
+
+    function toggleDiscussion(id) {
+      const discussion = document.getElementById(id);
+      const toggleNum = id.replace('discussion', '');
+      const toggleBtn = document.getElementById('toggle' + toggleNum);
+      
+      if (discussion.classList.contains('hidden')) {
+        discussion.classList.remove('hidden');
+        toggleBtn.textContent = 'Hide Discussion';
+      } else {
+        discussion.classList.add('hidden');
+        toggleBtn.textContent = 'Show Discussion';
+      }
+    }
+
+    function toggleHowTo(id) {
+      const howTo = document.getElementById(id);
+      
+      if (howTo.classList.contains('hidden')) {
+        howTo.classList.remove('hidden');
+      } else {
+        howTo.classList.add('hidden');
+      }
+    }
+
+    // ===== Popup System =====
+    function showExplanationPopup(title, content) {
+      const popup = document.getElementById('explanationPopup');
+      const popupTitle = document.getElementById('popupTitle');
+      const popupContent = document.getElementById('popupContent');
+      
+      popupTitle.textContent = title;
+      popupContent.innerHTML = content;
+      
+      popup.classList.add('show');
+    }
+
+    function closeExplanationPopup() {
+      const popup = document.getElementById('explanationPopup');
+      
+      popup.classList.remove('show');
+    }
+
+    // Setup popup close handlers
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('closePopup').addEventListener('click', closeExplanationPopup);
+    });
+
+    // ===== SIMULATION 1: Magnetic Poles Interaction =====
+    class PolesSimulation {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.setupCanvas();
+        
+        this.magnets = [
+          { x: 150, y: 150, width: 100, height: 160, flipped: false, dragging: false, horizontal: false, selected: false, id: 0 },
+          { x: 450, y: 150, width: 100, height: 160, flipped: false, dragging: false, horizontal: false, selected: false, id: 1 }
+        ];
+        
+        this.nextMagnetId = 2;
+        this.poleStrength = 5;
+        this.dragOffset = { x: 0, y: 0 };
+        this.selectedMagnet = null;
+        this.lastClickTime = 0;
+        
+        this.setupEventListeners();
+        this.animate();
+      }
+
+      setupCanvas() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+      }
+
+      setupEventListeners() {
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
+        this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
+
+        document.getElementById('addMagnet').addEventListener('click', () => this.addMagnet());
+        document.getElementById('removeMagnet').addEventListener('click', () => this.removeSelectedMagnet());
+        document.getElementById('resetMagnets').addEventListener('click', () => this.reset());
+        document.getElementById('flipSelected').addEventListener('click', () => this.flipSelected());
+        document.getElementById('rotateSelected').addEventListener('click', () => this.rotateSelected());
+        
+        const strengthSlider = document.getElementById('poleStrength');
+        strengthSlider.addEventListener('input', (e) => {
+          this.poleStrength = parseFloat(e.target.value);
+          document.getElementById('poleStrengthValue').textContent = e.target.value;
+        });
+      }
+
+      getMousePos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      handleMouseDown(e) {
+        const pos = this.getMousePos(e);
+        const currentTime = Date.now();
+        let foundMagnet = false;
+        
+        for (let i = this.magnets.length - 1; i >= 0; i--) {
+          const m = this.magnets[i];
+          if (pos.x >= m.x && pos.x <= m.x + m.width &&
+              pos.y >= m.y && pos.y <= m.y + m.height) {
+            
+            // Check for double-click (within 300ms)
+            if (currentTime - this.lastClickTime < 300 && this.selectedMagnet === i) {
+              // Double click - toggle selection only
+              m.selected = !m.selected;
+              this.updateMagnetCount();
+            } else {
+              // Single click - select and prepare to drag
+              this.magnets.forEach(mag => mag.selected = false);
+              m.selected = true;
+              this.selectedMagnet = i;
+              m.dragging = true;
+              this.dragOffset.x = pos.x - m.x;
+              this.dragOffset.y = pos.y - m.y;
+              this.updateMagnetCount();
+            }
+            
+            this.lastClickTime = currentTime;
+            foundMagnet = true;
+            break;
+          }
+        }
+        
+        // Click on empty space - deselect all
+        if (!foundMagnet) {
+          this.magnets.forEach(mag => mag.selected = false);
+          this.updateMagnetCount();
+        }
+      }
+
+      handleMouseMove(e) {
+        if (this.selectedMagnet !== null) {
+          const pos = this.getMousePos(e);
+          const m = this.magnets[this.selectedMagnet];
+          m.x = pos.x - this.dragOffset.x;
+          m.y = pos.y - this.dragOffset.y;
+          
+          m.x = Math.max(10, Math.min(this.canvas.width - m.width - 10, m.x));
+          m.y = Math.max(10, Math.min(this.canvas.height - m.height - 10, m.y));
+        }
+      }
+
+      handleMouseUp() {
+        this.selectedMagnet = null;
+        this.magnets.forEach(m => m.dragging = false);
+      }
+
+      reset() {
+        this.magnets = [
+          { x: 150, y: 150, width: 100, height: 160, flipped: false, dragging: false, horizontal: false, selected: false, id: 0 },
+          { x: 450, y: 150, width: 100, height: 160, flipped: false, dragging: false, horizontal: false, selected: false, id: 1 }
+        ];
+        this.nextMagnetId = 2;
+        this.updateMagnetCount();
+      }
+
+      addMagnet() {
+        if (this.magnets.length >= 10) {
+          return;
+        }
+        
+        const newMagnet = {
+          x: this.canvas.width / 2 - 50,
+          y: this.canvas.height / 2 - 80,
+          width: 100,
+          height: 160,
+          flipped: false,
+          dragging: false,
+          horizontal: false,
+          selected: true,
+          id: this.nextMagnetId++,
+          showSparkles: true
+        };
+        
+        this.magnets.forEach(m => m.selected = false);
+        this.magnets.push(newMagnet);
+        
+        SoundFX.playMagnetize();
+        setTimeout(() => {
+          newMagnet.showSparkles = false;
+        }, 1000);
+        
+        this.updateMagnetCount();
+      }
+
+      removeSelectedMagnet() {
+        const selectedIndex = this.magnets.findIndex(m => m.selected);
+        if (selectedIndex !== -1 && this.magnets.length > 1) {
+          this.magnets.splice(selectedIndex, 1);
+          SoundFX.playDemagnetize();
+          this.updateMagnetCount();
+        }
+      }
+
+      flipSelected() {
+        const selected = this.magnets.find(m => m.selected);
+        if (selected) {
+          selected.flipped = !selected.flipped;
+          selected.showSparkles = true;
+          SoundFX.playWhoosh();
+          setTimeout(() => {
+            selected.showSparkles = false;
+          }, 1000);
+        }
+      }
+
+      rotateSelected() {
+        const selected = this.magnets.find(m => m.selected);
+        if (selected) {
+          selected.horizontal = !selected.horizontal;
+          const temp = selected.width;
+          selected.width = selected.height;
+          selected.height = temp;
+          
+          selected.x = Math.max(10, Math.min(this.canvas.width - selected.width - 10, selected.x));
+          selected.y = Math.max(10, Math.min(this.canvas.height - selected.height - 10, selected.y));
+          
+          selected.showSparkles = true;
+          SoundFX.playWhoosh();
+          setTimeout(() => {
+            selected.showSparkles = false;
+          }, 1000);
+        }
+      }
+
+      updateMagnetCount() {
+        document.getElementById('magnetCount').textContent = this.magnets.length;
+      }
+
+      calculateForces() {
+        if (this.magnets.length < 2) return;
+        
+        // Calculate forces between all pairs of magnets
+        for (let i = 0; i < this.magnets.length; i++) {
+          for (let j = i + 1; j < this.magnets.length; j++) {
+            const m1 = this.magnets[i];
+            const m2 = this.magnets[j];
+            
+            const dx = (m2.x + m2.width / 2) - (m1.x + m1.width / 2);
+            const dy = (m2.y + m2.height / 2) - (m1.y + m1.height / 2);
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance < 20) continue;
+            
+            const samePoles = m1.flipped === m2.flipped;
+            const forceMagnitude = (this.poleStrength * 1500) / (distance * distance);
+            const force = samePoles ? -forceMagnitude : forceMagnitude;
+            
+            // Store interaction type for visual effects
+            m1.interactionType = samePoles ? 'repel' : 'attract';
+            m2.interactionType = samePoles ? 'repel' : 'attract';
+            m1.interactionStrength = Math.min(Math.abs(force) / 50, 1);
+            m2.interactionStrength = Math.min(Math.abs(force) / 50, 1);
+            
+            const angle = Math.atan2(dy, dx);
+            const fx = Math.cos(angle) * force;
+            const fy = Math.sin(angle) * force;
+            
+            if (!m1.dragging) {
+              m1.x -= fx * 0.3;
+              m1.y -= fy * 0.3;
+            }
+            
+            if (!m2.dragging) {
+              m2.x += fx * 0.3;
+              m2.y += fy * 0.3;
+            }
+          }
+        }
+        
+        this.magnets.forEach(m => {
+          m.x = Math.max(10, Math.min(this.canvas.width - m.width - 10, m.x));
+          m.y = Math.max(10, Math.min(this.canvas.height - m.height - 10, m.y));
+        });
+      }
+
+      drawMagnet(magnet) {
+        // Draw selection highlight
+        if (magnet.selected) {
+          this.ctx.strokeStyle = '#f39c12';
+          this.ctx.lineWidth = 6;
+          this.ctx.setLineDash([10, 5]);
+          this.ctx.strokeRect(magnet.x - 5, magnet.y - 5, magnet.width + 10, magnet.height + 10);
+          this.ctx.setLineDash([]);
+        }
+        
+        if (magnet.horizontal) {
+          const leftColor = magnet.flipped ? '#e74c3c' : '#3498db';
+          const rightColor = magnet.flipped ? '#3498db' : '#e74c3c';
+          const leftLabel = magnet.flipped ? 'S' : 'N';
+          const rightLabel = magnet.flipped ? 'N' : 'S';
+          
+          this.ctx.fillStyle = leftColor;
+          this.ctx.fillRect(magnet.x, magnet.y, magnet.width / 2, magnet.height);
+          
+          this.ctx.fillStyle = rightColor;
+          this.ctx.fillRect(magnet.x + magnet.width / 2, magnet.y, magnet.width / 2, magnet.height);
+          
+          this.ctx.strokeStyle = '#2c3e50';
+          this.ctx.lineWidth = 3;
+          this.ctx.strokeRect(magnet.x, magnet.y, magnet.width, magnet.height);
+          
+          this.ctx.fillStyle = '#ffffff';
+          this.ctx.font = 'bold 20px Arial';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          
+          this.ctx.fillText(leftLabel, magnet.x + magnet.width / 4, magnet.y + magnet.height / 2);
+          this.ctx.fillText(rightLabel, magnet.x + 3 * magnet.width / 4, magnet.y + magnet.height / 2);
+        } else {
+          const topColor = magnet.flipped ? '#e74c3c' : '#3498db';
+          const bottomColor = magnet.flipped ? '#3498db' : '#e74c3c';
+          const topLabel = magnet.flipped ? 'S' : 'N';
+          const bottomLabel = magnet.flipped ? 'N' : 'S';
+          
+          this.ctx.fillStyle = topColor;
+          this.ctx.fillRect(magnet.x, magnet.y, magnet.width, magnet.height / 2);
+          
+          this.ctx.fillStyle = bottomColor;
+          this.ctx.fillRect(magnet.x, magnet.y + magnet.height / 2, magnet.width, magnet.height / 2);
+          
+          this.ctx.strokeStyle = '#2c3e50';
+          this.ctx.lineWidth = 3;
+          this.ctx.strokeRect(magnet.x, magnet.y, magnet.width, magnet.height);
+          
+          this.ctx.fillStyle = '#ffffff';
+          this.ctx.font = 'bold 20px Arial';
+          this.ctx.textAlign = 'center';
+          this.ctx.textBaseline = 'middle';
+          
+          this.ctx.fillText(topLabel, magnet.x + magnet.width / 2, magnet.y + magnet.height / 4);
+          this.ctx.fillText(bottomLabel, magnet.x + magnet.width / 2, magnet.y + 3 * magnet.height / 4);
+        }
+        
+        if (magnet.showSparkles) {
+          this.drawSparkles(magnet);
+        }
+      }
+
+      drawSparkles(magnet) {
+        const centerX = magnet.x + magnet.width / 2;
+        const centerY = magnet.y + magnet.height / 2;
+        const time = Date.now() * 0.01;
+        
+        for (let i = 0; i < 6; i++) {
+          const angle = (i / 6) * Math.PI * 2 + time;
+          const distance = 60 + Math.sin(time + i) * 10;
+          const x = centerX + Math.cos(angle) * distance;
+          const y = centerY + Math.sin(angle) * distance;
+          const size = 3 + Math.sin(time * 2 + i) * 2;
+          
+          this.ctx.fillStyle = `rgba(255, 220, 100, ${0.5 + Math.sin(time * 3 + i) * 0.3})`;
+          this.ctx.beginPath();
+          this.ctx.arc(x, y, size, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+      }
+
+      drawForceLines() {
+        if (this.magnets.length < 2) return;
+        
+        const time = Date.now() * 0.005;
+        
+        // Draw force lines between all pairs of magnets
+        for (let i = 0; i < this.magnets.length; i++) {
+          for (let j = i + 1; j < this.magnets.length; j++) {
+            const m1 = this.magnets[i];
+            const m2 = this.magnets[j];
+            
+            const m1CenterX = m1.x + m1.width / 2;
+            const m1CenterY = m1.y + m1.height / 2;
+            const m2CenterX = m2.x + m2.width / 2;
+            const m2CenterY = m2.y + m2.height / 2;
+            
+            const dx = m2CenterX - m1CenterX;
+            const dy = m2CenterY - m1CenterY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 500) continue;
+            
+            const samePoles = m1.flipped === m2.flipped;
+            
+            // Draw animated force lines between magnets - MORE VISIBLE
+            const numLines = 12;
+            for (let k = 0; k < numLines; k++) {
+              const offset = (k / numLines) * 80 - 40;
+              const angle = Math.atan2(dy, dx);
+              const perpAngle = angle + Math.PI / 2;
+              
+              const x1 = m1CenterX + Math.cos(perpAngle) * offset;
+              const y1 = m1CenterY + Math.sin(perpAngle) * offset;
+              const x2 = m2CenterX + Math.cos(perpAngle) * offset;
+              const y2 = m2CenterY + Math.sin(perpAngle) * offset;
+              
+              // Animated wave effect - BIGGER WAVES
+              const wave = Math.sin(time * 2 + k * 0.5) * 20;
+              const midX = (x1 + x2) / 2 + Math.cos(perpAngle) * wave;
+              const midY = (y1 + y2) / 2 + Math.sin(perpAngle) * wave;
+              
+              if (samePoles) {
+                // Repulsion - BRIGHT red zigzag lines
+                this.ctx.strokeStyle = `rgba(231, 76, 60, ${0.8 - distance / 1500})`;
+                this.ctx.lineWidth = 4;
+                this.ctx.setLineDash([8, 8]);
+                this.ctx.lineDashOffset = -time * 30;
+              } else {
+                // Attraction - BRIGHT blue flowing lines
+                this.ctx.strokeStyle = `rgba(52, 152, 219, ${0.9 - distance / 1500})`;
+                this.ctx.lineWidth = 4;
+                this.ctx.setLineDash([15, 8]);
+                this.ctx.lineDashOffset = time * 30;
+              }
+              
+              this.ctx.beginPath();
+              this.ctx.moveTo(x1, y1);
+              this.ctx.quadraticCurveTo(midX, midY, x2, y2);
+              this.ctx.stroke();
+            }
+            
+            this.ctx.setLineDash([]);
+            
+            // Draw BIGGER pulsing energy between magnets
+            const pulseSize = 20 + Math.sin(time * 3) * 10;
+            const pulseAlpha = 0.6 + Math.sin(time * 3) * 0.3;
+            
+            if (samePoles) {
+              // Repulsion energy burst in center - BIGGER AND BRIGHTER
+              const gradient = this.ctx.createRadialGradient(
+                (m1CenterX + m2CenterX) / 2, (m1CenterY + m2CenterY) / 2, 0,
+                (m1CenterX + m2CenterX) / 2, (m1CenterY + m2CenterY) / 2, pulseSize * 5
+              );
+              gradient.addColorStop(0, `rgba(231, 76, 60, ${pulseAlpha})`);
+              gradient.addColorStop(0.5, `rgba(255, 100, 80, ${pulseAlpha * 0.5})`);
+              gradient.addColorStop(1, 'rgba(231, 76, 60, 0)');
+              
+              this.ctx.fillStyle = gradient;
+              this.ctx.beginPath();
+              this.ctx.arc((m1CenterX + m2CenterX) / 2, (m1CenterY + m2CenterY) / 2, pulseSize * 5, 0, Math.PI * 2);
+              this.ctx.fill();
+              
+              // Add explosive lines
+              for (let k = 0; k < 8; k++) {
+                const explosionAngle = (k / 8) * Math.PI * 2;
+                const explosionDist = pulseSize * 3;
+                const explX = (m1CenterX + m2CenterX) / 2 + Math.cos(explosionAngle + time) * explosionDist;
+                const explY = (m1CenterY + m2CenterY) / 2 + Math.sin(explosionAngle + time) * explosionDist;
+                
+                this.ctx.strokeStyle = `rgba(255, 100, 80, ${pulseAlpha * 0.6})`;
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo((m1CenterX + m2CenterX) / 2, (m1CenterY + m2CenterY) / 2);
+                this.ctx.lineTo(explX, explY);
+                this.ctx.stroke();
+              }
+            } else {
+              // Attraction energy flowing - MULTIPLE PARTICLES
+              for (let p = 0; p < 3; p++) {
+                const flowPos = ((Math.sin(time + p * 2) + 1) / 2);
+                const flowX = m1CenterX + (m2CenterX - m1CenterX) * flowPos;
+                const flowY = m1CenterY + (m2CenterY - m1CenterY) * flowPos;
+                
+                const gradient = this.ctx.createRadialGradient(flowX, flowY, 0, flowX, flowY, pulseSize * 3);
+                gradient.addColorStop(0, `rgba(52, 152, 219, ${pulseAlpha})`);
+                gradient.addColorStop(0.5, `rgba(100, 200, 255, ${pulseAlpha * 0.6})`);
+                gradient.addColorStop(1, 'rgba(52, 152, 219, 0)');
+                
+                this.ctx.fillStyle = gradient;
+                this.ctx.beginPath();
+                this.ctx.arc(flowX, flowY, pulseSize * 3, 0, Math.PI * 2);
+                this.ctx.fill();
+              }
+              
+              // Add arrow particles showing direction
+              for (let a = 0; a < 5; a++) {
+                const arrowPos = (a / 5 + time * 0.3) % 1;
+                const arrowX = m1CenterX + (m2CenterX - m1CenterX) * arrowPos;
+                const arrowY = m1CenterY + (m2CenterY - m1CenterY) * arrowPos;
+                const arrowAngle = Math.atan2(dy, dx);
+                
+                this.ctx.save();
+                this.ctx.translate(arrowX, arrowY);
+                this.ctx.rotate(arrowAngle);
+                this.ctx.fillStyle = `rgba(52, 152, 219, ${0.7})`;
+                this.ctx.beginPath();
+                this.ctx.moveTo(6, 0);
+                this.ctx.lineTo(-3, -4);
+                this.ctx.lineTo(-3, 4);
+                this.ctx.closePath();
+                this.ctx.fill();
+                this.ctx.restore();
+              }
+            }
+          }
+        }
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw force lines first (behind magnets)
+        this.drawForceLines();
+        
+        this.magnets.forEach(magnet => this.drawMagnet(magnet));
+      }
+
+      animate() {
+        this.calculateForces();
+        this.draw();
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    // ===== SIMULATION 2: Domains =====
+    class DomainsSimulation {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.setupCanvas();
+        
+        this.domains = [];
+        this.initDomains();
+        this.alignment = 0;
+        this.animating = false;
+        
+        // Material properties - realistic magnetic materials
+        this.materials = {
+          iron: {
+            name: 'Iron',
+            curieTemp: 770,
+            coercivity: 'Low',
+            retentivity: 0.3,
+            alignmentSpeed: 0.15,
+            randomizationRate: 0.25,
+            description: 'Soft ferromagnetic - easy to magnetize, easy to demagnetize. Loses magnetism quickly without external field.'
+          },
+          steel: {
+            name: 'Steel',
+            curieTemp: 740,
+            coercivity: 'Medium',
+            retentivity: 0.6,
+            alignmentSpeed: 0.10,
+            randomizationRate: 0.15,
+            description: 'Medium hard magnetic material - retains magnetism moderately well. Used in permanent magnets and tools.'
+          },
+          alnico: {
+            name: 'Alnico',
+            curieTemp: 860,
+            coercivity: 'High',
+            retentivity: 0.85,
+            alignmentSpeed: 0.08,
+            randomizationRate: 0.08,
+            description: 'Hard magnetic alloy (Al-Ni-Co) - excellent for permanent magnets. Resists demagnetization strongly.'
+          },
+          neodymium: {
+            name: 'Neodymium',
+            curieTemp: 310,
+            coercivity: 'Very High',
+            retentivity: 0.95,
+            alignmentSpeed: 0.06,
+            randomizationRate: 0.05,
+            description: 'Strongest permanent magnet material (rare earth). Very hard to demagnetize but has low Curie temperature.'
+          }
+        };
+        
+        this.currentMaterial = 'iron';
+        this.updateMaterialDisplay();
+        
+        // Animation effects
+        this.strokeMagnet = null;
+        this.inductionField = [];
+        this.coilRotation = 0;
+        this.coilActive = false;
+        this.heatParticles = [];
+        this.hammer = null;
+        this.acWave = null;
+        this.shakeOffset = { x: 0, y: 0 };
+        
+        this.setupEventListeners();
+        this.animate();
+      }
+
+      setupCanvas() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+      }
+
+      initDomains() {
+        const rows = 10;
+        const cols = 20;
+        const spacing = 30;
+        const startX = (this.canvas.width - cols * spacing) / 2;
+        const startY = (this.canvas.height - rows * spacing) / 2;
+        
+        for (let i = 0; i < rows; i++) {
+          for (let j = 0; j < cols; j++) {
+            this.domains.push({
+              x: startX + j * spacing,
+              y: startY + i * spacing,
+              angle: Math.random() * Math.PI * 2,
+              targetAngle: Math.random() * Math.PI * 2,
+              size: 20,
+              vibrating: false,
+              glowing: false
+            });
+          }
+        }
+        this.updateAlignment();
+      }
+
+      setupEventListeners() {
+        document.getElementById('materialType').addEventListener('change', (e) => {
+          this.currentMaterial = e.target.value;
+          this.updateMaterialDisplay();
+          
+          // Show material info popup
+          const mat = this.materials[this.currentMaterial];
+          showExplanationPopup(
+            mat.name + ' - Magnetic Properties',
+            `<strong>${mat.description}</strong><br><br>` +
+            `<strong>Curie Temperature:</strong> ${mat.curieTemp}°C<br>` +
+            `<strong>Coercivity:</strong> ${mat.coercivity}<br>` +
+            `<strong>Retentivity:</strong> ${(mat.retentivity * 100).toFixed(0)}%<br><br>` +
+            `<em>Try different magnetization methods to see how this material responds!</em>`
+          );
+        });
+        
+        document.getElementById('strokeMagnetize').addEventListener('click', () => this.strokeMagnetize());
+        document.getElementById('inductionMagnetize').addEventListener('click', () => this.inductionMagnetize());
+        document.getElementById('coilMagnetize').addEventListener('click', () => this.coilMagnetize());
+        document.getElementById('heatDemagnetize').addEventListener('click', () => this.heatDemagnetize());
+        document.getElementById('hammerDemagnetize').addEventListener('click', () => this.hammerDemagnetize());
+        document.getElementById('acDemagnetize').addEventListener('click', () => this.acDemagnetize());
+        document.getElementById('resetDomains').addEventListener('click', () => this.resetDomains());
+      }
+
+      strokeMagnetize() {
+        this.animating = true;
+        SoundFX.playMagnetize();
+        
+        const mat = this.materials[this.currentMaterial];
+        
+        // Show explanation popup with material-specific info
+        showExplanationPopup(
+          "Stroking Magnetization - " + mat.name,
+          "<strong>What's Happening:</strong><br>A permanent magnet is being stroked across the " + mat.name + " in one direction repeatedly. The magnetic field from the stroking magnet aligns the magnetic domains as it passes over them.<br><br><strong>Material Response:</strong> " + mat.description + "<br><br><strong>Result:</strong> Domains align in the direction of stroking. " + mat.name + " alignment speed: " + (mat.alignmentSpeed * 100).toFixed(0) + "% of max."
+        );
+        
+        // Animate a magnet stroking across the material
+        this.strokeMagnet = {
+          x: -100,
+          y: this.canvas.height / 2 - 20,
+          width: 80,
+          height: 40,
+          progress: 0
+        };
+        
+        const animateStroke = () => {
+          this.strokeMagnet.progress += 0.02;
+          this.strokeMagnet.x = -100 + (this.canvas.width + 200) * this.strokeMagnet.progress;
+          
+          // Align domains as magnet passes over them - affected by material properties
+          this.domains.forEach((domain, i) => {
+            const distanceToMagnet = Math.abs(domain.x - this.strokeMagnet.x);
+            if (distanceToMagnet < 150) {
+              // Hard materials (high coercivity) resist alignment more
+              const alignmentChance = mat.retentivity;
+              if (Math.random() < alignmentChance) {
+                domain.targetAngle = 0;
+                domain.glowing = true;
+                setTimeout(() => domain.glowing = false, 500);
+              }
+            }
+          });
+          
+          if (this.strokeMagnet.progress < 1) {
+            setTimeout(animateStroke, 30);
+          } else {
+            this.strokeMagnet = null;
+          }
+        };
+        
+        animateStroke();
+      }
+
+      inductionMagnetize() {
+        this.animating = true;
+        SoundFX.playMagnetize();
+        
+        // Show explanation popup
+        showExplanationPopup(
+          "Induction Magnetization",
+          "<strong>What's Happening:</strong><br>A strong permanent magnet is placed near the material without touching it. The magnetic field from the nearby magnet induces magnetization in the material by aligning its domains.<br><br><strong>Result:</strong> Domains align with the external magnetic field, causing the material to become temporarily or permanently magnetized depending on the material's properties."
+        );
+        
+        // Create field lines emanating from a nearby magnet
+        const magnetX = this.canvas.width - 100;
+        const magnetY = this.canvas.height / 2;
+        
+        for (let i = 0; i < 20; i++) {
+          const angle = (i / 20) * Math.PI * 2;
+          this.inductionField.push({
+            x: magnetX,
+            y: magnetY,
+            vx: Math.cos(angle) * 3,
+            vy: Math.sin(angle) * 3,
+            life: 1
+          });
+        }
+        
+        this.domains.forEach(domain => {
+          if (Math.random() < 0.7) {
+            domain.targetAngle = 0 + (Math.random() - 0.5) * 0.5;
+            domain.glowing = true;
+            setTimeout(() => domain.glowing = false, 800);
+          }
+        });
+        
+        setTimeout(() => {
+          this.inductionField = [];
+        }, 2000);
+      }
+
+      coilMagnetize() {
+        this.animating = true;
+        SoundFX.playElectric();
+        
+        // Show explanation popup
+        showExplanationPopup(
+          "Coil Magnetization (Electromagnetic)",
+          "<strong>What's Happening:</strong><br>The material is placed inside a coil of wire carrying an electric current. The current creates a strong, uniform magnetic field along the coil's axis (Ampère's Law).<br><br><strong>Result:</strong> This is the most powerful and uniform magnetization method. All domains align parallel to the coil axis, creating a strong permanent magnet. Used in industrial manufacturing."
+        );
+        
+        this.coilActive = true;
+        this.coilRotation = 0;
+        
+        const animateCoil = () => {
+          this.coilRotation += 0.15;
+          
+          if (this.coilRotation < Math.PI * 4) {
+            setTimeout(animateCoil, 30);
+          } else {
+            this.coilActive = false;
+          }
+        };
+        
+        animateCoil();
+        
+        // Align all domains with electric pulses
+        this.domains.forEach((domain, i) => {
+          setTimeout(() => {
+            domain.targetAngle = 0;
+            domain.glowing = true;
+            setTimeout(() => domain.glowing = false, 300);
+          }, i * 5);
+        });
+      }
+
+      heatDemagnetize() {
+        // Clear any existing animations first
+        if (this.fireInterval) clearInterval(this.fireInterval);
+        this.heatParticles = [];
+        
+        this.animating = true;
+        SoundFX.playHeat();
+        
+        // Show explanation popup
+        showExplanationPopup(
+          "Heat Demagnetization",
+          "<strong>What's Happening:</strong><br>The magnet is heated above its Curie temperature (the critical temperature where ferromagnetic materials lose its magnetic properties). Heat increases thermal vibrations, causing domains to randomize.<br><br><strong>Result:</strong> Thermal energy overcomes the magnetic alignment, and domains point in random directions. The material loses its magnetization completely."
+        );
+        
+        // Create REALISTIC FIRE with flames and embers
+        const fireAnimation = () => {
+          // Continuous fire particle generation for 3 seconds
+          if (this.heatParticles.length < 200) {
+            for (let i = 0; i < 5; i++) {
+              const centerX = this.canvas.width / 2;
+              const centerY = this.canvas.height / 2;
+              const spreadX = (Math.random() - 0.5) * 350;
+              
+              // Fire flames (yellow-orange-red gradient)
+              this.heatParticles.push({
+                x: centerX + spreadX,
+                y: centerY + 120,
+                vx: (Math.random() - 0.5) * 1.5,
+                vy: -Math.random() * 4 - 2,
+                size: Math.random() * 12 + 6,
+                life: 1,
+                type: 'flame',
+                color: Math.random() > 0.7 ? 'rgba(255, 50, 0' : (Math.random() > 0.4 ? 'rgba(255, 150, 0' : 'rgba(255, 220, 0'),
+                flicker: Math.random() * Math.PI * 2
+              });
+              
+              // Hot embers
+              if (Math.random() > 0.7) {
+                this.heatParticles.push({
+                  x: centerX + spreadX,
+                  y: centerY + 120,
+                  vx: (Math.random() - 0.5) * 3,
+                  vy: -Math.random() * 5 - 1,
+                  size: Math.random() * 3 + 2,
+                  life: 1,
+                  type: 'ember',
+                  color: 'rgba(255, 100, 0',
+                  glow: true
+                });
+              }
+              
+              // Smoke particles
+              if (Math.random() > 0.8) {
+                this.heatParticles.push({
+                  x: centerX + spreadX,
+                  y: centerY + 80,
+                  vx: (Math.random() - 0.5) * 2,
+                  vy: -Math.random() * 2 - 1,
+                  size: Math.random() * 20 + 10,
+                  life: 1,
+                  type: 'smoke',
+                  color: 'rgba(80, 80, 80'
+                });
+              }
+            }
+          }
+        };
+        
+        // Generate fire continuously for 3 seconds
+        this.fireInterval = setInterval(fireAnimation, 50);
+        
+        // Randomize domain angles with vibration from heat
+        this.domains.forEach((domain, i) => {
+          domain.vibrating = true;
+          setTimeout(() => {
+            domain.targetAngle = Math.random() * Math.PI * 2;
+            setTimeout(() => domain.vibrating = false, 1500);
+          }, i * 3);
+        });
+        
+        setTimeout(() => {
+          if (this.fireInterval) {
+            clearInterval(this.fireInterval);
+            this.fireInterval = null;
+          }
+          // Let existing particles finish
+          setTimeout(() => {
+            this.heatParticles = [];
+          }, 2000);
+        }, 3000);
+      }
+
+      hammerDemagnetize() {
+        this.animating = true;
+        SoundFX.playHammer();
+        
+        const mat = this.materials[this.currentMaterial];
+        
+        // Show explanation popup with material-specific response
+        showExplanationPopup(
+          "Hammer Demagnetization - " + mat.name,
+          "<strong>What's Happening:</strong><br>The " + mat.name + " magnet is struck repeatedly with a hammer. The physical shocks disrupt domain alignment.<br><br><strong>Material Response:</strong> " + mat.name + " has " + mat.coercivity + " coercivity - " + (mat.coercivity === 'Low' || mat.coercivity === 'Medium' ? "mechanical shock is moderately effective" : "this material strongly resists mechanical demagnetization") + ".<br><br><strong>Result:</strong> Mechanical energy randomizes ~" + (mat.randomizationRate * 100).toFixed(0) + "% of domains."
+        );
+        
+        // Create hammer animation
+        this.hammer = {
+          x: this.canvas.width / 2,
+          y: -100,
+          rotation: -Math.PI / 4,
+          phase: 0
+        };
+        
+        const hammerAnimation = () => {
+          this.hammer.phase += 0.1;
+          
+          if (this.hammer.phase < 1) {
+            // Hammer swinging down
+            this.hammer.y = -100 + 200 * this.hammer.phase;
+            this.hammer.rotation = -Math.PI / 4 + (Math.PI / 2) * this.hammer.phase;
+          } else if (this.hammer.phase < 1.3) {
+            // Impact moment
+            this.hammer.y = 100;
+            this.hammer.rotation = Math.PI / 4;
+            
+            // Shake effect on impact
+            if (this.hammer.phase > 1 && this.hammer.phase < 1.1) {
+              this.shakeOffset.x = (Math.random() - 0.5) * 15;
+              this.shakeOffset.y = (Math.random() - 0.5) * 15;
+              
+              // Randomize domains on impact - harder materials resist more
+              this.domains.forEach(domain => {
+                if (Math.random() < mat.randomizationRate) {
+                  domain.targetAngle = Math.random() * Math.PI * 2;
+                  domain.vibrating = true;
+                }
+              });
+              
+              // Create impact particles
+              for (let i = 0; i < 30; i++) {
+                const angle = (Math.random() * Math.PI * 2);
+                this.heatParticles.push({
+                  x: this.canvas.width / 2,
+                  y: 120,
+                  vx: Math.cos(angle) * (Math.random() * 5 + 3),
+                  vy: Math.sin(angle) * (Math.random() * 5 + 3),
+                  size: Math.random() * 3 + 2,
+                  life: 1,
+                  color: 'rgba(255, 255, 100'
+                });
+              }
+            }
+          } else if (this.hammer.phase < 2) {
+            // Hammer lifting back up
+            const liftProgress = (this.hammer.phase - 1.3) / 0.7;
+            this.hammer.y = 100 - 200 * liftProgress;
+            this.hammer.rotation = Math.PI / 4 - (Math.PI / 2) * liftProgress;
+            this.shakeOffset.x *= 0.8;
+            this.shakeOffset.y *= 0.8;
+          } else {
+            this.hammer = null;
+            this.shakeOffset = { x: 0, y: 0 };
+            this.domains.forEach(domain => domain.vibrating = false);
+            return;
+          }
+          
+          setTimeout(hammerAnimation, 30);
+        };
+        
+        hammerAnimation();
+      }
+
+      acDemagnetize() {
+        this.animating = true;
+        SoundFX.playElectric();
+        
+        // Show explanation popup
+        showExplanationPopup(
+          "AC Demagnetization (Alternating Current)",
+          "<strong>What's Happening:</strong><br>An alternating current (AC) is applied to a coil around the magnet, creating a magnetic field that alternates direction rapidly. The amplitude of the AC is gradually decreased to zero.<br><br><strong>Result:</strong> Domains are repeatedly flipped back and forth with decreasing intensity until they settle in random orientations. This is the most controlled demagnetization method, used in precision applications like degaussing CRT monitors and audio equipment."
+        );
+        
+        // Create AC wave effect
+        this.acWave = {
+          phase: 0,
+          amplitude: 50,
+          frequency: 0.1
+        };
+        
+        const waveAnimation = () => {
+          this.acWave.phase += 0.15;
+          
+          // Alternate domain angles with decreasing amplitude
+          const currentAmplitude = this.acWave.amplitude * (1 - this.acWave.phase / 10);
+          
+          this.domains.forEach((domain, i) => {
+            const row = Math.floor(i / 20);
+            const waveValue = Math.sin(this.acWave.phase + row * 0.3);
+            domain.targetAngle = waveValue * currentAmplitude * Math.PI / 180;
+            domain.glowing = Math.abs(waveValue) > 0.5;
+          });
+          
+          if (this.acWave.phase < 10) {
+            setTimeout(waveAnimation, 50);
+          } else {
+            this.acWave = null;
+            this.domains.forEach(domain => {
+              domain.targetAngle = Math.random() * Math.PI * 2;
+              domain.glowing = false;
+            });
+          }
+        };
+        
+        waveAnimation();
+      }
+
+      resetDomains() {
+        // FORCE STOP ALL ANIMATIONS - clear every possible animation state
+        if (this.fireInterval) {
+          clearInterval(this.fireInterval);
+          this.fireInterval = null;
+        }
+        
+        // Clear all animation objects
+        this.strokeMagnet = null;
+        this.inductionField = [];
+        this.coilActive = false;
+        this.coilRotation = 0;
+        this.heatParticles = [];
+        this.hammer = null;
+        this.acWave = null;
+        this.shakeOffset = { x: 0, y: 0 };
+        
+        // FORCE CLEAR all domain animation states
+        this.domains.forEach(domain => {
+          domain.targetAngle = Math.random() * Math.PI * 2;
+          domain.angle = domain.targetAngle; // Immediately set angle to target
+          domain.vibrating = false;
+          domain.glowing = false;
+        });
+        
+        // Force immediate alignment update
+        this.updateAlignment();
+        
+        this.animating = false; // Stop animation loop from continuing
+        SoundFX.playClick();
+        
+        // Force immediate redraw
+        this.draw();
+      }
+
+      updateAlignment() {
+        let sumX = 0;
+        let sumY = 0;
+        
+        this.domains.forEach(domain => {
+          sumX += Math.cos(domain.angle);
+          sumY += Math.sin(domain.angle);
+        });
+        
+        const magnitude = Math.sqrt(sumX * sumX + sumY * sumY) / this.domains.length;
+        this.alignment = Math.round(magnitude * 100);
+        document.getElementById('alignmentValue').textContent = this.alignment;
+      }
+
+      updateMaterialDisplay() {
+        const mat = this.materials[this.currentMaterial];
+        document.getElementById('currentMaterial').textContent = mat.name;
+        document.getElementById('curieTemp').textContent = mat.curieTemp + '°C';
+        document.getElementById('coercivity').textContent = mat.coercivity;
+      }
+
+      drawDomain(domain) {
+        const width = 24;
+        const height = 12;
+        
+        this.ctx.save();
+        
+        // Apply vibration if active
+        let vibrateX = domain.vibrating ? (Math.random() - 0.5) * 3 : 0;
+        let vibrateY = domain.vibrating ? (Math.random() - 0.5) * 3 : 0;
+        
+        this.ctx.translate(domain.x + vibrateX + this.shakeOffset.x, domain.y + vibrateY + this.shakeOffset.y);
+        this.ctx.rotate(domain.angle);
+        
+        // Glow effect
+        if (domain.glowing) {
+          this.ctx.shadowColor = '#3498db';
+          this.ctx.shadowBlur = 15;
+        }
+        
+        // Draw mini bar magnet (North side - blue on right, South side - red on left)
+        // South (red) - left half
+        this.ctx.fillStyle = '#e74c3c';
+        this.ctx.fillRect(-width / 2, -height / 2, width / 2, height);
+        
+        // North (blue) - right half
+        this.ctx.fillStyle = '#3498db';
+        this.ctx.fillRect(0, -height / 2, width / 2, height);
+        
+        // Border around magnet
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.strokeRect(-width / 2, -height / 2, width, height);
+        
+        // Center dividing line
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -height / 2);
+        this.ctx.lineTo(0, height / 2);
+        this.ctx.stroke();
+        
+        // Optional: Add tiny S and N labels
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = 'bold 8px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('S', -width / 4, 0);
+        this.ctx.fillText('N', width / 4, 0);
+        
+        this.ctx.restore();
+      }
+
+      drawStrokeMagnet() {
+        if (!this.strokeMagnet) return;
+        
+        const m = this.strokeMagnet;
+        
+        // Draw trailing field lines
+        for (let i = 0; i < 8; i++) {
+          const angle = (i / 8) * Math.PI * 2;
+          const lineLength = 40;
+          const startX = m.x + m.width / 2 + Math.cos(angle) * 20;
+          const startY = m.y + m.height / 2 + Math.sin(angle) * 20;
+          const endX = startX + Math.cos(angle) * lineLength;
+          const endY = startY + Math.sin(angle) * lineLength;
+          
+          this.ctx.strokeStyle = 'rgba(52, 152, 219, 0.5)';
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          this.ctx.moveTo(startX, startY);
+          this.ctx.lineTo(endX, endY);
+          this.ctx.stroke();
+        }
+        
+        // Draw magnet
+        this.ctx.fillStyle = '#3498db';
+        this.ctx.fillRect(m.x, m.y, m.width / 2, m.height);
+        this.ctx.fillStyle = '#e74c3c';
+        this.ctx.fillRect(m.x + m.width / 2, m.y, m.width / 2, m.height);
+        
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(m.x, m.y, m.width, m.height);
+        
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = 'bold 16px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('N', m.x + m.width / 4, m.y + m.height / 2);
+        this.ctx.fillText('S', m.x + 3 * m.width / 4, m.y + m.height / 2);
+      }
+
+      drawInductionField() {
+        this.inductionField = this.inductionField.filter(particle => {
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          particle.life -= 0.01;
+          
+          if (particle.life > 0) {
+            this.ctx.strokeStyle = `rgba(52, 152, 219, ${particle.life * 0.7})`;
+            this.ctx.lineWidth = 3;
+            this.ctx.beginPath();
+            this.ctx.moveTo(particle.x - particle.vx * 3, particle.y - particle.vy * 3);
+            this.ctx.lineTo(particle.x, particle.y);
+            this.ctx.stroke();
+            return true;
+          }
+          return false;
+        });
+      }
+
+      drawCoil() {
+        if (!this.coilActive) return;
+        
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        const coilRadius = 150;
+        
+        // Draw coil windings
+        for (let i = 0; i < 8; i++) {
+          const angle = this.coilRotation + (i / 8) * Math.PI * 2;
+          const x = centerX + Math.cos(angle) * coilRadius;
+          const y = centerY + Math.sin(angle) * coilRadius;
+          
+          this.ctx.fillStyle = `rgba(255, 200, 0, ${0.7 + Math.sin(this.coilRotation * 3 + i) * 0.3})`;
+          this.ctx.beginPath();
+          this.ctx.arc(x, y, 8, 0, Math.PI * 2);
+          this.ctx.fill();
+          
+          // Electric arcs
+          if (i % 2 === 0) {
+            this.ctx.strokeStyle = `rgba(100, 200, 255, 0.8)`;
+            this.ctx.lineWidth = 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(centerX, centerY);
+            this.ctx.lineTo(x, y);
+            this.ctx.stroke();
+          }
+        }
+        
+        // Center coil
+        this.ctx.strokeStyle = 'rgba(255, 200, 0, 0.8)';
+        this.ctx.lineWidth = 4;
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, coilRadius, 0, Math.PI * 2);
+        this.ctx.stroke();
+      }
+
+      drawHeatParticles() {
+        this.heatParticles = this.heatParticles.filter(particle => {
+          particle.x += particle.vx;
+          particle.y += particle.vy;
+          particle.life -= 0.01;
+          
+          if (particle.type === 'flame') {
+            // Flames rise and flicker
+            particle.vy -= 0.08; // Rise faster
+            particle.flicker += 0.2;
+            particle.vx += Math.sin(particle.flicker) * 0.3; // Flicker sideways
+            particle.size *= 0.98; // Shrink as they rise
+          } else if (particle.type === 'ember') {
+            // Embers slow down
+            particle.vy += 0.05; // Slight gravity
+            particle.vx *= 0.98;
+          } else if (particle.type === 'smoke') {
+            // Smoke dissipates and spreads
+            particle.vy -= 0.03;
+            particle.vx *= 0.95;
+            particle.size *= 1.02; // Expand
+          }
+          
+          if (particle.life > 0) {
+            if (particle.type === 'flame') {
+              // Draw flame with glow
+              this.ctx.shadowBlur = 20;
+              this.ctx.shadowColor = particle.color + ', 0.8)';
+              this.ctx.fillStyle = `${particle.color}, ${particle.life * 0.9})`;
+              this.ctx.beginPath();
+              
+              // Flame shape (teardrop)
+              const flickerSize = particle.size + Math.sin(particle.flicker) * 2;
+              this.ctx.ellipse(particle.x, particle.y, flickerSize * 0.6, flickerSize, 0, 0, Math.PI * 2);
+              this.ctx.fill();
+              
+              // Inner bright core
+              this.ctx.fillStyle = `rgba(255, 255, 200, ${particle.life * 0.7})`;
+              this.ctx.beginPath();
+              this.ctx.arc(particle.x, particle.y, flickerSize * 0.3, 0, Math.PI * 2);
+              this.ctx.fill();
+              
+              this.ctx.shadowBlur = 0;
+            } else if (particle.type === 'ember') {
+              // Glowing ember
+              if (particle.glow) {
+                this.ctx.shadowBlur = 15;
+                this.ctx.shadowColor = 'rgba(255, 150, 0, 0.8)';
+              }
+              this.ctx.fillStyle = `${particle.color}, ${particle.life})`;
+              this.ctx.beginPath();
+              this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+              this.ctx.fill();
+              this.ctx.shadowBlur = 0;
+            } else if (particle.type === 'smoke') {
+              // Soft smoke
+              this.ctx.fillStyle = `${particle.color}, ${particle.life * 0.3})`;
+              this.ctx.beginPath();
+              this.ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+              this.ctx.fill();
+            }
+            return true;
+          }
+          return false;
+        });
+      }
+
+      drawHammer() {
+        if (!this.hammer) return;
+        
+        const h = this.hammer;
+        
+        this.ctx.save();
+        this.ctx.translate(h.x, h.y);
+        this.ctx.rotate(h.rotation);
+        
+        // Hammer handle
+        this.ctx.fillStyle = '#8B4513';
+        this.ctx.fillRect(-8, 0, 16, 120);
+        
+        // Hammer head
+        this.ctx.fillStyle = '#7f8c8d';
+        this.ctx.fillRect(-40, -30, 80, 35);
+        
+        // Hammer head shine
+        this.ctx.fillStyle = '#95a5a6';
+        this.ctx.fillRect(-35, -28, 30, 8);
+        
+        // Impact flash at bottom if hitting
+        if (h.phase > 1 && h.phase < 1.1) {
+          this.ctx.fillStyle = 'rgba(255, 255, 100, 0.8)';
+          this.ctx.beginPath();
+          this.ctx.arc(0, 130, 50, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+        
+        this.ctx.restore();
+      }
+
+      drawACWave() {
+        if (!this.acWave) return;
+        
+        const centerY = this.canvas.height / 2;
+        const amplitude = this.acWave.amplitude * (1 - this.acWave.phase / 10);
+        
+        // Draw AC waveform
+        this.ctx.strokeStyle = 'rgba(52, 152, 219, 0.6)';
+        this.ctx.lineWidth = 4;
+        this.ctx.beginPath();
+        
+        for (let x = 0; x < this.canvas.width; x += 5) {
+          const y = centerY + Math.sin(this.acWave.phase + x * 0.02) * amplitude;
+          if (x === 0) {
+            this.ctx.moveTo(x, y);
+          } else {
+            this.ctx.lineTo(x, y);
+          }
+        }
+        this.ctx.stroke();
+        
+        // Draw frequency lines
+        for (let i = 0; i < 5; i++) {
+          const alpha = 0.3 - (this.acWave.phase / 10) * 0.3;
+          this.ctx.strokeStyle = `rgba(100, 200, 255, ${alpha})`;
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          const offset = (this.acWave.phase * 50 + i * 100) % this.canvas.width;
+          this.ctx.moveTo(offset, 0);
+          this.ctx.lineTo(offset, this.canvas.height);
+          this.ctx.stroke();
+        }
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw animation effects first (background)
+        this.drawACWave();
+        this.drawCoil();
+        this.drawInductionField();
+        
+        // Draw domains with material-specific alignment speed
+        const mat = this.materials[this.currentMaterial];
+        let needsUpdate = false;
+        
+        this.domains.forEach(domain => {
+          const diff = domain.targetAngle - domain.angle;
+          const shortestAngle = Math.atan2(Math.sin(diff), Math.cos(diff));
+          
+          if (Math.abs(shortestAngle) > 0.01) {
+            // Apply material-specific alignment speed
+            domain.angle += shortestAngle * mat.alignmentSpeed;
+            needsUpdate = true;
+          } else {
+            domain.angle = domain.targetAngle;
+          }
+          
+          this.drawDomain(domain);
+        });
+        
+        // Draw animation effects on top
+        this.drawHeatParticles();
+        this.drawStrokeMagnet();
+        this.drawHammer();
+        
+        if (needsUpdate) {
+          this.updateAlignment();
+        } else {
+          this.animating = false;
+        }
+      }
+
+      animate() {
+        this.draw();
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    // ===== SIMULATION 3: Compass & Magnet =====
+    class CompassSimulation {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.setupCanvas();
+        
+        // Compass in center
+        this.compass = {
+          x: this.canvas.width / 2,
+          y: this.canvas.height / 2,
+          needleAngle: 0,
+          targetAngle: 0,
+          radius: 60
+        };
+        
+        // Bar magnet
+        this.magnet = {
+          x: this.canvas.width / 2 + 200,
+          y: this.canvas.height / 2,
+          width: 120,
+          height: 50,
+          angle: 0,
+          flipped: false,
+          dragging: false
+        };
+        
+        this.magnetStrength = 6;
+        this.showEarthField = true;
+        this.earthFieldAngle = 0; // Points North (upward)
+        this.dragOffset = { x: 0, y: 0 };
+        
+        this.setupEventListeners();
+        this.animate();
+      }
+
+      setupCanvas() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+      }
+
+      setupEventListeners() {
+        // Canvas interaction
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
+        this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
+
+        // Controls
+        document.getElementById('flipCompassMagnet').addEventListener('click', () => {
+          this.magnet.flipped = !this.magnet.flipped;
+          SoundFX.playWhoosh();
+          
+          showExplanationPopup(
+            "Magnet Poles Flipped! 🔄",
+            "<strong>What happened:</strong><br>The North and South poles of the bar magnet just switched positions!<br><br>" +
+            "<strong>Physics:</strong><br>The compass needle (which is itself a tiny magnet) always aligns so its <strong>North pole points TOWARD the South pole</strong> of nearby magnets.<br><br>" +
+            "<strong>Watch:</strong> The needle should rotate to point the opposite direction now!"
+          );
+        });
+
+        document.getElementById('rotateCompassMagnet').addEventListener('click', () => {
+          this.magnet.angle += Math.PI / 2;
+          if (this.magnet.angle >= Math.PI * 2) this.magnet.angle = 0;
+          SoundFX.playWhoosh();
+          
+          showExplanationPopup(
+            "Magnet Rotated! 🔄",
+            "<strong>What happened:</strong><br>The bar magnet just rotated 90 degrees!<br><br>" +
+            "<strong>Physics:</strong><br>The magnetic field lines now point in a different direction. The compass needle detects the <strong>direction</strong> of the total magnetic field at its location.<br><br>" +
+            "<strong>Watch:</strong> The needle adjusts to the new field direction!"
+          );
+        });
+
+        document.getElementById('resetCompass').addEventListener('click', () => {
+          this.magnet.x = this.canvas.width / 2 + 200;
+          this.magnet.y = this.canvas.height / 2;
+          this.magnet.angle = 0;
+          this.magnet.flipped = false;
+          SoundFX.playClick();
+          
+          showExplanationPopup(
+            "Reset to Starting Position 🎯",
+            "<strong>What happened:</strong><br>The magnet returned to its default position and orientation.<br><br>" +
+            "<strong>Try this:</strong><br>Drag the magnet close to the compass and watch the needle deflect from North!"
+          );
+        });
+
+        document.getElementById('showEarthField').addEventListener('change', (e) => {
+          this.showEarthField = e.target.checked;
+          
+          if (e.target.checked) {
+            showExplanationPopup(
+              "Earth's Magnetic Field ON 🌍",
+              "<strong>What you see:</strong><br>The green vertical lines represent Earth's magnetic field, which points North.<br><br>" +
+              "<strong>Physics:</strong><br>Earth acts like a giant bar magnet! Normally, compasses point North because they align with Earth's weak magnetic field (~0.5 gauss).<br><br>" +
+              "<strong>But:</strong> When a strong magnet is nearby, its field overpowers Earth's field and the needle points toward that magnet instead!"
+            );
+          } else {
+            showExplanationPopup(
+              "Earth's Field Hidden 🌍",
+              "<strong>What happened:</strong><br>The Earth's magnetic field visualization is now hidden.<br><br>" +
+              "<strong>Note:</strong> Earth's field is still being calculated - the needle will still have a slight preference to point North when the magnet is far away!"
+            );
+          }
+        });
+
+        const strengthSlider = document.getElementById('compassMagnetStrength');
+        strengthSlider.addEventListener('input', (e) => {
+          this.magnetStrength = parseFloat(e.target.value);
+          document.getElementById('compassMagnetStrengthValue').textContent = e.target.value;
+          
+          if (e.target.value >= 9) {
+            showExplanationPopup(
+              "Super Strong Magnet! 💪",
+              "<strong>Strength Level: " + e.target.value + "/10</strong><br><br>" +
+              "<strong>Physics:</strong><br>A very strong magnet (like neodymium rare-earth magnets) creates a powerful magnetic field that can influence the compass from far away.<br><br>" +
+              "<strong>Watch:</strong> The needle responds even when the magnet is distant!"
+            );
+          } else if (e.target.value <= 2) {
+            showExplanationPopup(
+              "Weak Magnet 🧲",
+              "<strong>Strength Level: " + e.target.value + "/10</strong><br><br>" +
+              "<strong>Physics:</strong><br>A weak magnet has a limited range. You'll need to bring it close to the compass to see the needle deflect from North.<br><br>" +
+              "<strong>Field Strength:</strong> Magnetic field strength decreases with the <em>inverse cube</em> of distance!"
+            );
+          }
+        });
+      }
+
+      getMousePos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      handleMouseDown(e) {
+        const pos = this.getMousePos(e);
+        const m = this.magnet;
+        
+        // Check if clicked on magnet
+        const dx = pos.x - (m.x + m.width / 2);
+        const dy = pos.y - (m.y + m.height / 2);
+        const cos = Math.cos(-m.angle);
+        const sin = Math.sin(-m.angle);
+        const localX = dx * cos - dy * sin;
+        const localY = dx * sin + dy * cos;
+        
+        if (Math.abs(localX) < m.width / 2 && Math.abs(localY) < m.height / 2) {
+          m.dragging = true;
+          this.dragOffset.x = pos.x - m.x;
+          this.dragOffset.y = pos.y - m.y;
+          this.canvas.style.cursor = 'grabbing';
+        }
+      }
+
+      handleMouseMove(e) {
+        const pos = this.getMousePos(e);
+        
+        if (this.magnet.dragging) {
+          this.magnet.x = pos.x - this.dragOffset.x;
+          this.magnet.y = pos.y - this.dragOffset.y;
+          
+          // Keep within bounds
+          this.magnet.x = Math.max(60, Math.min(this.canvas.width - 60, this.magnet.x));
+          this.magnet.y = Math.max(30, Math.min(this.canvas.height - 30, this.magnet.y));
+        } else {
+          // Check if hovering over magnet
+          const m = this.magnet;
+          const dx = pos.x - (m.x + m.width / 2);
+          const dy = pos.y - (m.y + m.height / 2);
+          const cos = Math.cos(-m.angle);
+          const sin = Math.sin(-m.angle);
+          const localX = dx * cos - dy * sin;
+          const localY = dx * sin + dy * cos;
+          
+          if (Math.abs(localX) < m.width / 2 && Math.abs(localY) < m.height / 2) {
+            this.canvas.style.cursor = 'grab';
+          } else {
+            this.canvas.style.cursor = 'default';
+          }
+        }
+      }
+
+      handleMouseUp() {
+        this.magnet.dragging = false;
+        this.canvas.style.cursor = 'default';
+      }
+
+      calculateMagneticField() {
+        // Calculate field at compass location from bar magnet
+        const m = this.magnet;
+        const centerX = m.x + m.width / 2;
+        const centerY = m.y + m.height / 2;
+        
+        // North and South pole positions based on magnet orientation and flip state
+        let northAngle = m.angle;
+        let southAngle = m.angle + Math.PI;
+        
+        if (m.flipped) {
+          // Swap poles
+          northAngle = m.angle + Math.PI;
+          southAngle = m.angle;
+        }
+        
+        const poleDistance = m.width * 0.35;
+        const northX = centerX + Math.cos(northAngle) * poleDistance;
+        const northY = centerY + Math.sin(northAngle) * poleDistance;
+        const southX = centerX + Math.cos(southAngle) * poleDistance;
+        const southY = centerY + Math.sin(southAngle) * poleDistance;
+        
+        // Field from north pole (points away from north pole)
+        const dnx = this.compass.x - northX;
+        const dny = this.compass.y - northY;
+        const dn = Math.sqrt(dnx * dnx + dny * dny) + 1;
+        const northFieldX = (dnx / (dn * dn * dn)) * this.magnetStrength * 50000;
+        const northFieldY = (dny / (dn * dn * dn)) * this.magnetStrength * 50000;
+        
+        // Field from south pole (points toward south pole)
+        const dsx = this.compass.x - southX;
+        const dsy = this.compass.y - southY;
+        const ds = Math.sqrt(dsx * dsx + dsy * dsy) + 1;
+        const southFieldX = -(dsx / (ds * ds * ds)) * this.magnetStrength * 50000;
+        const southFieldY = -(dsy / (ds * ds * ds)) * this.magnetStrength * 50000;
+        
+        // Total field from magnet
+        let totalFieldX = northFieldX + southFieldX;
+        let totalFieldY = northFieldY + southFieldY;
+        
+        // Add Earth's magnetic field (weak, pointing North/upward)
+        if (this.showEarthField) {
+          const earthFieldStrength = 0.5;
+          totalFieldX += Math.cos(this.earthFieldAngle - Math.PI / 2) * earthFieldStrength;
+          totalFieldY += Math.sin(this.earthFieldAngle - Math.PI / 2) * earthFieldStrength;
+        }
+        
+        // Calculate target angle for compass needle
+        // Needle's NORTH pole points in direction of field
+        this.compass.targetAngle = Math.atan2(totalFieldY, totalFieldX);
+        
+        // Update distance display
+        const distance = Math.round(Math.sqrt(
+          Math.pow(centerX - this.compass.x, 2) + 
+          Math.pow(centerY - this.compass.y, 2)
+        ));
+        document.getElementById('magnetDistance').textContent = distance;
+      }
+
+      updateNeedle() {
+        // Smooth rotation toward target angle
+        let diff = this.compass.targetAngle - this.compass.needleAngle;
+        
+        // Normalize angle difference to [-PI, PI]
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        
+        // Smooth rotation with damping
+        this.compass.needleAngle += diff * 0.15;
+        
+        // Normalize needle angle
+        while (this.compass.needleAngle > Math.PI) this.compass.needleAngle -= Math.PI * 2;
+        while (this.compass.needleAngle < -Math.PI) this.compass.needleAngle += Math.PI * 2;
+        
+        // Update angle display (convert to degrees)
+        const degrees = Math.round((this.compass.needleAngle * 180 / Math.PI + 360) % 360);
+        document.getElementById('needleAngle').textContent = degrees + '°';
+      }
+
+      drawEarthField() {
+        if (!this.showEarthField) return;
+        
+        // Draw subtle Earth field lines in background
+        this.ctx.strokeStyle = 'rgba(150, 200, 150, 0.15)';
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash([10, 10]);
+        
+        const spacing = 50;
+        for (let x = 0; x < this.canvas.width; x += spacing) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(x, this.canvas.height);
+          this.ctx.lineTo(x, 0);
+          this.ctx.stroke();
+          
+          // Draw arrow pointing north
+          this.ctx.fillStyle = 'rgba(150, 200, 150, 0.2)';
+          this.ctx.save();
+          this.ctx.translate(x, 30);
+          this.ctx.rotate(this.earthFieldAngle - Math.PI / 2);
+          this.ctx.beginPath();
+          this.ctx.moveTo(0, -8);
+          this.ctx.lineTo(-5, 3);
+          this.ctx.lineTo(5, 3);
+          this.ctx.closePath();
+          this.ctx.fill();
+          this.ctx.restore();
+        }
+        
+        this.ctx.setLineDash([]);
+        
+        // Label
+        this.ctx.fillStyle = 'rgba(100, 150, 100, 0.6)';
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText("Earth's Magnetic Field (North)", 10, 25);
+      }
+
+      drawCompass() {
+        const c = this.compass;
+        
+        // Compass housing - outer circle
+        this.ctx.fillStyle = '#ecf0f1';
+        this.ctx.strokeStyle = '#34495e';
+        this.ctx.lineWidth = 4;
+        this.ctx.beginPath();
+        this.ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        // Cardinal directions (N, E, S, W)
+        this.ctx.fillStyle = '#2c3e50';
+        this.ctx.font = 'bold 16px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        this.ctx.fillText('N', c.x, c.y - c.radius + 15);
+        this.ctx.fillText('E', c.x + c.radius - 15, c.y);
+        this.ctx.fillText('S', c.x, c.y + c.radius - 15);
+        this.ctx.fillText('W', c.x - c.radius + 15, c.y);
+        
+        // Draw tick marks
+        for (let i = 0; i < 360; i += 30) {
+          const angle = (i * Math.PI) / 180;
+          const x1 = c.x + Math.cos(angle) * (c.radius - 10);
+          const y1 = c.y + Math.sin(angle) * (c.radius - 10);
+          const x2 = c.x + Math.cos(angle) * (c.radius - 5);
+          const y2 = c.y + Math.sin(angle) * (c.radius - 5);
+          
+          this.ctx.strokeStyle = '#95a5a6';
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          this.ctx.moveTo(x1, y1);
+          this.ctx.lineTo(x2, y2);
+          this.ctx.stroke();
+        }
+        
+        // Compass needle pivot point
+        this.ctx.fillStyle = '#34495e';
+        this.ctx.beginPath();
+        this.ctx.arc(c.x, c.y, 5, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Draw needle (red = North end, white = South end)
+        this.ctx.save();
+        this.ctx.translate(c.x, c.y);
+        this.ctx.rotate(c.needleAngle);
+        
+        // North end (red) - points in direction of magnetic field
+        this.ctx.fillStyle = '#e74c3c';
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(-6, 8);
+        this.ctx.lineTo(6, 8);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        this.ctx.fillStyle = '#e74c3c';
+        this.ctx.fillRect(-3, 0, 6, 40);
+        
+        // South end (white/gray)
+        this.ctx.fillStyle = '#ecf0f1';
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, 0);
+        this.ctx.lineTo(-6, -8);
+        this.ctx.lineTo(6, -8);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        this.ctx.fillStyle = '#bdc3c7';
+        this.ctx.fillRect(-3, -40, 6, 40);
+        
+        // Outline
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -40);
+        this.ctx.lineTo(0, 40);
+        this.ctx.stroke();
+        
+        this.ctx.restore();
+        
+        // Shadow/glow effect when near magnet
+        const distance = Math.sqrt(
+          Math.pow(this.magnet.x + this.magnet.width / 2 - c.x, 2) + 
+          Math.pow(this.magnet.y + this.magnet.height / 2 - c.y, 2)
+        );
+        
+        if (distance < 150) {
+          const intensity = 1 - distance / 150;
+          this.ctx.strokeStyle = `rgba(231, 76, 60, ${intensity * 0.5})`;
+          this.ctx.lineWidth = 8;
+          this.ctx.beginPath();
+          this.ctx.arc(c.x, c.y, c.radius + 5, 0, Math.PI * 2);
+          this.ctx.stroke();
+        }
+      }
+
+      drawMagnet() {
+        const m = this.magnet;
+        
+        this.ctx.save();
+        
+        // Translate to magnet center and rotate
+        const centerX = m.x + m.width / 2;
+        const centerY = m.y + m.height / 2;
+        this.ctx.translate(centerX, centerY);
+        this.ctx.rotate(m.angle);
+        
+        // Determine colors based on flip state
+        let leftColor, rightColor, leftLabel, rightLabel;
+        if (m.flipped) {
+          leftColor = '#3498db'; // North on left
+          rightColor = '#e74c3c'; // South on right
+          leftLabel = 'N';
+          rightLabel = 'S';
+        } else {
+          leftColor = '#e74c3c'; // South on left
+          rightColor = '#3498db'; // North on right
+          leftLabel = 'S';
+          rightLabel = 'N';
+        }
+        
+        // Draw magnet halves
+        this.ctx.fillStyle = leftColor;
+        this.ctx.fillRect(-m.width / 2, -m.height / 2, m.width / 2, m.height);
+        
+        this.ctx.fillStyle = rightColor;
+        this.ctx.fillRect(0, -m.height / 2, m.width / 2, m.height);
+        
+        // Border
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(-m.width / 2, -m.height / 2, m.width, m.height);
+        
+        // Labels
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = 'bold 22px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(leftLabel, -m.width / 4, 0);
+        this.ctx.fillText(rightLabel, m.width / 4, 0);
+        
+        this.ctx.restore();
+        
+        // Draw field lines from magnet
+        this.drawMagnetFieldLines();
+      }
+
+      drawMagnetFieldLines() {
+        const m = this.magnet;
+        const centerX = m.x + m.width / 2;
+        const centerY = m.y + m.height / 2;
+        
+        // North and South pole positions
+        let northAngle = m.angle;
+        let southAngle = m.angle + Math.PI;
+        
+        if (m.flipped) {
+          northAngle = m.angle + Math.PI;
+          southAngle = m.angle;
+        }
+        
+        const poleDistance = m.width * 0.35;
+        const northX = centerX + Math.cos(northAngle) * poleDistance;
+        const northY = centerY + Math.sin(northAngle) * poleDistance;
+        const southX = centerX + Math.cos(southAngle) * poleDistance;
+        const southY = centerY + Math.sin(southAngle) * poleDistance;
+        
+        // Draw field lines emanating from magnet
+        const numLines = 8;
+        for (let i = 0; i < numLines; i++) {
+          const angle = (i / numLines) * Math.PI * 2;
+          const startX = northX + Math.cos(angle) * 15;
+          const startY = northY + Math.sin(angle) * 15;
+          
+          this.ctx.strokeStyle = 'rgba(52, 152, 219, 0.3)';
+          this.ctx.lineWidth = 2;
+          this.ctx.setLineDash([5, 5]);
+          
+          this.ctx.beginPath();
+          this.ctx.moveTo(startX, startY);
+          
+          // Draw curved field line
+          let x = startX;
+          let y = startY;
+          for (let step = 0; step < 30; step++) {
+            const dx = x - northX;
+            const dy = y - northY;
+            const dn = Math.sqrt(dx * dx + dy * dy) + 1;
+            const dsx = x - southX;
+            const dsy = y - southY;
+            const ds = Math.sqrt(dsx * dsx + dsy * dsy) + 1;
+            
+            const fx = dx / (dn * dn) - dsx / (ds * ds);
+            const fy = dy / (dn * dn) - dsy / (ds * ds);
+            const mag = Math.sqrt(fx * fx + fy * fy) + 0.01;
+            
+            x += (fx / mag) * 3;
+            y += (fy / mag) * 3;
+            
+            this.ctx.lineTo(x, y);
+            
+            if (x < 0 || x > this.canvas.width || y < 0 || y > this.canvas.height) break;
+          }
+          
+          this.ctx.stroke();
+        }
+        
+        this.ctx.setLineDash([]);
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.drawEarthField();
+        this.drawMagnet();
+        this.drawCompass();
+      }
+
+      animate() {
+        this.calculateMagneticField();
+        this.updateNeedle();
+        this.draw();
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    // ===== SIMULATION 4: Field Patterns =====
+    class FieldSimulation {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.setupCanvas();
+        
+        this.magnets = [];
+        this.showFieldLines = true;
+        this.density = 12;
+        this.magnetCount = 1;
+        this.draggingMagnet = null;
+        this.dragOffset = { x: 0, y: 0 };
+        
+        this.setupMagnets();
+        this.setupEventListeners();
+        this.animate();
+      }
+
+      setupCanvas() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+      }
+
+      setupMagnets() {
+        this.magnets = [];
+        const centerY = this.canvas.height / 2;
+        
+        if (this.magnetCount === 1) {
+          this.magnets.push({
+            x: this.canvas.width / 2 - 50,
+            y: centerY - 20,
+            width: 100,
+            height: 40,
+            angle: 0,
+            dragging: false
+          });
+        } else if (this.magnetCount === 2) {
+          this.magnets.push({
+            x: this.canvas.width / 3 - 50,
+            y: centerY - 20,
+            width: 100,
+            height: 40,
+            angle: 0,
+            dragging: false
+          });
+          this.magnets.push({
+            x: 2 * this.canvas.width / 3 - 50,
+            y: centerY - 20,
+            width: 100,
+            height: 40,
+            angle: Math.PI,
+            dragging: false
+          });
+        } else if (this.magnetCount === 3) {
+          this.magnets.push({
+            x: this.canvas.width / 4 - 40,
+            y: centerY - 20,
+            width: 80,
+            height: 40,
+            angle: 0,
+            dragging: false
+          });
+          this.magnets.push({
+            x: this.canvas.width / 2 - 40,
+            y: centerY - 20,
+            width: 80,
+            height: 40,
+            angle: 0,
+            dragging: false
+          });
+          this.magnets.push({
+            x: 3 * this.canvas.width / 4 - 40,
+            y: centerY - 20,
+            width: 80,
+            height: 40,
+            angle: 0,
+            dragging: false
+          });
+        }
+      }
+
+      setupEventListeners() {
+        // Canvas drag events
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
+        this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
+        this.canvas.addEventListener('dblclick', (e) => this.handleDoubleClick(e));
+
+        document.getElementById('magnetConfig').addEventListener('change', (e) => {
+          this.magnetCount = parseInt(e.target.value);
+          this.setupMagnets();
+          this.draw();
+        });
+
+        document.getElementById('showFieldLines').addEventListener('change', (e) => {
+          this.showFieldLines = e.target.checked;
+          this.draw();
+        });
+
+        const densitySlider = document.getElementById('fieldDensity');
+        densitySlider.addEventListener('input', (e) => {
+          this.density = parseInt(e.target.value);
+          document.getElementById('fieldDensityValue').textContent = e.target.value;
+          this.draw();
+        });
+      }
+
+      getMousePos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      handleMouseDown(e) {
+        const pos = this.getMousePos(e);
+        
+        for (let i = this.magnets.length - 1; i >= 0; i--) {
+          const m = this.magnets[i];
+          if (pos.x >= m.x && pos.x <= m.x + m.width &&
+              pos.y >= m.y && pos.y <= m.y + m.height) {
+            this.draggingMagnet = i;
+            m.dragging = true;
+            this.dragOffset.x = pos.x - m.x;
+            this.dragOffset.y = pos.y - m.y;
+            this.canvas.style.cursor = 'grabbing';
+            break;
+          }
+        }
+      }
+
+      handleMouseMove(e) {
+        const pos = this.getMousePos(e);
+        
+        if (this.draggingMagnet !== null) {
+          const m = this.magnets[this.draggingMagnet];
+          m.x = pos.x - this.dragOffset.x;
+          m.y = pos.y - this.dragOffset.y;
+          
+          // Keep magnet within canvas bounds
+          m.x = Math.max(10, Math.min(this.canvas.width - m.width - 10, m.x));
+          m.y = Math.max(10, Math.min(this.canvas.height - m.height - 10, m.y));
+        } else {
+          // Check if mouse is over any magnet to show grab cursor
+          let overMagnet = false;
+          for (let i = 0; i < this.magnets.length; i++) {
+            const m = this.magnets[i];
+            if (pos.x >= m.x && pos.x <= m.x + m.width &&
+                pos.y >= m.y && pos.y <= m.y + m.height) {
+              overMagnet = true;
+              break;
+            }
+          }
+          this.canvas.style.cursor = overMagnet ? 'grab' : 'default';
+        }
+      }
+
+      handleMouseUp() {
+        if (this.draggingMagnet !== null) {
+          this.magnets[this.draggingMagnet].dragging = false;
+          this.draggingMagnet = null;
+          this.canvas.style.cursor = 'grab';
+        }
+      }
+
+      handleDoubleClick(e) {
+        const pos = this.getMousePos(e);
+        
+        for (let i = this.magnets.length - 1; i >= 0; i--) {
+          const m = this.magnets[i];
+          if (pos.x >= m.x && pos.x <= m.x + m.width &&
+              pos.y >= m.y && pos.y <= m.y + m.height) {
+            // Flip the magnet by rotating 180 degrees
+            m.angle = (m.angle + Math.PI) % (Math.PI * 2);
+            SoundFX.playWhoosh();
+            break;
+          }
+        }
+      }
+
+      getFieldAt(x, y) {
+        let fx = 0;
+        let fy = 0;
+        
+        this.magnets.forEach(magnet => {
+          // Calculate pole positions based on magnet angle (rotation)
+          const centerX = magnet.x + magnet.width / 2;
+          const centerY = magnet.y + magnet.height / 2;
+          
+          // North pole at 75% from left when angle is 0
+          const northOffsetX = Math.cos(magnet.angle) * magnet.width * 0.25;
+          const northOffsetY = Math.sin(magnet.angle) * magnet.width * 0.25;
+          const northX = centerX + northOffsetX;
+          const northY = centerY + northOffsetY;
+          
+          // South pole at 25% from left when angle is 0
+          const southOffsetX = Math.cos(magnet.angle) * magnet.width * -0.25;
+          const southOffsetY = Math.sin(magnet.angle) * magnet.width * -0.25;
+          const southX = centerX + southOffsetX;
+          const southY = centerY + southOffsetY;
+          
+          const dnx = x - northX;
+          const dny = y - northY;
+          const dn = Math.sqrt(dnx * dnx + dny * dny) + 1;
+          
+          fx += dnx / (dn * dn * dn);
+          fy += dny / (dn * dn * dn);
+          
+          const dsx = x - southX;
+          const dsy = y - southY;
+          const ds = Math.sqrt(dsx * dsx + dsy * dsy) + 1;
+          
+          fx -= dsx / (ds * ds * ds);
+          fy -= dsy / (ds * ds * ds);
+        });
+        
+        return { x: fx, y: fy };
+      }
+
+      drawFieldLine(startX, startY, forward = true) {
+        const points = [];
+        let x = startX;
+        let y = startY;
+        const stepSize = 3;
+        const maxSteps = 500;
+        
+        for (let step = 0; step < maxSteps; step++) {
+          points.push({ x, y });
+          
+          const field = this.getFieldAt(x, y);
+          const magnitude = Math.sqrt(field.x * field.x + field.y * field.y);
+          
+          if (magnitude < 0.0001) break;
+          
+          const dx = (forward ? field.x : -field.x) / magnitude * stepSize;
+          const dy = (forward ? field.y : -field.y) / magnitude * stepSize;
+          
+          x += dx;
+          y += dy;
+          
+          // Check if line reaches any magnet's SOUTH pole (complete loop)
+          let hitSouthPole = false;
+          this.magnets.forEach(magnet => {
+            const centerX = magnet.x + magnet.width / 2;
+            const centerY = magnet.y + magnet.height / 2;
+            const southOffsetX = Math.cos(magnet.angle) * magnet.width * -0.25;
+            const southOffsetY = Math.sin(magnet.angle) * magnet.width * -0.25;
+            const southX = centerX + southOffsetX;
+            const southY = centerY + southOffsetY;
+            const distToSouth = Math.sqrt((x - southX) * (x - southX) + (y - southY) * (y - southY));
+            
+            if (distToSouth < 20) {
+              hitSouthPole = true;
+              // Add final point at south pole to complete loop
+              points.push({ x: southX, y: southY });
+            }
+          });
+          
+          if (hitSouthPole) break;
+          
+          // Stop if goes off canvas
+          if (x < -50 || x > this.canvas.width + 50 || y < -50 || y > this.canvas.height + 50) break;
+        }
+        
+        if (points.length > 1) {
+          // Draw gradient line - stronger near poles, weaker in middle
+          for (let i = 0; i < points.length - 1; i++) {
+            const progress = i / points.length;
+            const alpha = 0.4 + Math.sin(progress * Math.PI) * 0.4;
+            this.ctx.strokeStyle = `rgba(52, 152, 219, ${alpha})`;
+            this.ctx.lineWidth = 2;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(points[i].x, points[i].y);
+            this.ctx.lineTo(points[i + 1].x, points[i + 1].y);
+            this.ctx.stroke();
+            
+            // Draw arrow heads along the line to show direction
+            if (i % 20 === 0 && i > 0 && i < points.length - 1) {
+              const dx = points[i + 1].x - points[i].x;
+              const dy = points[i + 1].y - points[i].y;
+              const angle = Math.atan2(dy, dx);
+              
+              this.ctx.save();
+              this.ctx.translate(points[i].x, points[i].y);
+              this.ctx.rotate(angle);
+              this.ctx.fillStyle = `rgba(52, 152, 219, ${alpha})`;
+              this.ctx.beginPath();
+              this.ctx.moveTo(6, 0);
+              this.ctx.lineTo(-3, -3);
+              this.ctx.lineTo(-3, 3);
+              this.ctx.closePath();
+              this.ctx.fill();
+              this.ctx.restore();
+            }
+          }
+        }
+      }
+
+      drawMagnet(magnet) {
+        this.ctx.save();
+        
+        // Translate to magnet center and rotate
+        const centerX = magnet.x + magnet.width / 2;
+        const centerY = magnet.y + magnet.height / 2;
+        this.ctx.translate(centerX, centerY);
+        this.ctx.rotate(magnet.angle);
+        
+        // Draw magnet centered at origin (North on right, South on left)
+        this.ctx.fillStyle = '#e74c3c'; // South (red) on left
+        this.ctx.fillRect(-magnet.width / 2, -magnet.height / 2, magnet.width / 2, magnet.height);
+        
+        this.ctx.fillStyle = '#3498db'; // North (blue) on right
+        this.ctx.fillRect(0, -magnet.height / 2, magnet.width / 2, magnet.height);
+        
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(-magnet.width / 2, -magnet.height / 2, magnet.width, magnet.height);
+        
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = 'bold 18px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        this.ctx.fillText('S', -magnet.width / 4, 0);
+        this.ctx.fillText('N', magnet.width / 4, 0);
+        
+        this.ctx.restore();
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        if (this.showFieldLines) {
+          this.ctx.strokeStyle = 'rgba(52, 152, 219, 0.6)';
+          this.ctx.lineWidth = 1.5;
+          
+          this.magnets.forEach(magnet => {
+            const centerX = magnet.x + magnet.width / 2;
+            const centerY = magnet.y + magnet.height / 2;
+            const northOffsetX = Math.cos(magnet.angle) * magnet.width * 0.25;
+            const northOffsetY = Math.sin(magnet.angle) * magnet.width * 0.25;
+            const northX = centerX + northOffsetX;
+            const northY = centerY + northOffsetY;
+            
+            for (let i = 0; i < this.density; i++) {
+              const angle = (i / this.density) * Math.PI * 2;
+              const startX = northX + Math.cos(angle) * 25;
+              const startY = northY + Math.sin(angle) * 25;
+              this.drawFieldLine(startX, startY, true);
+            }
+          });
+        }
+        
+        this.magnets.forEach(magnet => this.drawMagnet(magnet));
+      }
+
+      animate() {
+        this.draw();
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    // ===== SIMULATION 5: Electromagnet =====
+    class ElectromagnetSimulation {
+      constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.setupCanvas();
+        
+        // Circuit state - switch controls current
+        this.switchClosed = false; // Switch is OPEN by default
+        this.coilTurns = 25;
+        this.voltage = 4.5; // 3×AA batteries
+        
+        // Current animation (only flows when switch is closed)
+        this.currentFlow = 0;
+        
+        // Component positions (realistic classroom setup)
+        this.battery = { x: 50, y: 50, width: 50, height: 120 };
+        this.switchPos = { x: 150, y: 80, clickRadius: 30 };
+        this.nail = { x: 400, y: 50, width: 30, height: 200, dragging: false };
+        this.coilRegion = { x: 385, y: 110, width: 60, height: 120 };
+        
+        // Paper clips on table below nail
+        this.paperClips = [];
+        this.initPaperClips();
+        
+        // Drag state
+        this.draggingClip = null;
+        this.draggingNail = false;
+        this.dragOffset = { x: 0, y: 0 };
+        
+        this.setupEventListeners();
+        this.animate();
+      }
+
+      setupCanvas() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+      }
+
+      initPaperClips() {
+        // 8 paper clips scattered on table below nail pointed tip
+        const tableY = 340;
+        const centerX = this.nail.x + this.nail.width / 2;
+        
+        for (let i = 0; i < 8; i++) {
+          const offsetX = (i % 4) * 25 - 37.5;
+          const offsetY = Math.floor(i / 4) * 20;
+          
+          this.paperClips.push({
+            id: i,
+            x: centerX + offsetX,
+            y: tableY + offsetY,
+            restX: centerX + offsetX,
+            restY: tableY + offsetY,
+            vx: 0,
+            vy: 0,
+            attached: false,
+            dragging: false,
+            angle: (Math.random() - 0.5) * 0.4,
+            length: 18
+          });
+        }
+      }
+
+      setupEventListeners() {
+        // Canvas click for switch
+        this.canvas.addEventListener('click', (e) => this.handleCanvasClick(e));
+        
+        // Canvas drag for paper clips
+        this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+        this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
+        this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
+
+        // Control sliders
+        document.getElementById('coilTurns').addEventListener('input', (e) => {
+          this.coilTurns = parseInt(e.target.value);
+          document.getElementById('coilTurnsValue').textContent = e.target.value;
+        });
+
+        document.getElementById('batteryVoltage').addEventListener('input', (e) => {
+          this.voltage = parseFloat(e.target.value);
+          document.getElementById('batteryVoltageValue').textContent = e.target.value + 'V';
+        });
+
+        // Button controls (removed reverse current - not needed for basic setup)
+        document.getElementById('togglePower').addEventListener('click', () => {
+          this.switchClosed = !this.switchClosed;
+          this.updateUI();
+          SoundFX.playClick();
+          
+          if (this.switchClosed) {
+            showExplanationPopup(
+              "⚡ Circuit Closed - Current Flows!",
+              "<strong>What's happening:</strong><br>The switch is now CLOSED, completing the circuit. Electric current flows from battery → switch → coil → back to battery.<br><br>" +
+              "<strong>Ampère's Law:</strong><br>Moving electric charges (current) create a magnetic field. Each coil loop adds to the total field!<br><br>" +
+              "<strong>The Iron Nail:</strong><br>The nail's magnetic domains align with the field. Iron amplifies the field ~1000×. The nail becomes a TEMPORARY magnet!<br><br>" +
+              "<strong>Result:</strong> Paper clips near the nail will be attracted and stick to it!"
+            );
+          } else {
+            showExplanationPopup(
+              "🔌 Circuit Open - No Current",
+              "<strong>What's happening:</strong><br>The switch is now OPEN, breaking the circuit. No current can flow.<br><br>" +
+              "<strong>No Current = No Field:</strong><br>Without moving charges, there's no magnetic field around the wire.<br><br>" +
+              "<strong>The Iron Nail:</strong><br>The nail's domains immediately randomize. The nail is NO LONGER magnetic - it's just plain iron again.<br><br>" +
+              "<strong>Watch:</strong> Paper clips lose their magnetic attraction and fall due to gravity!"
+            );
+          }
+        });
+
+        document.getElementById('reverseCurrent').addEventListener('click', () => {
+          // Not needed for basic classroom demo - removed functionality
+          showExplanationPopup(
+            "ℹ️ Simplified Classroom Setup",
+            "<strong>Note:</strong> This is a basic electromagnet demonstration focused on ON/OFF behavior.<br><br>" +
+            "Reversing current direction would swap the North and South poles, but doesn't affect whether paper clips are attracted.<br><br>" +
+            "Try adjusting <strong>coil turns</strong> and <strong>voltage</strong> instead to see how they affect magnetic strength!"
+          );
+        });
+
+        document.getElementById('resetElectromagnet').addEventListener('click', () => {
+          this.switchClosed = false;
+          this.coilTurns = 25;
+          this.voltage = 4.5;
+          
+          document.getElementById('coilTurns').value = 25;
+          document.getElementById('coilTurnsValue').textContent = '25';
+          document.getElementById('batteryVoltage').value = 4.5;
+          document.getElementById('batteryVoltageValue').textContent = '4.5V';
+          
+          // Reset paper clips to table
+          this.paperClips.forEach(clip => {
+            clip.x = clip.restX;
+            clip.y = clip.restY;
+            clip.vx = 0;
+            clip.vy = 0;
+            clip.attached = false;
+            clip.angle = (Math.random() - 0.5) * 0.4;
+          });
+          
+          this.updateUI();
+          SoundFX.playClick();
+        });
+      }
+
+      handleCanvasClick(e) {
+        const pos = this.getMousePos(e);
+        const s = this.switchPos;
+        
+        // Check if clicked on switch
+        const dx = pos.x - s.x;
+        const dy = pos.y - s.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < s.clickRadius) {
+          this.switchClosed = !this.switchClosed;
+          this.updateUI();
+          SoundFX.playClick();
+        }
+      }
+
+      handleMouseDown(e) {
+        const pos = this.getMousePos(e);
+        
+        // Check if clicking on nail first
+        const n = this.nail;
+        if (pos.x >= n.x && pos.x <= n.x + n.width &&
+            pos.y >= n.y && pos.y <= n.y + n.height) {
+          this.draggingNail = true;
+          n.dragging = true;
+          this.dragOffset.x = pos.x - n.x;
+          this.dragOffset.y = pos.y - n.y;
+          this.canvas.style.cursor = 'grabbing';
+          
+          // Detach all paper clips when nail moves
+          this.paperClips.forEach(clip => {
+            if (clip.attached) {
+              clip.attached = false;
+              clip.vx = (Math.random() - 0.5) * 3;
+              clip.vy = 0;
+            }
+          });
+          return;
+        }
+        
+        // Check if clicking on a paper clip
+        for (let i = this.paperClips.length - 1; i >= 0; i--) {
+          const clip = this.paperClips[i];
+          const dx = pos.x - clip.x;
+          const dy = pos.y - clip.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < 15) {
+            this.draggingClip = clip;
+            clip.dragging = true;
+            clip.attached = false;
+            this.dragOffset.x = dx;
+            this.dragOffset.y = dy;
+            this.canvas.style.cursor = 'grabbing';
+            break;
+          }
+        }
+      }
+
+      handleMouseMove(e) {
+        const pos = this.getMousePos(e);
+        
+        if (this.draggingNail) {
+          const n = this.nail;
+          n.x = pos.x - this.dragOffset.x;
+          n.y = pos.y - this.dragOffset.y;
+          
+          // Keep nail within bounds
+          n.x = Math.max(10, Math.min(this.canvas.width - n.width - 10, n.x));
+          n.y = Math.max(10, Math.min(250, n.y));
+          
+          // Update coil position to follow nail
+          this.coilRegion.x = n.x - 15;
+          this.coilRegion.y = n.y + 60;
+        } else if (this.draggingClip) {
+          this.draggingClip.x = pos.x - this.dragOffset.x;
+          this.draggingClip.y = pos.y - this.dragOffset.y;
+          this.draggingClip.vx = 0;
+          this.draggingClip.vy = 0;
+        } else {
+          // Show grab cursor when hovering over nail or clips
+          const n = this.nail;
+          let overNail = pos.x >= n.x && pos.x <= n.x + n.width &&
+                         pos.y >= n.y && pos.y <= n.y + n.height;
+          
+          if (!overNail) {
+            for (const clip of this.paperClips) {
+              const dx = pos.x - clip.x;
+              const dy = pos.y - clip.y;
+              if (Math.sqrt(dx * dx + dy * dy) < 15) {
+                overNail = true;
+                break;
+              }
+            }
+          }
+          this.canvas.style.cursor = overNail ? 'grab' : 'default';
+        }
+      }
+
+      handleMouseUp() {
+        if (this.draggingNail) {
+          this.nail.dragging = false;
+          this.draggingNail = false;
+        }
+        if (this.draggingClip) {
+          this.draggingClip.dragging = false;
+          this.draggingClip = null;
+        }
+        this.canvas.style.cursor = 'default';
+      }
+
+      getMousePos(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      updateUI() {
+        document.getElementById('togglePower').textContent = 
+          this.switchClosed ? 'Power: ON' : 'Power: OFF';
+        document.getElementById('powerStatus').textContent = 
+          this.switchClosed ? 'ON' : 'OFF';
+        document.getElementById('fieldStrength').textContent = 
+          this.switchClosed ? Math.round(this.getMagneticStrength()) : 0;
+      }
+
+      getMagneticStrength() {
+        // Magnetic field strength ∝ current × number of turns
+        // Current ∝ voltage (Ohm's law, assuming constant resistance)
+        const current = this.voltage / 2; // Simplified model
+        return current * this.coilTurns;
+      }
+
+      getMaxClipsLifted() {
+        // Stronger electromagnet lifts more clips
+        const strength = this.getMagneticStrength();
+        
+        // Thresholds based on realistic electromagnet behavior
+        if (strength < 20) return 1;
+        if (strength < 40) return 2;
+        if (strength < 60) return 3;
+        if (strength < 80) return 4;
+        if (strength < 100) return 5;
+        if (strength < 130) return 6;
+        if (strength < 160) return 7;
+        if (strength < 200) return 8;
+        return 10; // Max all clips
+      }
+
+      updatePaperClips() {
+        // Nail tip is at BOTTOM now (pointed end attracts clips)
+        const nailTipX = this.nail.x + this.nail.width / 2;
+        const nailTipY = this.nail.y + this.nail.height; // Bottom = pointed tip
+        const maxClips = this.getMaxClipsLifted();
+        
+        // Count already attached clips
+        let attachedCount = 0;
+        this.paperClips.forEach(clip => {
+          if (clip.attached) attachedCount++;
+        });
+        
+        this.paperClips.forEach((clip, index) => {
+          if (clip.dragging) return; // User is dragging this clip
+          
+          const dx = nailTipX - clip.x;
+          const dy = nailTipY - clip.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          
+          // Only magnetized if switch is CLOSED
+          const nailIsMagnetized = this.switchClosed;
+          
+          if (nailIsMagnetized && !clip.attached && distance < 100) {
+            // Check if we can attach more clips
+            if (attachedCount < maxClips) {
+              // Attraction force - pulls clip toward nail tip
+              const forceMagnitude = (100 - distance) / 100;
+              clip.vx += (dx / distance) * forceMagnitude * 2.5;
+              clip.vy += (dy / distance) * forceMagnitude * 2.5;
+              
+              // Snap to nail if very close
+              if (distance < 15) {
+                clip.attached = true;
+                attachedCount++;
+                
+                // Stack position (clips hang from pointed tip)
+                const stackIndex = attachedCount - 1;
+                clip.x = nailTipX - 3 + (stackIndex % 2) * 6;
+                clip.y = nailTipY + 5 + Math.floor(stackIndex / 2) * 14;
+                clip.angle = 0;
+                clip.vx = 0;
+                clip.vy = 0;
+                
+                SoundFX.playMagnetSnap();
+              }
+            }
+          } else if (!nailIsMagnetized && clip.attached) {
+            // Switch is OPEN - nail loses magnetism immediately!
+            clip.attached = false;
+            clip.vx = (Math.random() - 0.5) * 3;
+            clip.vy = 0;
+          }
+          
+          // Physics for non-attached clips
+          if (!clip.attached) {
+            // Gravity
+            clip.vy += 0.5;
+            
+            // Apply velocity
+            clip.x += clip.vx;
+            clip.y += clip.vy;
+            
+            // Rotation while falling
+            clip.angle += clip.vx * 0.05;
+            
+            // Friction
+            clip.vx *= 0.95;
+            
+            // Bounce on table (y = 370)
+            if (clip.y > 370) {
+              clip.y = 370;
+              clip.vy *= -0.3;
+              clip.vx *= 0.7;
+              
+              // Stop if slow enough
+              if (Math.abs(clip.vy) < 0.5) {
+                clip.vy = 0;
+                clip.vx = 0;
+              }
+            }
+            
+            // Keep on canvas
+            if (clip.x < 0) clip.x = 0;
+            if (clip.x > this.canvas.width) clip.x = this.canvas.width;
+          }
+        });
+        
+        // Update display
+        document.getElementById('clipsAttached').textContent = 
+          `${attachedCount}/${maxClips}`;
+      }
+
+      drawBattery() {
+        const b = this.battery;
+        
+        // AA battery pack (3 batteries = 4.5V typical)
+        this.ctx.fillStyle = '#2c3e50';
+        this.ctx.fillRect(b.x, b.y, b.width, b.height);
+        
+        // Positive terminal (top - red)
+        this.ctx.fillStyle = '#e74c3c';
+        this.ctx.fillRect(b.x + 15, b.y - 12, 20, 12);
+        
+        // Negative terminal (bottom - black)
+        this.ctx.fillStyle = '#34495e';
+        this.ctx.fillRect(b.x + 15, b.y + b.height, 20, 12);
+        
+        // Battery markings
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = 'bold 20px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('+', b.x + 25, b.y + 15);
+        this.ctx.fillText('−', b.x + 25, b.y + b.height - 10);
+        
+        // Voltage label
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.fillText(this.voltage + 'V', b.x + 25, b.y + b.height / 2);
+        
+        // Battery outline
+        this.ctx.strokeStyle = '#7f8c8d';
+        this.ctx.lineWidth = 3;
+        this.ctx.strokeRect(b.x, b.y, b.width, b.height);
+      }
+
+      drawSwitch() {
+        const s = this.switchPos;
+        
+        // Switch base (two terminals)
+        this.ctx.fillStyle = '#7f8c8d';
+        this.ctx.beginPath();
+        this.ctx.arc(s.x - 20, s.y, 8, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.beginPath();
+        this.ctx.arc(s.x + 20, s.y, 8, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Switch lever
+        this.ctx.strokeStyle = this.switchClosed ? '#27ae60' : '#e74c3c';
+        this.ctx.lineWidth = 6;
+        this.ctx.lineCap = 'round';
+        this.ctx.beginPath();
+        this.ctx.moveTo(s.x - 20, s.y);
+        
+        if (this.switchClosed) {
+          // Horizontal = closed = current flows
+          this.ctx.lineTo(s.x + 20, s.y);
+        } else {
+          // Angled up = open = no current
+          this.ctx.lineTo(s.x + 15, s.y - 20);
+        }
+        this.ctx.stroke();
+        
+        // Label
+        this.ctx.fillStyle = '#2c3e50';
+        this.ctx.font = 'bold 14px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(
+          this.switchClosed ? 'ON' : 'OFF',
+          s.x,
+          s.y + 30
+        );
+        
+        // Click hint
+        this.ctx.font = '11px Arial';
+        this.ctx.fillStyle = '#7f8c8d';
+        this.ctx.fillText('(click)', s.x, s.y + 45);
+      }
+
+      drawWires() {
+        // Red copper wire
+        this.ctx.strokeStyle = '#c0392b';
+        this.ctx.lineWidth = 5;
+        
+        // Battery + to switch left terminal
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.battery.x + 25, this.battery.y - 12);
+        this.ctx.lineTo(this.battery.x + 25, this.switchPos.y - 30);
+        this.ctx.lineTo(this.switchPos.x - 20, this.switchPos.y - 30);
+        this.ctx.lineTo(this.switchPos.x - 20, this.switchPos.y);
+        this.ctx.stroke();
+        
+        // Switch right terminal to coil
+        // Show current flow animation ONLY when switch is closed
+        if (this.switchClosed) {
+          this.ctx.setLineDash([12, 8]);
+          this.ctx.lineDashOffset = -this.currentFlow;
+        }
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.switchPos.x + 20, this.switchPos.y);
+        this.ctx.lineTo(this.switchPos.x + 80, this.switchPos.y);
+        this.ctx.lineTo(this.switchPos.x + 80, this.coilRegion.y);
+        this.ctx.lineTo(this.nail.x + this.nail.width / 2, this.coilRegion.y);
+        this.ctx.stroke();
+        
+        // Coil to battery -
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.nail.x + this.nail.width / 2, this.coilRegion.y + this.coilRegion.height);
+        this.ctx.lineTo(this.nail.x + this.nail.width / 2, 350);
+        this.ctx.lineTo(this.battery.x + 25, 350);
+        this.ctx.lineTo(this.battery.x + 25, this.battery.y + this.battery.height + 12);
+        this.ctx.stroke();
+        
+        this.ctx.setLineDash([]);
+      }
+
+      drawCoil() {
+        const numLoops = Math.max(5, Math.floor(this.coilTurns / 5));
+        const loopHeight = this.coilRegion.height / numLoops;
+        
+        // Copper wire wrapped around nail
+        this.ctx.strokeStyle = this.switchClosed ? '#e67e22' : '#95a5a6';
+        this.ctx.lineWidth = 4;
+        
+        for (let i = 0; i < numLoops; i++) {
+          const y = this.coilRegion.y + i * loopHeight + loopHeight / 2;
+          
+          // Glow effect when powered
+          if (this.switchClosed) {
+            this.ctx.shadowColor = '#f39c12';
+            this.ctx.shadowBlur = 10;
+          }
+          
+          // Draw coil loop (ellipse around nail)
+          this.ctx.beginPath();
+          this.ctx.ellipse(
+            this.nail.x + this.nail.width / 2,
+            y,
+            this.coilRegion.width / 2,
+            loopHeight * 0.4,
+            0, 0, Math.PI * 2
+          );
+          this.ctx.stroke();
+          
+          this.ctx.shadowBlur = 0;
+        }
+      }
+
+      drawNail() {
+        const n = this.nail;
+        
+        // Iron nail (flat head at top, pointed tip at bottom)
+        // Nail color changes when magnetized
+        if (this.switchClosed) {
+          // Magnetized - subtle blue glow at pointed tip
+          this.ctx.shadowColor = '#3498db';
+          this.ctx.shadowBlur = 25;
+        }
+        
+        // Nail body (gray iron)
+        this.ctx.fillStyle = this.switchClosed ? '#95a5a6' : '#7f8c8d';
+        
+        // Nail head (flat top)
+        this.ctx.beginPath();
+        this.ctx.arc(n.x + n.width / 2, n.y + 15, 18, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Nail shaft
+        this.ctx.fillRect(n.x, n.y + 15, n.width, n.height - 40);
+        
+        // Pointed tip at bottom
+        this.ctx.beginPath();
+        this.ctx.moveTo(n.x + n.width / 2, n.y + n.height);
+        this.ctx.lineTo(n.x, n.y + n.height - 25);
+        this.ctx.lineTo(n.x + n.width, n.y + n.height - 25);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        this.ctx.shadowBlur = 0;
+        
+        // Outline - head
+        this.ctx.strokeStyle = '#2c3e50';
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(n.x + n.width / 2, n.y + 15, 18, 0, Math.PI * 2);
+        this.ctx.stroke();
+        
+        // Outline - left side
+        this.ctx.beginPath();
+        this.ctx.moveTo(n.x, n.y + 15);
+        this.ctx.lineTo(n.x, n.y + n.height - 25);
+        this.ctx.lineTo(n.x + n.width / 2, n.y + n.height);
+        this.ctx.stroke();
+        
+        // Outline - right side
+        this.ctx.beginPath();
+        this.ctx.moveTo(n.x + n.width, n.y + 15);
+        this.ctx.lineTo(n.x + n.width, n.y + n.height - 25);
+        this.ctx.lineTo(n.x + n.width / 2, n.y + n.height);
+        this.ctx.stroke();
+        
+        // Label when magnetized
+        if (this.switchClosed) {
+          this.ctx.fillStyle = '#2c3e50';
+          this.ctx.font = 'bold 12px Arial';
+          this.ctx.textAlign = 'left';
+          this.ctx.fillText('magnetized', n.x + 40, n.y + 100);
+          
+          // Arrow pointing to tip
+          this.ctx.strokeStyle = '#e74c3c';
+          this.ctx.lineWidth = 2;
+          this.ctx.beginPath();
+          this.ctx.moveTo(n.x + 40, n.y + n.height - 10);
+          this.ctx.lineTo(n.x + 20, n.y + n.height - 10);
+          this.ctx.stroke();
+          
+          // Arrow head
+          this.ctx.fillStyle = '#e74c3c';
+          this.ctx.beginPath();
+          this.ctx.moveTo(n.x + 20, n.y + n.height - 10);
+          this.ctx.lineTo(n.x + 27, n.y + n.height - 14);
+          this.ctx.lineTo(n.x + 27, n.y + n.height - 6);
+          this.ctx.closePath();
+          this.ctx.fill();
+        }
+      }
+
+      drawTable() {
+        // Wooden table surface
+        this.ctx.fillStyle = '#d4a574';
+        this.ctx.fillRect(0, 370, this.canvas.width, 30);
+        
+        this.ctx.strokeStyle = '#8B6F47';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(0, 370, this.canvas.width, 30);
+      }
+
+      drawPaperClip(clip) {
+        this.ctx.save();
+        this.ctx.translate(clip.x, clip.y);
+        this.ctx.rotate(clip.angle);
+        
+        // Realistic paper clip shape
+        this.ctx.strokeStyle = clip.attached ? '#bdc3c7' : '#95a5a6';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.lineCap = 'round';
+        
+        // Outer loop
+        this.ctx.beginPath();
+        this.ctx.arc(0, -4, 5, Math.PI * 0.8, Math.PI * 2.2);
+        this.ctx.stroke();
+        
+        // Inner loop
+        this.ctx.beginPath();
+        this.ctx.arc(0, 4, 4, Math.PI * 1.2, Math.PI * -0.2, true);
+        this.ctx.stroke();
+        
+        // Main wire body
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -9);
+        this.ctx.lineTo(0, 8);
+        this.ctx.stroke();
+        
+        this.ctx.restore();
+      }
+
+      draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw table first (background)
+        this.drawTable();
+        
+        // Draw circuit components
+        this.drawBattery();
+        this.drawSwitch();
+        this.drawWires();
+        
+        // Draw electromagnet
+        this.drawNail();
+        this.drawCoil();
+        
+        // Draw paper clips (foreground)
+        this.paperClips.forEach(clip => this.drawPaperClip(clip));
+        
+        // Animate current flow
+        if (this.switchClosed) {
+          this.currentFlow += 3;
+        }
+      }
+
+      animate() {
+        this.updatePaperClips();
+        this.draw();
+        requestAnimationFrame(() => this.animate());
+      }
+    }
+
+    // ===== Initialize All Simulations =====
+    window.addEventListener('DOMContentLoaded', () => {
+      new PolesSimulation('polesCanvas');
+      new DomainsSimulation('domainsCanvas');
+      new CompassSimulation('compassCanvas');
+      new FieldSimulation('fieldCanvas');
+      new ElectromagnetSimulation('electromagnetCanvas');
+      
+      document.querySelectorAll('.btn').forEach(btn => addButtonClickEffect(btn));
+      document.querySelectorAll('.toggle-btn').forEach(btn => addButtonClickEffect(btn));
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c7d8b2273d64edf',t:'MTc3MDA3NTczMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

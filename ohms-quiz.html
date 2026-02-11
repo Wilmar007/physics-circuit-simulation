@@ -1,0 +1,1671 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ohm's Law Interactive Quiz</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      font-family: 'Orbitron', 'Rajdhani', 'Exo 2', sans-serif;
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 50%, #0f0f2e 100%);
+      color: #00ffff;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    .electric-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .spark {
+      position: fixed;
+      width: 4px;
+      height: 4px;
+      background: #ffff00;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00;
+      pointer-events: none;
+      z-index: 1;
+      animation: sparkFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes sparkFloat {
+      0%, 100% { 
+        transform: translateY(0) translateX(0) rotate(0deg);
+        opacity: 0;
+      }
+      25% {
+        opacity: 0.8;
+        transform: translateY(-30px) translateX(20px) rotate(90deg);
+      }
+      50% { 
+        opacity: 1;
+        transform: translateY(-50px) translateX(-20px) rotate(180deg);
+      }
+      75% {
+        opacity: 0.8;
+        transform: translateY(-30px) translateX(20px) rotate(270deg);
+      }
+    }
+
+    .lightning-bolt {
+      position: fixed;
+      width: 3px;
+      height: 100px;
+      background: linear-gradient(180deg, #ffff00, transparent);
+      box-shadow: 0 0 10px #ffff00, 0 0 20px #ffff00;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      animation: lightning 4s ease-in-out infinite;
+    }
+
+    @keyframes lightning {
+      0%, 90%, 100% { 
+        opacity: 0;
+        transform: translateY(-100px) scaleY(0);
+      }
+      92% { 
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+      }
+      94% {
+        opacity: 0;
+      }
+      96% {
+        opacity: 1;
+      }
+      98% {
+        opacity: 0;
+      }
+    }
+
+    .energy-orb {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      background: radial-gradient(circle, #00ffff, #0080ff);
+      border-radius: 50%;
+      box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px #00ffff;
+      pointer-events: none;
+      z-index: 1;
+      animation: orbFloat 6s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat {
+      0%, 100% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0.3;
+      }
+      25% {
+        transform: translateY(-80px) translateX(60px) scale(1.3);
+        opacity: 0.8;
+      }
+      50% {
+        transform: translateY(-150px) translateX(-40px) scale(1);
+        opacity: 1;
+      }
+      75% {
+        transform: translateY(-80px) translateX(60px) scale(0.8);
+        opacity: 0.6;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: titlePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+      0%, 100% { 
+        text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px #00ffff;
+      }
+      50% { 
+        text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff, 0 0 90px #00ffff;
+      }
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #00ffff;
+      margin-bottom: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #ffff00;
+      opacity: 0.9;
+    }
+
+    .progress-container {
+      margin-bottom: 30px;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 20px;
+      padding: 20px;
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    }
+
+    .progress-text {
+      text-align: center;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: #ffff00;
+      font-weight: 600;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 30px;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 15px;
+      overflow: hidden;
+      border: 2px solid #00ffff;
+      position: relative;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #00ffff 0%, #0080ff 50%, #ffff00 100%);
+      border-radius: 15px;
+      transition: width 0.5s ease;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 200%; }
+    }
+
+    .quiz-card {
+      background: rgba(10, 10, 40, 0.8);
+      border-radius: 20px;
+      padding: 40px;
+      border: 3px solid #00ffff;
+      box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
+      margin-bottom: 30px;
+      position: relative;
+      overflow: hidden;
+      animation: cardGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes cardGlow {
+      0%, 100% { 
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0, 255, 255, 0.1);
+      }
+      50% { 
+        box-shadow: 0 0 60px rgba(0, 255, 255, 0.5), inset 0 0 30px rgba(0, 255, 255, 0.2);
+      }
+    }
+
+    .quiz-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
+      animation: rotate 10s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .question-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .question-number {
+      font-size: 0.9rem;
+      color: #ffff00;
+      margin-bottom: 15px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .question-text {
+      font-size: 1.4rem;
+      color: #ffffff;
+      margin-bottom: 30px;
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .option-btn {
+      background: rgba(0, 20, 40, 0.8);
+      border: 2px solid #00ffff;
+      color: #ffffff;
+      padding: 20px 25px;
+      font-size: 1.1rem;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+      font-family: inherit;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .option-btn:hover::before {
+      left: 100%;
+    }
+
+    .option-btn:hover {
+      background: rgba(0, 255, 255, 0.2);
+      border-color: #ffff00;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+      transform: translateX(10px);
+    }
+
+    .option-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
+    .option-btn.selected {
+      background: rgba(0, 128, 255, 0.3);
+      border-color: #0080ff;
+    }
+
+    .option-btn.correct {
+      background: rgba(0, 255, 0, 0.2);
+      border-color: #00ff00;
+      animation: correctPulse 0.5s ease;
+    }
+
+    .option-btn.incorrect {
+      background: rgba(255, 0, 0, 0.2);
+      border-color: #ff0000;
+      animation: incorrectShake 0.5s ease;
+    }
+
+    @keyframes correctPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes incorrectShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+
+    .feedback {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feedback.correct {
+      background: rgba(0, 255, 0, 0.2);
+      border: 2px solid #00ff00;
+      color: #00ff00;
+    }
+
+    .feedback.incorrect {
+      background: rgba(255, 0, 0, 0.2);
+      border: 2px solid #ff0000;
+      color: #ff0000;
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, #00ffff 0%, #0080ff 100%);
+      border: none;
+      color: #000000;
+      padding: 18px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 25px;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+      font-family: inherit;
+    }
+
+    .next-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+    }
+
+    .next-btn:disabled {
+      background: rgba(100, 100, 100, 0.5);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .prev-btn {
+      background: linear-gradient(135deg, #ffff00 0%, #ff6600 100%);
+      border: none;
+      color: #000000;
+      padding: 18px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+      font-family: inherit;
+    }
+
+    .prev-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(255, 255, 0, 0.8);
+    }
+
+    .prev-btn:disabled {
+      background: rgba(100, 100, 100, 0.5);
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.4;
+    }
+
+    .next-btn-group {
+      background: linear-gradient(135deg, #00ffff 0%, #0080ff 100%);
+      border: none;
+      color: #000000;
+      padding: 18px 40px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      flex: 1;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+      font-family: inherit;
+    }
+
+    .next-btn-group:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+    }
+
+    .next-btn-group:disabled {
+      background: rgba(100, 100, 100, 0.5);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+      border: 4px solid #00ffff;
+      border-radius: 30px;
+      padding: 50px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 0 80px rgba(0, 255, 255, 0.6);
+      position: relative;
+      animation: modalSlideIn 0.5s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from { 
+        transform: scale(0.7) translateY(-50px);
+        opacity: 0;
+      }
+      to { 
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-content.pass {
+      border-color: #00ff00;
+      box-shadow: 0 0 80px rgba(0, 255, 0, 0.6);
+    }
+
+    .modal-content.fail {
+      border-color: #ff0000;
+      box-shadow: 0 0 80px rgba(255, 0, 0, 0.6);
+    }
+
+    .modal-title {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .modal-content.pass .modal-title {
+      color: #00ff00;
+      animation: successPulse 1s ease-in-out infinite;
+    }
+
+    .modal-content.fail .modal-title {
+      color: #ff0000;
+    }
+
+    @keyframes successPulse {
+      0%, 100% { 
+        text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00;
+      }
+      50% { 
+        text-shadow: 0 0 40px #00ff00, 0 0 80px #00ff00;
+      }
+    }
+
+    .modal-score {
+      font-size: 4rem;
+      font-weight: 700;
+      margin: 30px 0;
+    }
+
+    .modal-content.pass .modal-score {
+      color: #ffff00;
+    }
+
+    .modal-content.fail .modal-score {
+      color: #ff6600;
+    }
+
+    .modal-message {
+      font-size: 1.3rem;
+      color: #ffffff;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .retry-btn {
+      background: linear-gradient(135deg, #ffff00 0%, #ff6600 100%);
+      border: none;
+      color: #000000;
+      padding: 18px 50px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+      font-family: inherit;
+    }
+
+    .retry-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(255, 255, 0, 0.8);
+    }
+
+    .celebration {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #ffff00;
+      border-radius: 50%;
+      animation: celebrate 2s ease-out infinite;
+    }
+
+    @keyframes celebrate {
+      0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-300px) scale(0);
+        opacity: 0;
+      }
+    }
+
+    .welcome-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .welcome-screen.hidden {
+      display: none;
+    }
+
+    .welcome-card {
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+      border: 4px solid #00ffff;
+      border-radius: 30px;
+      padding: 50px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 0 80px rgba(0, 255, 255, 0.6);
+      animation: modalSlideIn 0.5s ease, welcomePulse 3s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.15) 0%, transparent 70%);
+      animation: rotate 8s linear infinite;
+    }
+
+    @keyframes welcomePulse {
+      0%, 100% {
+        box-shadow: 0 0 80px rgba(0, 255, 255, 0.6);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 120px rgba(0, 255, 255, 0.8), 0 0 160px rgba(255, 255, 0, 0.4);
+        transform: scale(1.02);
+      }
+    }
+
+    .welcome-title {
+      font-size: 2.5rem;
+      color: #00ffff;
+      text-align: center;
+      margin-bottom: 15px;
+      font-weight: 700;
+      text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+    }
+
+    .welcome-subtitle {
+      font-size: 1.1rem;
+      color: #ffff00;
+      text-align: center;
+      margin-bottom: 40px;
+      opacity: 0.9;
+    }
+
+    .form-group {
+      margin-bottom: 30px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 1.1rem;
+      color: #00ffff;
+      margin-bottom: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      animation: labelGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes labelGlow {
+      0%, 100% {
+        text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 30px rgba(0, 255, 255, 0.4);
+      }
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 1.1rem;
+      background: rgba(0, 20, 40, 0.8);
+      border: 2px solid #00ffff;
+      border-radius: 15px;
+      color: #ffffff;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: #ffff00;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 50px rgba(255, 255, 0, 0.3);
+      background: rgba(0, 40, 80, 0.8);
+      animation: inputPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes inputPulse {
+      0%, 100% {
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 50px rgba(255, 255, 0, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 40px rgba(0, 255, 255, 0.7), 0 0 70px rgba(255, 255, 0, 0.5);
+      }
+    }
+
+    .form-input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 1.1rem;
+      background: rgba(0, 20, 40, 0.8);
+      border: 2px solid #00ffff;
+      border-radius: 15px;
+      color: #ffffff;
+      font-family: inherit;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: #ffff00;
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+      background: rgba(0, 40, 80, 0.8);
+    }
+
+    .form-select option {
+      background: #0a0e27;
+      color: #ffffff;
+    }
+
+    .start-btn {
+      background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+      border: none;
+      color: #000000;
+      padding: 18px 50px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+      font-family: inherit;
+      margin-top: 20px;
+      animation: startBtnBounce 2s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .start-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .start-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    @keyframes startBtnBounce {
+      0%, 100% {
+        transform: translateY(0) scale(1);
+        box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+      }
+      50% {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 0 50px rgba(0, 255, 0, 0.8), 0 0 80px rgba(0, 255, 0, 0.4);
+      }
+    }
+
+    .start-btn:hover {
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 0 60px rgba(0, 255, 0, 0.9), 0 0 100px rgba(0, 255, 0, 0.5);
+      animation: none;
+    }
+
+    .start-btn:disabled {
+      background: rgba(100, 100, 100, 0.5);
+      cursor: not-allowed;
+      box-shadow: none;
+      opacity: 0.4;
+    }
+
+    .student-info {
+      background: rgba(0, 0, 0, 0.4);
+      border: 2px solid rgba(0, 255, 255, 0.3);
+      border-radius: 15px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      animation: studentInfoSlide 0.6s ease, infoPulse 3s ease-in-out infinite 0.6s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .student-info::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+      animation: infoShimmer 3s ease-in-out infinite;
+    }
+
+    @keyframes studentInfoSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes infoPulse {
+      0%, 100% {
+        border-color: rgba(0, 255, 255, 0.3);
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
+      }
+      50% {
+        border-color: rgba(0, 255, 255, 0.6);
+        box-shadow: 0 0 30px rgba(0, 255, 255, 0.4), 0 0 50px rgba(255, 255, 0, 0.2);
+      }
+    }
+
+    @keyframes infoShimmer {
+      0% { left: -100%; }
+      50%, 100% { left: 200%; }
+    }
+
+    .student-name {
+      font-size: 1.3rem;
+      color: #ffff00;
+      font-weight: 600;
+      margin-bottom: 5px;
+      animation: nameGlow 2s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes nameGlow {
+      0%, 100% {
+        text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(255, 255, 0, 0.8), 0 0 30px rgba(255, 255, 0, 0.4);
+      }
+    }
+
+    .student-section {
+      font-size: 1rem;
+      color: #00ffff;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .quiz-card {
+        padding: 25px;
+      }
+
+      .question-text {
+        font-size: 1.2rem;
+      }
+
+      .option-btn {
+        font-size: 1rem;
+        padding: 15px 20px;
+      }
+
+      .modal-content {
+        padding: 30px;
+      }
+
+      .modal-title {
+        font-size: 2rem;
+      }
+
+      .modal-score {
+        font-size: 3rem;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="electric-bg"></div>
+  <div class="welcome-screen" id="welcome-screen">
+   <div class="welcome-card">
+    <div class="welcome-title">
+     ⚡ Welcome! ⚡
+    </div>
+    <div class="welcome-subtitle">
+     Enter your information to begin the quiz
+    </div>
+    <form id="student-form">
+     <div class="form-group"><label class="form-label" for="student-name">Full Name</label> <input type="text" id="student-name" class="form-input" placeholder="Enter your full name" required>
+     </div>
+     <div class="form-group"><label class="form-label" for="student-section">Section</label> <select id="student-section" class="form-select" required> <option value="">Select your section</option> <option value="STEM 201">STEM 201</option> <option value="STEM 202">STEM 202</option> <option value="STEM 203">STEM 203</option> <option value="STEM 204">STEM 204</option> <option value="STEM 205">STEM 205</option> <option value="STEM 206">STEM 206</option> <option value="STEM 207">STEM 207</option> </select>
+     </div><button type="submit" class="start-btn">Start Quiz ⚡</button>
+    </form>
+   </div>
+  </div>
+  <div class="container">
+   <div class="header">
+    <h1 id="quiz-title">⚡ Ohm's Law Interactive Quiz</h1>
+    <div class="subtitle">
+     Test Your Understanding of V = I × R
+    </div>
+   </div>
+   <div class="student-info" id="student-info" style="display: none;">
+    <div class="student-name" id="display-name"></div>
+    <div class="student-section" id="display-section"></div>
+   </div>
+   <div class="progress-container">
+    <div class="progress-text" id="progress-text">
+     Question 1 of 15
+    </div>
+    <div class="progress-bar-bg">
+     <div class="progress-bar" id="progress-bar" style="width: 6.67%"></div>
+    </div>
+   </div>
+   <div class="quiz-card">
+    <div class="question-content">
+     <div class="question-number" id="question-number">
+      Question 1
+     </div>
+     <div class="question-text" id="question-text"></div>
+     <div class="options" id="options"></div>
+     <div id="feedback"></div>
+     <div class="button-group"><button class="prev-btn" id="prev-btn">⬅ Previous</button> <button class="next-btn-group" id="next-btn" disabled>Next Question ⚡</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <div class="modal" id="result-modal">
+   <div class="modal-content" id="modal-content">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-score" id="modal-score"></div>
+    <div class="modal-message" id="modal-message"></div><button class="retry-btn" id="retry-btn">Retry Quiz ⚡</button>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      quiz_title: "⚡ Ohm's Law Interactive Quiz",
+      pass_message: "Congratulations! You've mastered Ohm's Law!",
+      fail_message: "Keep practicing! Review the concepts and try again."
+    };
+
+    const allQuestions = [
+      {
+        question: "What does Ohm's Law state?",
+        options: [
+          "Voltage equals current multiplied by resistance (V = I × R)",
+          "Power equals voltage multiplied by current (P = V × I)",
+          "Energy equals power multiplied by time (E = P × t)",
+          "Resistance equals voltage divided by power (R = V / P)"
+        ],
+        correct: 0
+      },
+      {
+        question: "A circuit has a voltage of 12V and a resistance of 4Ω. What is the current flowing through it?",
+        options: [
+          "2A",
+          "3A",
+          "4A",
+          "8A"
+        ],
+        correct: 1
+      },
+      {
+        question: "If a light bulb has a resistance of 240Ω and is connected to a 120V outlet, what current does it draw?",
+        options: [
+          "0.25A",
+          "0.5A",
+          "1A",
+          "2A"
+        ],
+        correct: 1
+      },
+      {
+        question: "A phone charger supplies 2A of current at 5V. What is the resistance of the charging circuit?",
+        options: [
+          "1.5Ω",
+          "2.5Ω",
+          "3.5Ω",
+          "10Ω"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which formula correctly rearranges Ohm's Law to solve for resistance?",
+        options: [
+          "R = V + I",
+          "R = V / I",
+          "R = I / V",
+          "R = V × I"
+        ],
+        correct: 1
+      },
+      {
+        question: "A heating element draws 10A of current from a 220V supply. What is its resistance?",
+        options: [
+          "18Ω",
+          "22Ω",
+          "28Ω",
+          "32Ω"
+        ],
+        correct: 1
+      },
+      {
+        question: "If the voltage across a resistor doubles while resistance stays constant, what happens to the current?",
+        options: [
+          "It stays the same",
+          "It doubles",
+          "It halves",
+          "It quadruples"
+        ],
+        correct: 1
+      },
+      {
+        question: "A circuit component has a resistance of 50Ω and a current of 0.4A flowing through it. What is the voltage across it?",
+        options: [
+          "10V",
+          "15V",
+          "20V",
+          "25V"
+        ],
+        correct: 2
+      },
+      {
+        question: "An electric kettle operates at 1800W on a 120V supply. What current does it draw? (Hint: First find R using P = V²/R, then use Ohm's Law)",
+        options: [
+          "10A",
+          "12A",
+          "15A",
+          "18A"
+        ],
+        correct: 2
+      },
+      {
+        question: "A resistor has 3V across it and 150mA (0.15A) flowing through it. What is its resistance?",
+        options: [
+          "15Ω",
+          "20Ω",
+          "25Ω",
+          "30Ω"
+        ],
+        correct: 1
+      },
+      {
+        question: "If you measure 9V across a resistor and want 3A of current to flow, what resistance value do you need?",
+        options: [
+          "2Ω",
+          "3Ω",
+          "6Ω",
+          "12Ω"
+        ],
+        correct: 1
+      },
+      {
+        question: "A car battery provides 12V. If the starter motor has a resistance of 0.05Ω, what current flows when starting?",
+        options: [
+          "120A",
+          "180A",
+          "240A",
+          "300A"
+        ],
+        correct: 2
+      },
+      {
+        question: "Which of the following will cause an increase in current through a fixed resistor?",
+        options: [
+          "Decreasing the voltage",
+          "Increasing the voltage",
+          "Increasing the resistance",
+          "Disconnecting the circuit"
+        ],
+        correct: 1
+      },
+      {
+        question: "A 100Ω resistor has 0.5A flowing through it. If you replace it with a 200Ω resistor at the same voltage, what is the new current?",
+        options: [
+          "0.15A",
+          "0.25A",
+          "0.5A",
+          "1A"
+        ],
+        correct: 1
+      },
+      {
+        question: "A circuit has a current of 5A and a resistance of 8Ω. If the resistance increases to 10Ω while voltage remains constant, what is the new current?",
+        options: [
+          "3A",
+          "4A",
+          "5A",
+          "6A"
+        ],
+        correct: 1
+      },
+      {
+        question: "A 6V battery is connected to a 3Ω resistor. How much current flows?",
+        options: [
+          "1A",
+          "2A",
+          "3A",
+          "18A"
+        ],
+        correct: 1
+      },
+      {
+        question: "If a resistor dissipates heat, and you want to reduce the current by half, what should you do to the resistance (keeping voltage constant)?",
+        options: [
+          "Halve it",
+          "Double it",
+          "Keep it the same",
+          "Quadruple it"
+        ],
+        correct: 1
+      },
+      {
+        question: "An LED circuit has a 9V battery and a 450Ω current-limiting resistor. What current flows through the LED?",
+        options: [
+          "0.01A",
+          "0.02A",
+          "0.05A",
+          "0.2A"
+        ],
+        correct: 1
+      },
+      {
+        question: "A toaster draws 8A from a 120V outlet. What is the resistance of the heating element?",
+        options: [
+          "10Ω",
+          "15Ω",
+          "20Ω",
+          "30Ω"
+        ],
+        correct: 1
+      },
+      {
+        question: "If the resistance in a circuit triples while voltage remains constant, the current becomes:",
+        options: [
+          "Three times larger",
+          "One-third of the original",
+          "Nine times larger",
+          "Unchanged"
+        ],
+        correct: 1
+      },
+      {
+        question: "A circuit has 24V across a resistor and draws 3A. What is the resistance?",
+        options: [
+          "6Ω",
+          "8Ω",
+          "12Ω",
+          "72Ω"
+        ],
+        correct: 1
+      },
+      {
+        question: "Which statement is true according to Ohm's Law?",
+        options: [
+          "Current is inversely proportional to voltage",
+          "Current is directly proportional to voltage",
+          "Resistance increases with current",
+          "Voltage is inversely proportional to resistance"
+        ],
+        correct: 1
+      },
+      {
+        question: "A hair dryer operates at 1500W on a 120V circuit. What is the current it draws?",
+        options: [
+          "10.5A",
+          "12.5A",
+          "15A",
+          "18A"
+        ],
+        correct: 1
+      },
+      {
+        question: "A 15Ω resistor needs 4A of current. What voltage should be applied?",
+        options: [
+          "30V",
+          "45V",
+          "60V",
+          "75V"
+        ],
+        correct: 2
+      },
+      {
+        question: "Two identical resistors are connected to the same voltage source. One has double the resistance of the other. How do their currents compare?",
+        options: [
+          "The higher resistance has double the current",
+          "The higher resistance has half the current",
+          "Both have equal current",
+          "The higher resistance has four times the current"
+        ],
+        correct: 1
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let selectedAnswer = null;
+    let questions = [];
+    let userAnswers = [];
+    let studentName = '';
+    let studentSection = '';
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function selectRandomQuestions() {
+      const shuffled = shuffleArray(allQuestions);
+      questions = shuffled.slice(0, 15);
+      
+      // Randomize options for each question
+      questions = questions.map(q => {
+        const optionsWithIndex = q.options.map((opt, idx) => ({ text: opt, isCorrect: idx === q.correct }));
+        const shuffledOptions = shuffleArray(optionsWithIndex);
+        const newCorrectIndex = shuffledOptions.findIndex(opt => opt.isCorrect);
+        
+        return {
+          question: q.question,
+          options: shuffledOptions.map(opt => opt.text),
+          correct: newCorrectIndex
+        };
+      });
+    }
+
+    function createSparks() {
+      for (let i = 0; i < 30; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        spark.style.left = Math.random() * 100 + '%';
+        spark.style.top = Math.random() * 100 + '%';
+        spark.style.animationDelay = Math.random() * 3 + 's';
+        spark.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        document.body.appendChild(spark);
+      }
+
+      // Create lightning bolts
+      for (let i = 0; i < 8; i++) {
+        const bolt = document.createElement('div');
+        bolt.className = 'lightning-bolt';
+        bolt.style.left = Math.random() * 100 + '%';
+        bolt.style.top = Math.random() * 50 + '%';
+        bolt.style.animationDelay = Math.random() * 4 + 's';
+        bolt.style.animationDuration = (Math.random() * 3 + 3) + 's';
+        document.body.appendChild(bolt);
+      }
+
+      // Create energy orbs
+      for (let i = 0; i < 10; i++) {
+        const orb = document.createElement('div');
+        orb.className = 'energy-orb';
+        orb.style.left = Math.random() * 100 + '%';
+        orb.style.top = Math.random() * 100 + '%';
+        orb.style.animationDelay = Math.random() * 6 + 's';
+        orb.style.animationDuration = (Math.random() * 4 + 5) + 's';
+        document.body.appendChild(orb);
+      }
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion + 1) / questions.length) * 100;
+      document.getElementById('progress-bar').style.width = progress + '%';
+      document.getElementById('progress-text').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+    }
+
+    function displayQuestion() {
+      const question = questions[currentQuestion];
+      document.getElementById('question-number').textContent = `Question ${currentQuestion + 1}`;
+      document.getElementById('question-text').textContent = question.question;
+      
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = '';
+
+      // Reset transient selection for this question
+      selectedAnswer = null;
+
+      question.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = option;
+
+        // Restore previous answer if exists (already submitted)
+        if (userAnswers[currentQuestion] !== undefined) {
+          btn.disabled = true;
+          if (userAnswers[currentQuestion] === index) {
+            btn.classList.add('selected');
+            if (index === question.correct) {
+              btn.classList.add('correct');
+            } else {
+              btn.classList.add('incorrect');
+            }
+          }
+        } else {
+          // Only mark selection visually; do not evaluate yet
+          btn.addEventListener('click', () => {
+            const optionBtns = document.querySelectorAll('.option-btn');
+            optionBtns.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedAnswer = index;
+            // enable submit button when an option is selected
+            const submitBtn = document.getElementById('submit-answer-btn');
+            if (submitBtn) submitBtn.disabled = false;
+          });
+        }
+
+        optionsContainer.appendChild(btn);
+      });
+
+      // If the question wasn't answered yet, add a Submit Answer button
+      // (students can change selection until they submit)
+      if (userAnswers[currentQuestion] === undefined) {
+        // remove existing submit button if any
+        const prevSubmit = document.getElementById('submit-answer-btn');
+        if (prevSubmit) prevSubmit.remove();
+
+        const submitBtn = document.createElement('button');
+        submitBtn.id = 'submit-answer-btn';
+        submitBtn.className = 'next-btn-group';
+        submitBtn.textContent = 'Submit Answer';
+        submitBtn.style.marginTop = '20px';
+        submitBtn.disabled = true; // enabled once student selects an option
+        submitBtn.addEventListener('click', () => {
+          if (selectedAnswer === null) return; // do nothing if nothing selected
+          // lock the answer and evaluate
+          userAnswers[currentQuestion] = selectedAnswer;
+          const questionObj = questions[currentQuestion];
+          const optionBtns = document.querySelectorAll('.option-btn');
+          optionBtns.forEach((b, i) => {
+            b.disabled = true;
+            if (i === selectedAnswer) {
+              if (i === questionObj.correct) {
+                b.classList.add('correct');
+                score++;
+                document.getElementById('feedback').innerHTML = '<div class="feedback correct">✓ Correct!</div>';
+              } else {
+                b.classList.add('incorrect');
+                document.getElementById('feedback').innerHTML = '<div class="feedback incorrect">✗ Incorrect</div>';
+              }
+            }
+          });
+          // enable Next button now that answer is submitted
+          document.getElementById('next-btn').disabled = false;
+          // remove submit button after submission
+          submitBtn.remove();
+        });
+
+        optionsContainer.appendChild(submitBtn);
+      }
+      
+      // Show feedback if question was already answered
+      const feedbackContainer = document.getElementById('feedback');
+      if (userAnswers[currentQuestion] !== undefined) {
+        const wasCorrect = userAnswers[currentQuestion] === question.correct;
+        feedbackContainer.innerHTML = wasCorrect ? 
+          '<div class="feedback correct">✓ Correct!</div>' : 
+          '<div class="feedback incorrect">✗ Incorrect</div>';
+        document.getElementById('next-btn').disabled = false;
+      } else {
+        feedbackContainer.innerHTML = '';
+        document.getElementById('next-btn').disabled = true;
+      }
+      
+      // Update Previous button state
+      document.getElementById('prev-btn').disabled = currentQuestion === 0;
+      
+      updateProgress();
+    }
+
+    function selectAnswer(index) {
+      if (userAnswers[currentQuestion] !== undefined) return;
+      
+      userAnswers[currentQuestion] = index;
+      const question = questions[currentQuestion];
+      const optionBtns = document.querySelectorAll('.option-btn');
+      
+      optionBtns.forEach((btn, i) => {
+        btn.disabled = true;
+        if (i === index) {
+          btn.classList.add('selected');
+          if (i === question.correct) {
+            btn.classList.add('correct');
+            score++;
+            document.getElementById('feedback').innerHTML = '<div class="feedback correct">✓ Correct!</div>';
+          } else {
+            btn.classList.add('incorrect');
+            document.getElementById('feedback').innerHTML = '<div class="feedback incorrect">✗ Incorrect</div>';
+          }
+        }
+      });
+      
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    function nextQuestion() {
+      currentQuestion++;
+      
+      if (currentQuestion < questions.length) {
+        displayQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        displayQuestion();
+      }
+    }
+
+    function showResults() {
+  const percentage = Math.round((score / questions.length) * 100);
+  const passed = percentage >= 75;
+
+  const modal = document.getElementById('result-modal');
+  const modalContent = document.getElementById('modal-content');
+  const modalTitle = document.getElementById('modal-title');
+  const modalScore = document.getElementById('modal-score');
+  const modalMessage = document.getElementById('modal-message');
+
+  modalContent.className = 'modal-content ' + (passed ? 'pass' : 'fail');
+  modalTitle.textContent = passed ? '🎉 PASSED! 🎉' : '⚠️ NOT PASSED';
+  modalScore.textContent = `${score} / ${questions.length} (${percentage}%)`;
+
+  const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+  modalMessage.textContent = passed
+    ? (config.pass_message || defaultConfig.pass_message)
+    : (config.fail_message || defaultConfig.fail_message);
+
+  modal.classList.add('active');
+
+  // ✅ ONLY when passed
+  if (passed) {
+    createCelebration();
+
+    // 🔓 tell parent page (index.html)
+    window.parent.postMessage(
+      { type: "QUIZ_PASSED", topic: "series" },
+      "*"
+    );
+    // Also notify backend to unlock the NEXT topic for this student (safe backend call)
+    try{
+      (function(){
+        var name = (typeof studentName !== 'undefined' && studentName) ? studentName : (localStorage.getItem('studentName')||'');
+        var section = (typeof studentSection !== 'undefined' && studentSection) ? studentSection : (localStorage.getItem('studentSection')||'');
+        var url = 'https://script.google.com/macros/s/AKfycbx-VVgOkLZOBr1yK2THSGWdbaFdxrNqYK_V2fgprn1inHxFr1fx5caL-NB3xSrjhnZm/exec';
+        var body = new URLSearchParams();
+        body.append('name', name);
+        body.append('section', section);
+        body.append('action', 'UNLOCK');
+        body.append('topic', 'series');
+        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: body.toString(), cache: 'no-store' })
+          .then(function(res){
+            if(!res.ok) return res.text().then(function(t){ throw new Error('HTTP '+res.status+': '+t); });
+            return res.json().catch(function(){ return null; });
+          })
+          .then(function(data){ console.log('Backend unlock request succeeded for series', data); })
+          .catch(function(err){ console.error('Backend unlock request failed for series', err); });
+      })();
+    }catch(e){ console.error('Backend unlock call error', e); }
+  }
+  // Optional: send full result to parent for central collection (index.html will forward when enabled)
+  try {
+    const result = {
+      topic: 'ohms',
+      studentName: studentName || '',
+      studentSection: studentSection || '',
+      score: score,
+      total: questions.length,
+      percentage,
+      passed
+    };
+    window.parent.postMessage({ type: 'QUIZ_RESULT', payload: result }, '*');
+  } catch (e) {
+    /* ignore */
+  }
+  // Send to Google Form (no UI changes) - called once when quiz finishes
+  try {
+    submitScoreToGoogleForm({
+      studentName: studentName || '',
+      studentSection: studentSection || '',
+      quizName: "Ohm's Law Interactive Quiz",
+      score: score,
+      percentage: percentage,
+      passed: passed
+    });
+  } catch (e) { /* ignore */ }
+}
+function createCelebration() {
+  const modalContent = document.getElementById('modal-content');
+  for (let i = 0; i < 20; i++) {
+    const celebration = document.createElement('div');
+    celebration.className = 'celebration';
+    celebration.style.left = Math.random() * 100 + '%';
+    celebration.style.animationDelay = Math.random() * 1 + 's';
+    modalContent.appendChild(celebration);
+  }
+}
+
+function submitScoreToGoogleForm({ studentName, studentSection, quizName, score, percentage, passed }) {
+  try {
+    const endpoint = 'https://docs.google.com/forms/d/e/1FAIpQLSdFWHfgpJkW2lzPZCCayDi-rI7pDuIk90zNmqgAVkIXB7tuCw/formResponse';
+    const params = new URLSearchParams();
+    params.append('entry.1885112147', studentName || '');
+    params.append('entry.1789780298', studentSection || '');
+    params.append('entry.871712505', quizName || '');
+    params.append('entry.29929990', String(score || 0));
+    params.append('entry.1068313912', String(Math.round(percentage || 0)));
+    params.append('entry.1408703668', passed ? 'PASSED' : 'FAILED');
+
+    fetch(endpoint, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    }).catch(() => {});
+  } catch (e) {
+    // swallow errors silently
+  }
+}
+
+    function resetQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      userAnswers = [];
+      selectedAnswer = null;
+      selectRandomQuestions();
+      document.getElementById('result-modal').classList.remove('active');
+      displayQuestion();
+    }
+
+    document.getElementById('next-btn').addEventListener('click', nextQuestion);
+    document.getElementById('prev-btn').addEventListener('click', previousQuestion);
+    document.getElementById('retry-btn').addEventListener('click', resetQuiz);
+
+    // Handle student form submission
+    document.getElementById('student-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      studentName = document.getElementById('student-name').value.trim();
+      studentSection = document.getElementById('student-section').value;
+      
+      if (studentName && studentSection) {
+        // Hide welcome screen
+        document.getElementById('welcome-screen').classList.add('hidden');
+        
+        // Show student info
+        document.getElementById('student-info').style.display = 'block';
+        document.getElementById('display-name').textContent = studentName;
+        document.getElementById('display-section').textContent = studentSection;
+        
+        // Start the quiz
+        selectRandomQuestions();
+        displayQuestion();
+      }
+    });
+
+    async function onConfigChange(config) {
+      const titleElement = document.getElementById('quiz-title');
+      titleElement.textContent = config.quiz_title || defaultConfig.quiz_title;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["quiz_title", config.quiz_title || defaultConfig.quiz_title],
+          ["pass_message", config.pass_message || defaultConfig.pass_message],
+          ["fail_message", config.fail_message || defaultConfig.fail_message]
+        ])
+      });
+    }
+
+    createSparks();
+    // Don't select questions or display until form is submitted
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c6018ec86e77b65',t:'MTc2OTc2Njk2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

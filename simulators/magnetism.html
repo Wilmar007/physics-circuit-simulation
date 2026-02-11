@@ -1,0 +1,3228 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>General Physics Simulation Laboratory</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a0000 0%, #330000 50%, #1a0000 100%);
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 0 0 10px 0;
+      background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+      }
+      to {
+        filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.8));
+      }
+    }
+
+    .header p {
+      font-size: 18px;
+      color: #FFD700;
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 50px;
+    }
+
+    .menu-box {
+      background: linear-gradient(135deg, #8B0000 0%, #B22222 100%);
+      border: 3px solid #FFD700;
+      border-radius: 20px;
+      padding: 40px 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .menu-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+    }
+
+    .menu-box:hover {
+      transform: translateY(-10px) scale(1.02);
+      border-color: #FFA500;
+      box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+    }
+
+    .menu-box h2 {
+      font-size: 28px;
+      color: #FFD700;
+      margin: 0 0 15px 0;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .menu-box p {
+      font-size: 16px;
+      color: #FFF8DC;
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+      text-align: center;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    .content-area {
+      background: linear-gradient(135deg, #2d0a0a 0%, #4a0e0e 100%);
+      border: 3px solid #FFD700;
+      border-radius: 20px;
+      padding: 40px;
+      min-height: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      display: none;
+    }
+
+    .content-area.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid #FFD700;
+      padding-bottom: 20px;
+    }
+
+    .content-header h2 {
+      font-size: 36px;
+      color: #FFD700;
+      margin: 0;
+    }
+
+    .back-button {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #8B0000;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      background: linear-gradient(135deg, #8B0000, #B22222);
+      color: #FFD700;
+      border: 2px solid #FFD700;
+      padding: 12px 25px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .tab:hover {
+      background: linear-gradient(135deg, #B22222, #DC143C);
+      transform: translateY(-2px);
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #8B0000;
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+    }
+
+    .tab-content {
+      display: none;
+      color: #FFF8DC;
+      line-height: 1.8;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .tab-content h3 {
+      color: #FFD700;
+      font-size: 24px;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+
+    .tab-content ul {
+      margin: 15px 0;
+      padding-left: 25px;
+    }
+
+    .tab-content li {
+      margin-bottom: 10px;
+    }
+
+    .simulation-canvas {
+      background: rgba(0, 0, 0, 0.3);
+      border: 2px solid #FFD700;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 20px;
+      min-height: 300px;
+      position: relative;
+    }
+
+    .charge {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      position: absolute;
+      cursor: move;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .charge:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.7);
+    }
+
+    .charge.selected {
+      transform: scale(1.15);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+      border-width: 4px !important;
+    }
+
+    .charge.positive {
+      background: radial-gradient(circle, #FFD700, #FFA500);
+      color: #8B0000;
+      border: 3px solid #FFA500;
+    }
+
+    .charge.negative {
+      background: radial-gradient(circle, #4169E1, #1E90FF);
+      color: white;
+      border: 3px solid #1E90FF;
+    }
+
+    .coulomb-human {
+      background: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .walking-human {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 80px;
+      height: 120px;
+    }
+
+    .human-figure {
+      position: relative;
+      font-size: 48px;
+      animation: bounce 1.5s ease-in-out infinite;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+
+    .human-arms {
+      position: absolute;
+      top: -8px;
+      left: -30px;
+      right: -30px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 20px;
+      animation: armSwing 1.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .human-legs {
+      position: absolute;
+      bottom: -12px;
+      left: -20px;
+      right: -20px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      animation: legWalk 1.2s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-4px);
+      }
+    }
+
+    @keyframes armSwing {
+      0%, 100% {
+        transform: rotate(0deg);
+      }
+      25% {
+        transform: rotate(-8deg);
+      }
+      75% {
+        transform: rotate(8deg);
+      }
+    }
+
+    @keyframes legWalk {
+      0%, 100% {
+        transform: scaleX(1) translateY(0px);
+      }
+      50% {
+        transform: scaleX(1.1) translateY(-2px);
+      }
+    }
+
+    .human-charge-label {
+      font-size: 14px;
+      margin-top: 8px;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #8B0000;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+      border: 2px solid #8B0000;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      animation: labelGlow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes labelGlow {
+      from {
+        box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      }
+      to {
+        box-shadow: 0 3px 12px rgba(255,215,0,0.5);
+      }
+    }
+
+    .human-charge-positive {
+      background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+      color: #8B0000 !important;
+      border-color: #8B0000 !important;
+    }
+
+    .human-charge-negative {
+      background: linear-gradient(135deg, #4169E1, #1E90FF) !important;
+      color: white !important;
+      border-color: #1E90FF !important;
+    }
+
+    .charge-label {
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 2px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .force-vector {
+      position: absolute;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .force-arrow {
+      stroke: #FF4444;
+      stroke-width: 3;
+      fill: none;
+      marker-end: url(#arrowhead);
+    }
+
+    .force-magnitude {
+      fill: #FF4444;
+      font-size: 12px;
+      font-weight: bold;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .control-button {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      color: #8B0000;
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .control-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+    }
+
+    .info-box {
+      background: rgba(139, 0, 0, 0.3);
+      border: 2px solid #FFD700;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      color: #FFF8DC;
+    }
+
+    .electric-field-line {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #FFD700, transparent);
+      transform-origin: left center;
+      pointer-events: none;
+      animation: fieldFlow 2s linear infinite;
+    }
+
+    @keyframes fieldFlow {
+      0% {
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 0.8;
+      }
+      100% {
+        opacity: 0.3;
+      }
+    }
+
+    .field-vector {
+      position: absolute;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .field-vector-arrow {
+      stroke: #00FFFF;
+      stroke-width: 2;
+      fill: none;
+      marker-end: url(#field-arrowhead);
+    }
+
+    .probe-cursor {
+      cursor: crosshair !important;
+    }
+
+    .probe-marker {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #FF69B4;
+      border-radius: 50%;
+      background: rgba(255, 105, 180, 0.3);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 15;
+      animation: probePulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes probePulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+      }
+    }
+
+    .field-colormap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.7;
+    }
+
+    .field-line-path {
+      stroke: #FFD700;
+      stroke-width: 2;
+      fill: none;
+      opacity: 0.8;
+      marker-end: url(#fieldline-arrowhead);
+    }
+
+    .continuous-field-line {
+      position: absolute;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 32px;
+      }
+
+      .menu-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .content-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .tab {
+        width: 100%;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div class="container">
+   <div class="header">
+    <h1 id="lab-title">General Physics Simulation Laboratory</h1>
+    <p>Interactive Learning Environment for Electrostatics</p>
+   </div>
+   <div id="menu-view">
+    <div class="menu-grid">
+     <div class="menu-box" onclick="showContent('module2')">
+      <div class="icon">
+       ⚡
+      </div>
+      <h2 id="module-title">Magnetism</h2>
+      <p>Electrostatic Force, Electric Field, and Electric Flux</p>
+     </div>
+     <div class="menu-box" onclick="showContent('realworld')">
+      <div class="icon">
+       🌍
+      </div>
+      <h2 id="realworld-title">Real World Application</h2>
+      <p>Practical applications of electrostatics in everyday life</p>
+     </div>
+     <div class="menu-box" onclick="showContent('discussion')">
+      <div class="icon">
+       💬
+      </div>
+      <h2 id="discussion-title">Discussion</h2>
+      <p>Explore concepts and problem-solving strategies</p>
+     </div>
+     <div class="menu-box" onclick="showContent('quizzes')">
+      <div class="icon">
+       📝
+      </div>
+      <h2 id="quizzes-title">Quizzes</h2>
+      <p>Test your understanding of electrostatics</p>
+     </div>
+    </div>
+   </div>
+   <div id="module2-content" class="content-area">
+    <div class="content-header">
+     <h2>Magnetism: Electrostatics</h2><button class="back-button" onclick="showMenu()">← Back to Menu</button>
+    </div>
+    <div class="tabs"><button class="tab active" onclick="showTab('module2', 'simulation')">Field Visualizer</button> <button class="tab" onclick="showTab('module2', 'coulomb')">Coulomb's Law</button> <button class="tab" onclick="showTab('module2', 'demonstration')">Demonstration</button> <button class="tab" onclick="showTab('module2', 'content')">Content</button>
+    </div>
+    <div id="module2-simulation" class="tab-content active">
+     <h3>Electric Field Visualizer - Continuous Field Display</h3>
+     <p>Visualize electric fields with vector arrows, field lines, and color maps. Use the probe tool to measure field strength and potential at any point!</p>
+     <div class="simulation-controls" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Charge Value:</label> <input type="number" id="charge-magnitude" value="2" step="0.1" min="0.1" max="10" style="width: 80px; padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;"> <span style="color: #FFF8DC;">μC</span>
+      </div>
+      <div style="display: flex; gap: 10px;"><button class="control-button" onclick="addCharge('positive')">Add Positive (+)</button> <button class="control-button" onclick="addCharge('negative')">Add Negative (−)</button>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Rendering Mode:</label> <select id="render-mode" style="padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateFieldVisualization()"> <option value="vectors">Vector Arrows</option> <option value="fieldlines">Field Lines</option> <option value="colormap">Color Map</option> <option value="combined">Combined View</option> </select>
+      </div>
+     </div>
+     <div class="simulation-canvas" id="simulation-canvas">
+      <div class="charge positive selected" id="charge1" style="left: 120px; top: 120px;" data-charge="2" onclick="selectCharge(this)"><span class="charge-label">+2μC</span>
+      </div>
+      <div class="charge negative" id="charge2" style="left: 320px; top: 120px;" data-charge="-3" onclick="selectCharge(this)"><span class="charge-label">−3μC</span>
+      </div>
+      <div class="ruler" id="ruler" style="display: none;"></div>
+     </div>
+     <div class="controls"><button class="control-button" onclick="toggleProbe()">Probe Tool</button> <button class="control-button" onclick="toggleShowWork()">Show Work Mode</button> <button class="control-button" onclick="toggleSuperposition()">Superposition Analysis</button> <button class="control-button" onclick="exportFieldImage()">Export Image</button> <button class="control-button" onclick="resetSimulation()">Reset</button>
+     </div>
+     <div class="field-controls" style="display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; align-items: center;">
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Test Charge:</label> <input type="number" id="test-charge" value="1" step="0.1" min="-10" max="10" style="width: 80px; padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;"> <span style="color: #FFF8DC;">μC</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Field Line Density:</label> <input type="range" id="field-density" min="5" max="25" value="12" style="width: 100px;" oninput="updateFieldVisualization()"> <span style="color: #FFF8DC;" id="density-value">12</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Vector Scale:</label> <input type="range" id="vector-scale" min="0.5" max="3" step="0.1" value="1" style="width: 100px;" oninput="updateFieldVisualization()"> <span style="color: #FFF8DC;" id="scale-value">1.0</span>
+      </div>
+     </div>
+     <div class="analysis-panel" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+      <div class="info-box">
+       <h4 style="color: #FFD700; margin-top: 0;">Probe Measurements</h4>
+       <div id="probe-info">
+        <p><strong>Position:</strong> <span id="probe-position">Click to probe</span></p>
+        <p><strong>Electric Field:</strong> <span id="probe-field">E = 0 N/C</span></p>
+        <p><strong>Electric Potential:</strong> <span id="probe-potential">V = 0 V</span></p>
+        <p><strong>Force on Test Charge:</strong> <span id="probe-force">F = 0 N</span></p>
+        <div id="probe-calculation" style="display: none; margin-top: 10px; font-size: 14px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;">
+         <p><strong>F = qE Demonstration:</strong></p>
+         <p>F = (<span id="test-q-display">1.0×10⁻⁶</span> C) × (<span id="field-display">0</span> N/C)</p>
+         <p>F = <span id="force-result">0</span> N</p>
+        </div>
+       </div>
+      </div>
+      <div class="info-box">
+       <h4 style="color: #FFD700; margin-top: 0;">Selected Charge Analysis</h4>
+       <div id="selected-charge-info">
+        <p><strong>Charge:</strong> <span id="selected-charge-value">+2.0 μC</span></p>
+        <p><strong>Position:</strong> <span id="selected-charge-pos">(120, 120) px</span></p>
+        <p><strong>Net Force:</strong> <span id="net-force-value">0.135 N →</span></p>
+        <p><strong>Force Direction:</strong> <span id="force-direction">0°</span></p>
+       </div>
+      </div>
+      <div class="info-box">
+       <h4 style="color: #FFD700; margin-top: 0;">Field Properties</h4>
+       <div id="field-properties">
+        <p><strong>Rendering Mode:</strong> <span id="current-mode">Vector Arrows</span></p>
+        <p><strong>Total Charges:</strong> <span id="charge-count">2</span></p>
+        <p><strong>Field Strength Range:</strong> <span id="field-range">0 - 1000 N/C</span></p>
+        <p><strong>Max Field Location:</strong> <span id="max-field-pos">Near charges</span></p>
+       </div>
+      </div>
+     </div>
+     <div id="superposition-panel" class="info-box" style="display: none; margin-top: 20px;">
+      <h4 style="color: #FFD700; margin-top: 0;">Superposition Analysis</h4>
+      <div id="superposition-breakdown">
+       <p><strong>Individual Force Contributions:</strong></p>
+       <div id="individual-forces"></div>
+       <p style="margin-top: 15px;"><strong>Vector Sum (Net Force):</strong> <span id="vector-sum"></span></p>
+      </div>
+     </div>
+    </div>
+    <div id="module2-coulomb" class="tab-content">
+     <h3>Coulomb's Law Interactive Simulation</h3>
+     <p>Drag charges along the ruler to see how distance affects the electrostatic force. Watch the force calculation update in real-time!</p>
+     <div class="coulomb-controls" style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Object 1 Type:</label> <select id="object1-type" style="padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateObjectTypes()"> <option value="charge">Point Charge</option> <option value="human">Human (70kg)</option> </select>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;" id="q1-input-label">Charge 1:</label> <input type="number" id="q1-value" value="2" step="0.1" min="-1000" max="1000" style="width: 80px; padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateCoulombForce()"> <span id="q1-unit-label" style="color: #FFF8DC;">μC</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Object 2 Type:</label> <select id="object2-type" style="padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateObjectTypes()"> <option value="charge">Point Charge</option> <option value="human">Human (70kg)</option> </select>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;" id="q2-input-label">Charge 2:</label> <input type="number" id="q2-value" value="-3" step="0.1" min="-1000" max="1000" style="width: 80px; padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateCoulombForce()"> <span id="q2-unit-label" style="color: #FFF8DC;">μC</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;" id="force-input-container"><label style="color: #FFD700; font-weight: 600;">Force:</label> <input type="number" id="force-value-input" value="0.216" step="0.001" min="0" style="width: 100px; padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateCoulombForce()"> <span style="color: #FFF8DC;">N</span>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Distance Units:</label> <select id="distance-units" style="padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateCoulombForce()"> <option value="m">meters (m)</option> <option value="cm">centimeters (cm)</option> <option value="mm">millimeters (mm)</option> </select>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Charge Units:</label> <select id="charge-units" style="padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateCoulombForce()"> <option value="μC" selected>microcoulombs (μC)</option> <option value="C">coulombs (C)</option> <option value="nC">nanocoulombs (nC)</option> <option value="mC">millicoulombs (mC)</option> </select>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;"><label style="color: #FFD700; font-weight: 600;">Solve For:</label> <select id="solve-for" style="padding: 5px; border-radius: 5px; border: 2px solid #FFD700; background: #2d0a0a; color: #FFD700;" onchange="updateSolveMode()"> <option value="force">Force (F)</option> <option value="distance">Distance (r)</option> <option value="charge1">Charge 1 (q₁)</option> <option value="charge2">Charge 2 (q₂)</option> </select>
+      </div><button class="control-button" onclick="toggleCoulombWork()">Show Calculation Steps</button>
+     </div>
+     <div class="coulomb-simulation" style="background: rgba(0, 0, 0, 0.3); border: 2px solid #FFD700; border-radius: 15px; padding: 30px; position: relative; height: 400px; overflow: hidden;"><!-- Ruler -->
+      <div class="ruler-container" style="position: absolute; bottom: 80px; left: 50px; right: 50px; height: 60px;">
+       <div class="ruler" style="width: 100%; height: 40px; background: linear-gradient(to bottom, #FFD700, #FFA500); border-radius: 5px; position: relative; box-shadow: 0 3px 10px rgba(0,0,0,0.5);"><!-- Ruler markings -->
+        <div id="ruler-markings" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div><!-- Distance label -->
+        <div id="distance-display" style="position: absolute; top: -35px; left: 50%; transform: translateX(-50%); background: rgba(139, 0, 0, 0.9); color: #FFD700; padding: 5px 15px; border-radius: 15px; font-weight: bold; font-size: 16px; border: 2px solid #FFD700;">
+         Distance: 0.50 m
+        </div>
+       </div>
+      </div><!-- Charges on ruler -->
+      <div class="coulomb-charge" id="coulomb-q1" style="position: absolute; bottom: 60px; left: 100px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #FFD700, #FFA500); color: #8B0000; border: 3px solid #FFA500; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: move; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); user-select: none; z-index: 10;">
+       <div style="font-size: 28px;">
+        +
+       </div><span style="font-size: 12px; margin-top: 2px;">2.0μC</span>
+      </div>
+      <div class="coulomb-charge" id="coulomb-q2" style="position: absolute; bottom: 60px; left: 300px; width: 80px; height: 80px; border-radius: 50%; background: radial-gradient(circle, #4169E1, #1E90FF); color: white; border: 3px solid #1E90FF; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: move; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); user-select: none; z-index: 10;">
+       <div style="font-size: 28px;">
+        −
+       </div><span style="font-size: 12px; margin-top: 2px;">3.0μC</span>
+      </div><!-- Force vectors -->
+      <svg id="coulomb-force-svg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5;"><defs>
+        <marker id="coulomb-arrowhead" markerwidth="12" markerheight="8" refx="11" refy="4" orient="auto">
+         <polygon points="0 0, 12 4, 0 8" fill="#FF1493" />
+        </marker>
+        <marker id="coulomb-arrowhead-repulsive" markerwidth="12" markerheight="8" refx="11" refy="4" orient="auto">
+         <polygon points="0 0, 12 4, 0 8" fill="#FF4500" />
+        </marker>
+       </defs>
+      </svg><!-- Force magnitude display -->
+      <div id="force-magnitude-display" style="position: absolute; top: 20px; left: 20px; background: rgba(139, 0, 0, 0.9); color: #FFD700; padding: 15px 20px; border-radius: 10px; font-size: 18px; font-weight: bold; border: 2px solid #FFD700; min-width: 200px;">
+       <div id="force-title">
+        Force Magnitude:
+       </div>
+       <div id="force-value" style="font-size: 24px; color: #FFA500; margin-top: 5px;">
+        0.216 N
+       </div>
+       <div id="force-type" style="font-size: 14px; margin-top: 5px; color: #FFF8DC;">
+        Attractive Force
+       </div>
+       <div id="force-comparison" style="font-size: 12px; margin-top: 8px; color: #90EE90; display: none;">
+        <div>
+         vs Gravity: <span id="gravity-ratio">10²⁰× stronger</span>
+        </div>
+       </div>
+      </div><!-- Calculation steps panel -->
+      <div id="coulomb-calculation-panel" style="position: absolute; top: 20px; right: 20px; background: rgba(139, 0, 0, 0.9); color: #FFD700; padding: 15px 20px; border-radius: 10px; border: 2px solid #FFD700; display: none; max-width: 300px;">
+       <h4 style="margin: 0 0 10px 0; color: #FFD700;">Coulomb's Law Calculation:</h4>
+       <div id="coulomb-steps" style="font-size: 14px; line-height: 1.6;">
+        <p style="margin: 5px 0;"><strong>F = k × |q₁ × q₂| / r²</strong></p>
+        <p style="margin: 5px 0;">k = 8.99 × 10⁹ N⋅m²/C²</p>
+        <p style="margin: 5px 0;">q₁ = <span id="calc-q1">2.0 × 10⁻⁶</span> C</p>
+        <p style="margin: 5px 0;">q₂ = <span id="calc-q2">-3.0 × 10⁻⁶</span> C</p>
+        <p style="margin: 5px 0;">r = <span id="calc-distance">0.50</span> m</p>
+        <p style="margin: 10px 0; border-top: 1px solid #FFD700; padding-top: 10px;">F = (8.99×10⁹) × <span id="calc-product">6.0×10⁻¹²</span> / <span id="calc-r-squared">0.25</span></p>
+        <p style="margin: 5px 0; color: #FFA500; font-weight: bold;">F = <span id="calc-result">0.216</span> N</p>
+       </div>
+      </div>
+     </div>
+     <div class="coulomb-analysis" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+      <div class="info-box">
+       <h4 style="color: #FFD700; margin-top: 0;">Measurement Data</h4>
+       <div id="coulomb-measurements">
+        <p><strong>Distance:</strong> <span id="measured-distance">0.50 m</span></p>
+        <p><strong>Charge 1:</strong> <span id="measured-q1">+2.0 μC</span></p>
+        <p><strong>Charge 2:</strong> <span id="measured-q2">-3.0 μC</span></p>
+        <p><strong>Force Direction:</strong> <span id="force-direction-text">Attractive (opposite charges)</span></p>
+        <p><strong>Force per unit charge:</strong> <span id="force-per-charge">1.08 × 10⁵ N/C</span></p>
+       </div>
+      </div>
+      <div class="info-box">
+       <h4 style="color: #FFD700; margin-top: 0;">Physics Insights</h4>
+       <div id="physics-insights">
+        <p><strong>Inverse Square Law:</strong> <span id="inverse-square-demo">Force ∝ 1/r²</span></p>
+        <p><strong>If distance doubles:</strong> <span id="distance-effect">Force becomes 1/4</span></p>
+        <p><strong>If charges double:</strong> <span id="charge-effect">Force becomes 4×</span></p>
+        <p><strong>Comparison to gravity:</strong> <span id="gravity-comparison">~10²⁰× stronger</span></p>
+       </div>
+      </div>
+     </div>
+     <div class="controls" style="margin-top: 20px;"><button class="control-button" onclick="clearCoulombArrows()">Clear Arrows</button> <button class="control-button" onclick="resetCoulombCharges()">Reset Positions</button> <button class="control-button" onclick="setPresetDistance(0.1)">Set 10 cm apart</button> <button class="control-button" onclick="setPresetDistance(0.5)">Set 50 cm apart</button> <button class="control-button" onclick="setPresetDistance(1.0)">Set 1 m apart</button> <button class="control-button" onclick="exportCoulombData()">Export Data</button>
+     </div>
+    </div>
+    <div id="module2-demonstration" class="tab-content">
+     <h3>Electrostatic Demonstrations</h3>
+     <h4 style="color: #FFD700; margin-top: 25px;">1. Coulomb's Law in Action</h4>
+     <p>When two point charges interact, the force between them is directly proportional to the product of their charges and inversely proportional to the square of the distance between them.</p>
+     <p><strong>Example:</strong> Two charges of +2μC and -3μC separated by 0.5m experience a force of approximately 0.216N of attraction.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">2. Electric Field Visualization</h4>
+     <p>Electric field lines always point away from positive charges and toward negative charges. The density of field lines indicates the strength of the electric field.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">3. Superposition Principle</h4>
+     <p>When multiple charges are present, the net electric field at any point is the vector sum of the electric fields produced by each individual charge.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">4. Gauss's Law Application</h4>
+     <p>For a uniformly charged sphere, the electric field outside behaves as if all charge were concentrated at the center. Inside a conductor, the electric field is zero.</p>
+    </div>
+    <div id="module2-content" class="tab-content">
+     <h3>Learning Competencies</h3>
+     <h4 style="color: #FFD700;">Electrostatic Force</h4>
+     <ul>
+      <li>Define electrostatic force using Coulomb's law</li>
+      <li>Calculate the electrostatic force between two charges</li>
+      <li>Use the superposition principle for systems of charges</li>
+      <li>Calculate net electric force on a point charge from multiple charges</li>
+      <li>Predict charge distributions in insulators and conductors</li>
+     </ul>
+     <h4 style="color: #FFD700;">Electric Field</h4>
+     <ul>
+      <li>Describe electric field as a region where charges experience force</li>
+      <li>Compute electric field at a distance from a source charge</li>
+      <li>Relate electric field to electric force on a test charge</li>
+      <li>Draw electric field patterns for point charge systems</li>
+      <li>Calculate electric field using Coulomb's law and superposition</li>
+      <li>Predict trajectory of point charges in uniform electric fields</li>
+     </ul>
+     <h4 style="color: #FFD700;">Electric Flux and Gauss's Law</h4>
+     <ul>
+      <li>Describe electric flux as measurement of field flow</li>
+      <li>Calculate electric flux through surfaces</li>
+      <li>Infer charge distribution on conductor surfaces</li>
+      <li>Use Gauss's law for wires, spheres, and plates</li>
+      <li>Solve problems involving charges, forces, fields, and flux</li>
+     </ul>
+    </div>
+   </div>
+   <div id="realworld-content" class="content-area">
+    <div class="content-header">
+     <h2>Real World Applications</h2><button class="back-button" onclick="showMenu()">← Back to Menu</button>
+    </div>
+    <div class="tabs"><button class="tab active" onclick="showTab('realworld', 'simulation')">Simulation</button> <button class="tab" onclick="showTab('realworld', 'demonstration')">Demonstration</button> <button class="tab" onclick="showTab('realworld', 'content')">Content</button>
+    </div>
+    <div id="realworld-simulation" class="tab-content active">
+     <h3>Electrostatic Precipitator Simulation</h3>
+     <p>See how power plants use electrostatics to remove pollutants from smoke!</p>
+     <div class="simulation-canvas" style="background: linear-gradient(to right, rgba(100,100,100,0.2), rgba(50,50,50,0.2));">
+      <div style="text-align: center; padding: 50px; color: #FFD700;">
+       <div style="font-size: 48px; margin-bottom: 20px;">
+        🏭
+       </div>
+       <p style="font-size: 18px;">Charged plates attract smoke particles</p>
+       <div style="margin-top: 30px; display: flex; justify-content: space-around; align-items: center;">
+        <div style="font-size: 36px;">
+         ➕
+        </div>
+        <div style="font-size: 24px;">
+         💨 → 💨 → 💨
+        </div>
+        <div style="font-size: 36px;">
+         ➖
+        </div>
+       </div>
+       <p style="margin-top: 30px; font-size: 14px; opacity: 0.8;">Particles get charged and stick to oppositely charged plates</p>
+      </div>
+     </div>
+     <div class="info-box"><strong>How it works:</strong> Smoke particles pass through a charging section where they acquire a charge, then are attracted to oppositely charged collection plates, removing up to 99% of pollutants!
+     </div>
+    </div>
+    <div id="realworld-demonstration" class="tab-content">
+     <h3>Practical Applications of Electrostatics</h3>
+     <h4 style="color: #FFD700; margin-top: 25px;">1. Inkjet Printers</h4>
+     <p>Tiny droplets of ink are given an electric charge and directed by electric fields to precise locations on paper, creating high-resolution prints.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">2. Photocopiers and Laser Printers</h4>
+     <p>Use electrostatic charges to attract toner particles to paper in the pattern of the document being copied or printed.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">3. Paint Spraying</h4>
+     <p>Car manufacturers charge paint droplets so they're attracted to the grounded car body, resulting in even coating with minimal waste.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">4. Air Purifiers</h4>
+     <p>Home air purifiers use electrostatic precipitation to remove dust, pollen, and other particles from the air.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">5. Lightning Protection</h4>
+     <p>Lightning rods use principles of electric fields and charge distribution to safely direct lightning strikes to the ground.</p>
+    </div>
+    <div id="realworld-content" class="tab-content">
+     <h3>Applications in Modern Technology</h3>
+     <h4 style="color: #FFD700;">Medical Applications</h4>
+     <ul>
+      <li><strong>Defibrillators:</strong> Use electric fields to restore normal heart rhythm</li>
+      <li><strong>Electrosurgery:</strong> Controlled electric fields for precise cutting and cauterization</li>
+      <li><strong>Drug Delivery:</strong> Electroporation uses electric fields to deliver drugs into cells</li>
+     </ul>
+     <h4 style="color: #FFD700;">Industrial Applications</h4>
+     <ul>
+      <li><strong>Electrostatic Separation:</strong> Sorting recyclable materials by their electrical properties</li>
+      <li><strong>Powder Coating:</strong> Applying protective coatings to metal products</li>
+      <li><strong>Semiconductor Manufacturing:</strong> Controlling particle deposition in chip production</li>
+     </ul>
+     <h4 style="color: #FFD700;">Everyday Technology</h4>
+     <ul>
+      <li><strong>Touchscreens:</strong> Capacitive screens detect changes in electric fields from your finger</li>
+      <li><strong>Air Filters:</strong> HEPA filters enhanced with electrostatic charging</li>
+      <li><strong>Fabric Softeners:</strong> Reduce static cling by neutralizing charges on clothing</li>
+     </ul>
+    </div>
+   </div>
+   <div id="discussion-content" class="content-area">
+    <div class="content-header">
+     <h2>Discussion</h2><button class="back-button" onclick="showMenu()">← Back to Menu</button>
+    </div>
+    <div class="tabs"><button class="tab active" onclick="showTab('discussion', 'simulation')">Simulation</button> <button class="tab" onclick="showTab('discussion', 'demonstration')">Demonstration</button> <button class="tab" onclick="showTab('discussion', 'content')">Content</button>
+    </div>
+    <div id="discussion-simulation" class="tab-content active">
+     <h3>Problem-Solving Simulator</h3>
+     <p>Practice calculating forces between charges with different scenarios!</p>
+     <div class="simulation-canvas">
+      <div style="padding: 30px;">
+       <h4 style="color: #FFD700; margin-top: 0;">Sample Problem:</h4>
+       <p style="font-size: 16px; line-height: 1.8;">Two point charges, q₁ = +3.0 μC and q₂ = -2.0 μC, are separated by a distance of 0.50 m. Calculate the magnitude of the electrostatic force between them.</p>
+       <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 10px; margin: 20px 0;">
+        <p style="color: #FFD700; margin: 5px 0;"><strong>Given:</strong></p>
+        <p style="margin: 5px 0;">q₁ = +3.0 × 10⁻⁶ C</p>
+        <p style="margin: 5px 0;">q₂ = -2.0 × 10⁻⁶ C</p>
+        <p style="margin: 5px 0;">r = 0.50 m</p>
+        <p style="margin: 5px 0;">k = 8.99 × 10⁹ N·m²/C²</p>
+       </div>
+       <div style="background: rgba(139,0,0,0.3); padding: 20px; border-radius: 10px;">
+        <p style="color: #FFD700; margin: 5px 0;"><strong>Solution:</strong></p>
+        <p style="margin: 10px 0;">F = k × |q₁ × q₂| / r²</p>
+        <p style="margin: 10px 0;">F = (8.99 × 10⁹) × |3.0 × 10⁻⁶ × (-2.0 × 10⁻⁶)| / (0.50)²</p>
+        <p style="margin: 10px 0;">F = (8.99 × 10⁹) × (6.0 × 10⁻¹²) / 0.25</p>
+        <p style="margin: 10px 0; color: #FFD700; font-size: 18px;"><strong>F = 0.216 N (attractive force)</strong></p>
+       </div>
+      </div>
+     </div>
+     <div class="info-box"><strong>Key Insight:</strong> The force is attractive because the charges have opposite signs. The magnitude is calculated using the absolute values of the charges.
+     </div>
+    </div>
+    <div id="discussion-demonstration" class="tab-content">
+     <h3>Common Misconceptions and Clarifications</h3>
+     <h4 style="color: #FFD700; margin-top: 25px;">Misconception 1: Electric Field Lines are Physical</h4>
+     <p><strong>Clarification:</strong> Electric field lines are a visualization tool. They represent the direction a positive test charge would move, but they're not physical entities.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">Misconception 2: Charges Always Move Along Field Lines</h4>
+     <p><strong>Clarification:</strong> Charges only move along field lines if they start from rest. If a charge has initial velocity, it follows a curved path influenced by both the field and its momentum.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">Misconception 3: Electric Field Inside a Conductor is Strong</h4>
+     <p><strong>Clarification:</strong> In electrostatic equilibrium, the electric field inside a conductor is exactly zero. All excess charge resides on the surface.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">Misconception 4: Gauss's Law Only Works for Symmetric Shapes</h4>
+     <p><strong>Clarification:</strong> Gauss's law is always true, but it's only useful for calculating electric fields when there's sufficient symmetry to simplify the math.</p>
+    </div>
+    <div id="discussion-content" class="tab-content">
+     <h3>Discussion Topics and Problem-Solving Strategies</h3>
+     <h4 style="color: #FFD700;">Strategy 1: Identifying Charge Interactions</h4>
+     <ul>
+      <li>Always identify all charges in the system first</li>
+      <li>Determine whether forces are attractive or repulsive</li>
+      <li>Use vector addition for multiple charges</li>
+      <li>Remember: opposite charges attract, like charges repel</li>
+     </ul>
+     <h4 style="color: #FFD700;">Strategy 2: Calculating Electric Fields</h4>
+     <ul>
+      <li>Choose an appropriate coordinate system</li>
+      <li>Calculate field contributions from each charge separately</li>
+      <li>Add fields as vectors (consider direction!)</li>
+      <li>Check if symmetry can simplify calculations</li>
+     </ul>
+     <h4 style="color: #FFD700;">Strategy 3: Applying Gauss's Law</h4>
+     <ul>
+      <li>Identify the symmetry of the charge distribution</li>
+      <li>Choose a Gaussian surface that matches the symmetry</li>
+      <li>Calculate the enclosed charge</li>
+      <li>Use Φ = Q_enclosed / ε₀ to find the field</li>
+     </ul>
+     <h4 style="color: #FFD700;">Strategy 4: Problem-Solving Checklist</h4>
+     <ul>
+      <li>Draw a clear diagram with all charges and distances labeled</li>
+      <li>List known and unknown quantities</li>
+      <li>Choose the appropriate equation or principle</li>
+      <li>Solve algebraically before substituting numbers</li>
+      <li>Check units and reasonableness of answer</li>
+     </ul>
+    </div>
+   </div>
+   <div id="quizzes-content" class="content-area">
+    <div class="content-header">
+     <h2>Quizzes</h2><button class="back-button" onclick="showMenu()">← Back to Menu</button>
+    </div>
+    <div class="tabs"><button class="tab active" onclick="showTab('quizzes', 'simulation')">Simulation</button> <button class="tab" onclick="showTab('quizzes', 'demonstration')">Demonstration</button> <button class="tab" onclick="showTab('quizzes', 'content')">Content</button>
+    </div>
+    <div id="quizzes-simulation" class="tab-content active">
+     <h3>Interactive Quiz: Test Your Knowledge</h3>
+     <div class="simulation-canvas">
+      <div style="padding: 30px;">
+       <div id="quiz-question" style="margin-bottom: 30px;">
+        <h4 style="color: #FFD700; margin-top: 0;">Question 1 of 5:</h4>
+        <p style="font-size: 18px; line-height: 1.6;">What happens to the electrostatic force between two charges if the distance between them is doubled?</p>
+       </div>
+       <div style="display: flex; flex-direction: column; gap: 15px;"><button class="control-button" onclick="checkAnswer(1, false)" style="text-align: left; padding: 15px 25px;"> A) The force doubles </button> <button class="control-button" onclick="checkAnswer(1, false)" style="text-align: left; padding: 15px 25px;"> B) The force is halved </button> <button class="control-button" onclick="checkAnswer(1, true)" style="text-align: left; padding: 15px 25px;"> C) The force becomes one-fourth </button> <button class="control-button" onclick="checkAnswer(1, false)" style="text-align: left; padding: 15px 25px;"> D) The force remains the same </button>
+       </div>
+       <div id="quiz-feedback" style="margin-top: 30px; padding: 20px; border-radius: 10px; display: none;"></div>
+      </div>
+     </div>
+     <div class="controls"><button class="control-button" onclick="nextQuestion()">Next Question</button> <button class="control-button" onclick="resetQuiz()">Restart Quiz</button>
+     </div>
+     <div class="info-box"><strong>Quiz Progress:</strong> <span id="quiz-score">0 / 0 correct</span>
+     </div>
+    </div>
+    <div id="quizzes-demonstration" class="tab-content">
+     <h3>Sample Quiz Questions with Solutions</h3>
+     <h4 style="color: #FFD700; margin-top: 25px;">Question 1: Coulomb's Law</h4>
+     <p><strong>Q:</strong> Two charges of +4μC and +6μC are 2m apart. What is the force between them?</p>
+     <p><strong>A:</strong> F = (8.99×10⁹)(4×10⁻⁶)(6×10⁻⁶)/(2²) = 0.054 N (repulsive)</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">Question 2: Electric Field</h4>
+     <p><strong>Q:</strong> What is the electric field 3m from a +5μC charge?</p>
+     <p><strong>A:</strong> E = kq/r² = (8.99×10⁹)(5×10⁻⁶)/(3²) = 4,995 N/C</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">Question 3: Superposition</h4>
+     <p><strong>Q:</strong> Three charges (+2μC, -3μC, +4μC) are arranged in a line. How do you find the net force on the middle charge?</p>
+     <p><strong>A:</strong> Calculate force from each charge separately, then add vectorially considering directions.</p>
+     <h4 style="color: #FFD700; margin-top: 25px;">Question 4: Electric Flux</h4>
+     <p><strong>Q:</strong> A charge of 8μC is enclosed by a spherical surface. What is the electric flux through the surface?</p>
+     <p><strong>A:</strong> Φ = Q/ε₀ = (8×10⁻⁶)/(8.85×10⁻¹²) = 9.04×10⁵ N·m²/C</p>
+    </div>
+    <div id="quizzes-content" class="tab-content">
+     <h3>Comprehensive Assessment Topics</h3>
+     <h4 style="color: #FFD700;">Fundamental Concepts (30%)</h4>
+     <ul>
+      <li>Definition and properties of electric charge</li>
+      <li>Coulomb's law and its applications</li>
+      <li>Electric field concept and calculation</li>
+      <li>Superposition principle</li>
+     </ul>
+     <h4 style="color: #FFD700;">Problem Solving (40%)</h4>
+     <ul>
+      <li>Calculating forces between multiple charges</li>
+      <li>Determining electric fields from charge distributions</li>
+      <li>Analyzing charge motion in electric fields</li>
+      <li>Applying Gauss's law to symmetric situations</li>
+     </ul>
+     <h4 style="color: #FFD700;">Applications (20%)</h4>
+     <ul>
+      <li>Real-world applications of electrostatics</li>
+      <li>Conductors and insulators in electric fields</li>
+      <li>Electrostatic precipitation and inkjet printing</li>
+      <li>Lightning and electrical breakdown</li>
+     </ul>
+     <h4 style="color: #FFD700;">Conceptual Understanding (10%)</h4>
+     <ul>
+      <li>Electric field line interpretation</li>
+      <li>Charge distribution on conductors</li>
+      <li>Relationship between field, force, and flux</li>
+      <li>Symmetry arguments in electrostatics</li>
+     </ul>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      lab_title: "General Physics Simulation Laboratory",
+      module_title: "Magnetism",
+      real_world_label: "Real World Application",
+      discussion_label: "Discussion",
+      quizzes_label: "Quizzes",
+      background_color: "#1a0000",
+      surface_color: "#8B0000",
+      text_color: "#FFD700",
+      primary_action_color: "#FFD700",
+      secondary_action_color: "#FFA500",
+      font_family: "Segoe UI",
+      font_size: 16
+    };
+
+    let config = { ...defaultConfig };
+
+    let draggedElement = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let chargeCount = 2;
+    let showFieldLines = false;
+    let showVectors = false;
+    let showWork = false;
+    let showSuperposition = false;
+    let selectedCharge = null;
+    let quizQuestionIndex = 0;
+    let quizScore = 0;
+    let quizTotal = 0;
+    let probeMode = false;
+    let currentRenderMode = 'vectors';
+    let fieldVisualization = null;
+    let probeMarker = null;
+    let coulombDraggedElement = null;
+    let coulombOffsetX = 0;
+    let coulombShowWork = false;
+    let solveMode = 'force';
+
+    function convertToCoulombs(value, unit) {
+      switch(unit) {
+        case 'C': return value;
+        case 'μC': return value * 1e-6;
+        case 'nC': return value * 1e-9;
+        case 'mC': return value * 1e-3;
+        default: return value * 1e-6; // Default to μC
+      }
+    }
+
+    function createWalkingHuman(chargeValue, unit) {
+      const sign = chargeValue >= 0 ? '+' : '−';
+      const absValue = Math.abs(chargeValue);
+      const chargeClass = chargeValue >= 0 ? 'human-charge-positive' : 'human-charge-negative';
+      
+      return `
+        <div class="walking-human">
+          <div class="human-figure">
+            <div class="human-arms">
+              <span>🤚</span>
+              <span>🤚</span>
+            </div>
+            <div>🧍‍♂️</div>
+            <div class="human-legs">
+              <span>🦶</span>
+              <span>🦶</span>
+            </div>
+          </div>
+          <div class="human-charge-label ${chargeClass}">${sign}${absValue.toFixed(1)}${unit}</div>
+        </div>
+      `;
+    }
+
+    function updateSolveMode() {
+      solveMode = document.getElementById('solve-for').value;
+      const forceInputContainer = document.getElementById('force-input-container');
+      const q1Input = document.getElementById('q1-value');
+      const q2Input = document.getElementById('q2-value');
+      const q1Label = document.getElementById('q1-input-label');
+      const q2Label = document.getElementById('q2-input-label');
+      
+      // Show/hide appropriate input fields based on solve mode
+      switch(solveMode) {
+        case 'force':
+          forceInputContainer.style.display = 'none';
+          q1Input.style.display = 'inline-block';
+          q2Input.style.display = 'inline-block';
+          q1Label.style.opacity = '1';
+          q2Label.style.opacity = '1';
+          q1Input.disabled = false;
+          q2Input.disabled = false;
+          break;
+        case 'distance':
+          forceInputContainer.style.display = 'flex';
+          q1Input.style.display = 'inline-block';
+          q2Input.style.display = 'inline-block';
+          q1Label.style.opacity = '1';
+          q2Label.style.opacity = '1';
+          q1Input.disabled = false;
+          q2Input.disabled = false;
+          break;
+        case 'charge1':
+          forceInputContainer.style.display = 'flex';
+          q1Input.style.display = 'none';
+          q2Input.style.display = 'inline-block';
+          q1Label.style.opacity = '0.5';
+          q2Label.style.opacity = '1';
+          q1Input.disabled = true;
+          q2Input.disabled = false;
+          break;
+        case 'charge2':
+          forceInputContainer.style.display = 'flex';
+          q1Input.style.display = 'inline-block';
+          q2Input.style.display = 'none';
+          q1Label.style.opacity = '1';
+          q2Label.style.opacity = '0.5';
+          q1Input.disabled = false;
+          q2Input.disabled = true;
+          break;
+      }
+      
+      updateCoulombForce();
+    }
+
+    function updateObjectTypes() {
+      const obj1Type = document.getElementById('object1-type').value;
+      const obj2Type = document.getElementById('object2-type').value;
+      
+      const q1Element = document.getElementById('coulomb-q1');
+      const q2Element = document.getElementById('coulomb-q2');
+      const q1Input = document.getElementById('q1-value');
+      const q2Input = document.getElementById('q2-value');
+      const q1Label = document.getElementById('q1-input-label');
+      const q2Label = document.getElementById('q2-input-label');
+      const q1UnitLabel = document.getElementById('q1-unit-label');
+      const q2UnitLabel = document.getElementById('q2-unit-label');
+      
+      // Update Object 1
+      if (obj1Type === 'human') {
+        q1Element.classList.add('coulomb-human');
+        q1Element.innerHTML = createWalkingHuman(parseFloat(q1Input.value), document.getElementById('charge-units').value);
+        q1Label.textContent = 'Human 1 Charge:';
+        q1Input.value = '1';
+        q1Input.style.display = 'inline-block';
+        q1UnitLabel.style.display = 'inline-block';
+      } else {
+        q1Element.classList.remove('coulomb-human');
+        q1Label.textContent = 'Charge 1:';
+        q1Input.value = '2';
+        q1Input.style.display = 'inline-block';
+        q1UnitLabel.style.display = 'inline-block';
+        updateChargeAppearance(q1Element, parseFloat(q1Input.value), document.getElementById('charge-units').value);
+      }
+      
+      // Update Object 2
+      if (obj2Type === 'human') {
+        q2Element.classList.add('coulomb-human');
+        q2Element.innerHTML = createWalkingHuman(parseFloat(q2Input.value), document.getElementById('charge-units').value);
+        q2Label.textContent = 'Human 2 Charge:';
+        q2Input.value = '-1';
+        q2Input.style.display = 'inline-block';
+        q2UnitLabel.style.display = 'inline-block';
+      } else {
+        q2Element.classList.remove('coulomb-human');
+        q2Label.textContent = 'Charge 2:';
+        q2Input.value = '-3';
+        q2Input.style.display = 'inline-block';
+        q2UnitLabel.style.display = 'inline-block';
+        updateChargeAppearance(q2Element, parseFloat(q2Input.value), document.getElementById('charge-units').value);
+      }
+      
+      updateCoulombForce();
+    }
+
+    const k = 8.99e9; // Coulomb's constant
+    const pixelsToMeters = 0.01; // 1 pixel = 0.01 meters for calculations
+
+    const quizQuestions = [
+      {
+        question: "What happens to the electrostatic force between two charges if the distance between them is doubled?",
+        options: ["The force doubles", "The force is halved", "The force becomes one-fourth", "The force remains the same"],
+        correct: 2,
+        explanation: "According to Coulomb's law (F = kq₁q₂/r²), force is inversely proportional to the square of distance. Doubling distance makes force 1/4."
+      },
+      {
+        question: "In which direction do electric field lines point?",
+        options: ["From negative to positive charges", "From positive to negative charges", "Perpendicular to charges", "In random directions"],
+        correct: 1,
+        explanation: "Electric field lines always point away from positive charges and toward negative charges, showing the direction a positive test charge would move."
+      },
+      {
+        question: "What is the electric field inside a conductor in electrostatic equilibrium?",
+        options: ["Very strong", "Depends on the conductor", "Zero", "Equal to the external field"],
+        correct: 2,
+        explanation: "In electrostatic equilibrium, the electric field inside a conductor is always zero. All excess charge resides on the surface."
+      },
+      {
+        question: "Two charges of +3μC and -3μC are placed 1m apart. What type of force exists between them?",
+        options: ["Repulsive", "Attractive", "No force", "Gravitational only"],
+        correct: 1,
+        explanation: "Opposite charges (positive and negative) always attract each other according to Coulomb's law."
+      },
+      {
+        question: "What does Gauss's law relate?",
+        options: ["Force and charge", "Field and distance", "Electric flux and enclosed charge", "Voltage and current"],
+        correct: 2,
+        explanation: "Gauss's law states that the electric flux through a closed surface is proportional to the charge enclosed: Φ = Q/ε₀"
+      }
+    ];
+
+    function showContent(section) {
+      document.getElementById('menu-view').style.display = 'none';
+      document.getElementById('module2-content').classList.remove('active');
+      document.getElementById('realworld-content').classList.remove('active');
+      document.getElementById('discussion-content').classList.remove('active');
+      document.getElementById('quizzes-content').classList.remove('active');
+      
+      document.getElementById(section + '-content').classList.add('active');
+      
+      showTab(section, 'simulation');
+    }
+
+    function showMenu() {
+      document.getElementById('menu-view').style.display = 'block';
+      document.getElementById('module2-content').classList.remove('active');
+      document.getElementById('realworld-content').classList.remove('active');
+      document.getElementById('discussion-content').classList.remove('active');
+      document.getElementById('quizzes-content').classList.remove('active');
+    }
+
+    function showTab(section, tab) {
+      const tabs = document.querySelectorAll(`#${section}-content .tab`);
+      const contents = document.querySelectorAll(`#${section}-content .tab-content`);
+      
+      tabs.forEach(t => t.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`${section}-${tab}`).classList.add('active');
+    }
+
+    function initDragAndDrop() {
+      const charges = document.querySelectorAll('.charge');
+      
+      charges.forEach(charge => {
+        charge.addEventListener('mousedown', startDrag);
+        charge.addEventListener('touchstart', startDrag);
+      });
+
+      document.addEventListener('mousemove', drag);
+      document.addEventListener('touchmove', drag);
+      document.addEventListener('mouseup', stopDrag);
+      document.addEventListener('touchend', stopDrag);
+    }
+
+    function startDrag(e) {
+      draggedElement = e.target.closest('.charge');
+      const rect = draggedElement.getBoundingClientRect();
+      const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+      
+      offsetX = clientX - rect.left;
+      offsetY = clientY - rect.top;
+      
+      draggedElement.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+
+    function drag(e) {
+      if (!draggedElement) return;
+      
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+      
+      let newX = clientX - canvasRect.left - offsetX;
+      let newY = clientY - canvasRect.top - offsetY;
+      
+      newX = Math.max(0, Math.min(newX, canvasRect.width - 80));
+      newY = Math.max(0, Math.min(newY, canvasRect.height - 80));
+      
+      draggedElement.style.left = newX + 'px';
+      draggedElement.style.top = newY + 'px';
+      
+      // Update analysis in real-time if this is the selected charge
+      if (draggedElement === selectedCharge) {
+        updateAnalysis();
+        if (showVectors) {
+          drawForceVectors();
+        }
+      }
+      
+      e.preventDefault();
+    }
+
+    function stopDrag() {
+      if (draggedElement) {
+        draggedElement.style.cursor = 'move';
+        draggedElement = null;
+      }
+    }
+
+    function selectCharge(element) {
+      // Remove selection from all charges
+      document.querySelectorAll('.charge').forEach(c => c.classList.remove('selected'));
+      
+      // Select the clicked charge
+      element.classList.add('selected');
+      selectedCharge = element;
+      
+      updateAnalysis();
+      if (showVectors) {
+        drawForceVectors();
+      }
+    }
+
+    function addCharge(type) {
+      const canvas = document.getElementById('simulation-canvas');
+      const magnitude = parseFloat(document.getElementById('charge-magnitude').value);
+      const charge = document.createElement('div');
+      
+      chargeCount++;
+      charge.className = `charge ${type}`;
+      charge.id = `charge${chargeCount}`;
+      charge.setAttribute('data-charge', type === 'positive' ? magnitude : -magnitude);
+      charge.onclick = () => selectCharge(charge);
+      
+      const sign = type === 'positive' ? '+' : '−';
+      charge.innerHTML = `<div style="font-size: 28px;">${sign}</div><span class="charge-label">${sign}${magnitude}μC</span>`;
+      
+      charge.style.left = (Math.random() * (canvas.offsetWidth - 80)) + 'px';
+      charge.style.top = (Math.random() * (canvas.offsetHeight - 80)) + 'px';
+      
+      canvas.appendChild(charge);
+      
+      charge.addEventListener('mousedown', startDrag);
+      charge.addEventListener('touchstart', startDrag);
+      
+      updateAnalysis();
+    }
+
+    function updateAnalysis() {
+      if (!selectedCharge) return;
+      
+      const chargeValue = parseFloat(selectedCharge.getAttribute('data-charge'));
+      const rect = selectedCharge.getBoundingClientRect();
+      const canvasRect = document.getElementById('simulation-canvas').getBoundingClientRect();
+      
+      const x = rect.left - canvasRect.left + 40; // Center of charge
+      const y = rect.top - canvasRect.top + 40;
+      
+      // Update selected charge info
+      document.getElementById('selected-charge-value').textContent = 
+        `${chargeValue > 0 ? '+' : ''}${chargeValue.toFixed(1)} μC`;
+      document.getElementById('selected-charge-pos').textContent = 
+        `(${Math.round(x)}, ${Math.round(y)}) px`;
+      
+      // Calculate net force
+      const netForce = calculateNetForce(selectedCharge);
+      document.getElementById('net-force-value').textContent = 
+        `${netForce.magnitude.toExponential(3)} N`;
+      document.getElementById('force-direction').textContent = 
+        `${Math.round(netForce.angle)}°`;
+      
+      // Update pairwise force calculation
+      updatePairwiseForces();
+      
+      if (showSuperposition) {
+        updateSuperpositionAnalysis();
+      }
+    }
+
+    function calculateNetForce(targetCharge) {
+      const charges = document.querySelectorAll('.charge');
+      const targetRect = targetCharge.getBoundingClientRect();
+      const canvasRect = document.getElementById('simulation-canvas').getBoundingClientRect();
+      
+      const targetX = targetRect.left - canvasRect.left + 40;
+      const targetY = targetRect.top - canvasRect.top + 40;
+      const targetQ = parseFloat(targetCharge.getAttribute('data-charge')) * 1e-6; // Convert to Coulombs
+      
+      let netFx = 0;
+      let netFy = 0;
+      
+      charges.forEach(charge => {
+        if (charge === targetCharge) return;
+        
+        const chargeRect = charge.getBoundingClientRect();
+        const chargeX = chargeRect.left - canvasRect.left + 40;
+        const chargeY = chargeRect.top - canvasRect.top + 40;
+        const chargeQ = parseFloat(charge.getAttribute('data-charge')) * 1e-6;
+        
+        const dx = (targetX - chargeX) * pixelsToMeters;
+        const dy = (targetY - chargeY) * pixelsToMeters;
+        const r = Math.sqrt(dx * dx + dy * dy);
+        
+        if (r > 0) {
+          const F = k * Math.abs(targetQ * chargeQ) / (r * r);
+          const forceDirection = targetQ * chargeQ > 0 ? 1 : -1; // Repulsive or attractive
+          
+          netFx += forceDirection * F * (dx / r);
+          netFy += forceDirection * F * (dy / r);
+        }
+      });
+      
+      const magnitude = Math.sqrt(netFx * netFx + netFy * netFy);
+      const angle = Math.atan2(netFy, netFx) * 180 / Math.PI;
+      
+      return { magnitude, angle, fx: netFx, fy: netFy };
+    }
+
+    function updatePairwiseForces() {
+      const charges = document.querySelectorAll('.charge');
+      if (charges.length < 2) return;
+      
+      // Find the closest charge to the selected one for pairwise analysis
+      let closestCharge = null;
+      let minDistance = Infinity;
+      
+      const selectedRect = selectedCharge.getBoundingClientRect();
+      const canvasRect = document.getElementById('simulation-canvas').getBoundingClientRect();
+      const selectedX = selectedRect.left - canvasRect.left + 40;
+      const selectedY = selectedRect.top - canvasRect.top + 40;
+      
+      charges.forEach(charge => {
+        if (charge === selectedCharge) return;
+        
+        const chargeRect = charge.getBoundingClientRect();
+        const chargeX = chargeRect.left - canvasRect.left + 40;
+        const chargeY = chargeRect.top - canvasRect.top + 40;
+        
+        const distance = Math.sqrt((selectedX - chargeX) ** 2 + (selectedY - chargeY) ** 2);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCharge = charge;
+        }
+      });
+      
+      if (closestCharge) {
+        const q1 = parseFloat(selectedCharge.getAttribute('data-charge'));
+        const q2 = parseFloat(closestCharge.getAttribute('data-charge'));
+        const distanceMeters = minDistance * pixelsToMeters;
+        
+        const force = k * Math.abs(q1 * q2 * 1e-12) / (distanceMeters * distanceMeters);
+        const forceType = (q1 * q2 > 0) ? 'repulsive' : 'attractive';
+        
+        document.getElementById('pair-distance').textContent = 
+          `${Math.round(minDistance)} px (${distanceMeters.toFixed(2)} m)`;
+        document.getElementById('pair-force').textContent = 
+          `${force.toExponential(3)} N (${forceType})`;
+        
+        if (showWork) {
+          document.getElementById('calculation-steps').style.display = 'block';
+          document.getElementById('calculation-steps').innerHTML = `
+            <p><strong>Calculation Steps:</strong></p>
+            <p>F = k × |q₁ × q₂| / r²</p>
+            <p>F = (8.99×10⁹) × |${q1}×10⁻⁶ × ${q2}×10⁻⁶| / (${distanceMeters.toFixed(2)})²</p>
+            <p>F = (8.99×10⁹) × (${Math.abs(q1 * q2)}×10⁻¹²) / ${(distanceMeters * distanceMeters).toFixed(4)}</p>
+            <p>F = ${force.toExponential(3)} N</p>
+          `;
+        } else {
+          document.getElementById('calculation-steps').style.display = 'none';
+        }
+      }
+    }
+
+    function toggleVectors() {
+      showVectors = !showVectors;
+      if (showVectors) {
+        drawForceVectors();
+      } else {
+        clearForceVectors();
+      }
+    }
+
+    function toggleShowWork() {
+      showWork = !showWork;
+      updateAnalysis();
+    }
+
+    function toggleSuperposition() {
+      showSuperposition = !showSuperposition;
+      const panel = document.getElementById('superposition-panel');
+      panel.style.display = showSuperposition ? 'block' : 'none';
+      if (showSuperposition) {
+        updateSuperpositionAnalysis();
+      }
+    }
+
+    function drawForceVectors() {
+      if (!selectedCharge) return;
+      
+      clearForceVectors();
+      
+      const canvas = document.getElementById('simulation-canvas');
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.id = 'force-vectors-svg';
+      svg.style.position = 'absolute';
+      svg.style.top = '0';
+      svg.style.left = '0';
+      svg.style.width = '100%';
+      svg.style.height = '100%';
+      svg.style.pointerEvents = 'none';
+      svg.style.zIndex = '10';
+      
+      // Add arrowhead marker
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'arrowhead');
+      marker.setAttribute('markerWidth', '10');
+      marker.setAttribute('markerHeight', '7');
+      marker.setAttribute('refX', '9');
+      marker.setAttribute('refY', '3.5');
+      marker.setAttribute('orient', 'auto');
+      
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      polygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+      polygon.setAttribute('fill', '#FF4444');
+      
+      marker.appendChild(polygon);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+      
+      const selectedRect = selectedCharge.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const selectedX = selectedRect.left - canvasRect.left + 40;
+      const selectedY = selectedRect.top - canvasRect.top + 40;
+      
+      const netForce = calculateNetForce(selectedCharge);
+      const scale = 1e8; // Scale factor for visualization
+      const vectorLength = Math.min(netForce.magnitude * scale, 100);
+      
+      if (vectorLength > 5) {
+        const endX = selectedX + vectorLength * Math.cos(netForce.angle * Math.PI / 180);
+        const endY = selectedY + vectorLength * Math.sin(netForce.angle * Math.PI / 180);
+        
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', selectedX);
+        line.setAttribute('y1', selectedY);
+        line.setAttribute('x2', endX);
+        line.setAttribute('y2', endY);
+        line.setAttribute('stroke', '#FF4444');
+        line.setAttribute('stroke-width', '3');
+        line.setAttribute('marker-end', 'url(#arrowhead)');
+        
+        svg.appendChild(line);
+        
+        // Add force magnitude label
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', endX + 10);
+        text.setAttribute('y', endY - 10);
+        text.setAttribute('fill', '#FF4444');
+        text.setAttribute('font-size', '12');
+        text.setAttribute('font-weight', 'bold');
+        text.textContent = `${netForce.magnitude.toExponential(2)} N`;
+        
+        svg.appendChild(text);
+      }
+      
+      canvas.appendChild(svg);
+    }
+
+    function clearForceVectors() {
+      const existingSvg = document.getElementById('force-vectors-svg');
+      if (existingSvg) {
+        existingSvg.remove();
+      }
+    }
+
+    function updateSuperpositionAnalysis() {
+      if (!selectedCharge || !showSuperposition) return;
+      
+      const charges = document.querySelectorAll('.charge');
+      const individualForcesDiv = document.getElementById('individual-forces');
+      const vectorSumSpan = document.getElementById('vector-sum');
+      
+      individualForcesDiv.innerHTML = '';
+      
+      const selectedRect = selectedCharge.getBoundingClientRect();
+      const canvasRect = document.getElementById('simulation-canvas').getBoundingClientRect();
+      const selectedX = selectedRect.left - canvasRect.left + 40;
+      const selectedY = selectedRect.top - canvasRect.top + 40;
+      const selectedQ = parseFloat(selectedCharge.getAttribute('data-charge')) * 1e-6;
+      
+      let netFx = 0;
+      let netFy = 0;
+      let forceIndex = 1;
+      
+      charges.forEach(charge => {
+        if (charge === selectedCharge) return;
+        
+        const chargeRect = charge.getBoundingClientRect();
+        const chargeX = chargeRect.left - canvasRect.left + 40;
+        const chargeY = chargeRect.top - canvasRect.top + 40;
+        const chargeQ = parseFloat(charge.getAttribute('data-charge')) * 1e-6;
+        
+        const dx = (selectedX - chargeX) * pixelsToMeters;
+        const dy = (selectedY - chargeY) * pixelsToMeters;
+        const r = Math.sqrt(dx * dx + dy * dy);
+        
+        if (r > 0) {
+          const F = k * Math.abs(selectedQ * chargeQ) / (r * r);
+          const forceDirection = selectedQ * chargeQ > 0 ? 1 : -1;
+          
+          const fx = forceDirection * F * (dx / r);
+          const fy = forceDirection * F * (dy / r);
+          
+          netFx += fx;
+          netFy += fy;
+          
+          const forceDiv = document.createElement('div');
+          forceDiv.style.marginBottom = '8px';
+          forceDiv.style.padding = '8px';
+          forceDiv.style.background = 'rgba(0,0,0,0.2)';
+          forceDiv.style.borderRadius = '5px';
+          forceDiv.innerHTML = `
+            <strong>F${forceIndex}:</strong> ${F.toExponential(2)} N<br>
+            <strong>Components:</strong> Fx = ${fx.toExponential(2)} N, Fy = ${fy.toExponential(2)} N<br>
+            <strong>From charge:</strong> ${parseFloat(charge.getAttribute('data-charge')).toFixed(1)} μC
+          `;
+          
+          individualForcesDiv.appendChild(forceDiv);
+          forceIndex++;
+        }
+      });
+      
+      const netMagnitude = Math.sqrt(netFx * netFx + netFy * netFy);
+      const netAngle = Math.atan2(netFy, netFx) * 180 / Math.PI;
+      
+      vectorSumSpan.innerHTML = `
+        ${netMagnitude.toExponential(2)} N at ${Math.round(netAngle)}°<br>
+        <small>Fx = ${netFx.toExponential(2)} N, Fy = ${netFy.toExponential(2)} N</small>
+      `;
+    }
+
+    function resetSimulation() {
+      const canvas = document.getElementById('simulation-canvas');
+      const charges = canvas.querySelectorAll('.charge');
+      
+      charges.forEach((charge, index) => {
+        if (index > 1) {
+          charge.remove();
+        }
+      });
+      
+      // Reset the initial charges
+      const charge1 = document.getElementById('charge1');
+      const charge2 = document.getElementById('charge2');
+      
+      charge1.style.left = '120px';
+      charge1.style.top = '120px';
+      charge1.setAttribute('data-charge', '2');
+      charge1.innerHTML = '<div style="font-size: 28px;">+</div><span class="charge-label">+2μC</span>';
+      
+      charge2.style.left = '320px';
+      charge2.style.top = '120px';
+      charge2.setAttribute('data-charge', '-3');
+      charge2.innerHTML = '<div style="font-size: 28px;">−</div><span class="charge-label">−3μC</span>';
+      
+      chargeCount = 2;
+      selectedCharge = charge1;
+      charge1.classList.add('selected');
+      charge2.classList.remove('selected');
+      
+      // Reset probe mode
+      probeMode = false;
+      canvas.classList.remove('probe-cursor');
+      canvas.removeEventListener('click', handleProbeClick);
+      if (probeMarker) {
+        probeMarker.remove();
+        probeMarker = null;
+      }
+      
+      clearForceVectors();
+      clearFieldVisualization();
+      updateAnalysis();
+      updateFieldVisualization();
+    }
+
+    function updateFieldVisualization() {
+      const mode = document.getElementById('render-mode').value;
+      const density = document.getElementById('field-density').value;
+      const scale = document.getElementById('vector-scale').value;
+      
+      document.getElementById('density-value').textContent = density;
+      document.getElementById('scale-value').textContent = parseFloat(scale).toFixed(1);
+      document.getElementById('current-mode').textContent = mode.charAt(0).toUpperCase() + mode.slice(1);
+      
+      currentRenderMode = mode;
+      clearFieldVisualization();
+      
+      switch(mode) {
+        case 'vectors':
+          drawFieldVectors(scale);
+          break;
+        case 'fieldlines':
+          drawFieldLines(density);
+          break;
+        case 'colormap':
+          drawFieldColorMap();
+          break;
+        case 'combined':
+          drawFieldColorMap();
+          drawFieldLines(Math.max(8, density - 4));
+          break;
+      }
+      
+      updateFieldProperties();
+    }
+
+    function clearFieldVisualization() {
+      const canvas = document.getElementById('simulation-canvas');
+      const existingViz = canvas.querySelectorAll('.field-vector, .continuous-field-line, .field-colormap');
+      existingViz.forEach(el => el.remove());
+      
+      const existingSvg = document.getElementById('field-visualization-svg');
+      if (existingSvg) {
+        existingSvg.remove();
+      }
+    }
+
+    function drawFieldVectors(scale = 1) {
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      
+      svg.id = 'field-visualization-svg';
+      svg.style.position = 'absolute';
+      svg.style.top = '0';
+      svg.style.left = '0';
+      svg.style.width = '100%';
+      svg.style.height = '100%';
+      svg.style.pointerEvents = 'none';
+      svg.style.zIndex = '5';
+      
+      // Add arrowhead marker for field vectors
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'field-arrowhead');
+      marker.setAttribute('markerWidth', '8');
+      marker.setAttribute('markerHeight', '6');
+      marker.setAttribute('refX', '7');
+      marker.setAttribute('refY', '3');
+      marker.setAttribute('orient', 'auto');
+      
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      polygon.setAttribute('points', '0 0, 8 3, 0 6');
+      polygon.setAttribute('fill', '#00FFFF');
+      
+      marker.appendChild(polygon);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+      
+      // Draw field vectors at grid points
+      const gridSize = 40;
+      const charges = canvas.querySelectorAll('.charge');
+      
+      for (let x = gridSize; x < canvasRect.width - gridSize; x += gridSize) {
+        for (let y = gridSize; y < canvasRect.height - gridSize; y += gridSize) {
+          // Skip points too close to charges
+          let tooClose = false;
+          charges.forEach(charge => {
+            const chargeRect = charge.getBoundingClientRect();
+            const chargeX = chargeRect.left - canvasRect.left + 40;
+            const chargeY = chargeRect.top - canvasRect.top + 40;
+            const distance = Math.sqrt((x - chargeX) ** 2 + (y - chargeY) ** 2);
+            if (distance < 50) tooClose = true;
+          });
+          
+          if (!tooClose) {
+            const field = calculateElectricField(x, y);
+            if (field.magnitude > 1e-3) {
+              const vectorLength = Math.min(30 * scale * Math.log10(field.magnitude + 1), 25);
+              const endX = x + vectorLength * Math.cos(field.angle);
+              const endY = y + vectorLength * Math.sin(field.angle);
+              
+              const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+              line.setAttribute('x1', x);
+              line.setAttribute('y1', y);
+              line.setAttribute('x2', endX);
+              line.setAttribute('y2', endY);
+              line.setAttribute('stroke', '#00FFFF');
+              line.setAttribute('stroke-width', '2');
+              line.setAttribute('marker-end', 'url(#field-arrowhead)');
+              line.setAttribute('opacity', Math.min(field.magnitude / 1000, 0.8));
+              
+              svg.appendChild(line);
+            }
+          }
+        }
+      }
+      
+      canvas.appendChild(svg);
+    }
+
+    function drawFieldLines(density = 12) {
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      
+      svg.id = 'field-visualization-svg';
+      svg.style.position = 'absolute';
+      svg.style.top = '0';
+      svg.style.left = '0';
+      svg.style.width = '100%';
+      svg.style.height = '100%';
+      svg.style.pointerEvents = 'none';
+      svg.style.zIndex = '3';
+      
+      // Add arrowhead marker for field lines
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+      marker.setAttribute('id', 'fieldline-arrowhead');
+      marker.setAttribute('markerWidth', '6');
+      marker.setAttribute('markerHeight', '4');
+      marker.setAttribute('refX', '5');
+      marker.setAttribute('refY', '2');
+      marker.setAttribute('orient', 'auto');
+      
+      const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+      polygon.setAttribute('points', '0 0, 6 2, 0 4');
+      polygon.setAttribute('fill', '#FFD700');
+      
+      marker.appendChild(polygon);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+      
+      const charges = canvas.querySelectorAll('.charge');
+      
+      charges.forEach(charge => {
+        const chargeValue = parseFloat(charge.getAttribute('data-charge'));
+        const chargeRect = charge.getBoundingClientRect();
+        const chargeX = chargeRect.left - canvasRect.left + 40;
+        const chargeY = chargeRect.top - canvasRect.top + 40;
+        
+        // Create field lines starting from each charge
+        const numLines = Math.max(4, Math.floor(density * Math.abs(chargeValue) / 5));
+        
+        for (let i = 0; i < numLines; i++) {
+          const angle = (2 * Math.PI * i) / numLines;
+          const startRadius = 45;
+          const startX = chargeX + startRadius * Math.cos(angle);
+          const startY = chargeY + startRadius * Math.sin(angle);
+          
+          const fieldLine = traceFieldLine(startX, startY, chargeValue > 0);
+          if (fieldLine.length > 1) {
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            let pathData = `M ${fieldLine[0].x} ${fieldLine[0].y}`;
+            
+            for (let j = 1; j < fieldLine.length; j++) {
+              pathData += ` L ${fieldLine[j].x} ${fieldLine[j].y}`;
+            }
+            
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', '#FFD700');
+            path.setAttribute('stroke-width', '2');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('opacity', '0.8');
+            path.setAttribute('marker-end', 'url(#fieldline-arrowhead)');
+            
+            svg.appendChild(path);
+          }
+        }
+      });
+      
+      canvas.appendChild(svg);
+    }
+
+    function drawFieldColorMap() {
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      const colorCanvas = document.createElement('canvas');
+      
+      colorCanvas.className = 'field-colormap';
+      colorCanvas.width = canvasRect.width;
+      colorCanvas.height = canvasRect.height;
+      
+      const ctx = colorCanvas.getContext('2d');
+      const imageData = ctx.createImageData(colorCanvas.width, colorCanvas.height);
+      
+      let maxField = 0;
+      const fieldData = [];
+      
+      // Calculate field at each pixel
+      for (let y = 0; y < colorCanvas.height; y += 2) {
+        for (let x = 0; x < colorCanvas.width; x += 2) {
+          const field = calculateElectricField(x, y);
+          fieldData.push(field.magnitude);
+          maxField = Math.max(maxField, field.magnitude);
+        }
+      }
+      
+      // Create color map
+      let dataIndex = 0;
+      for (let y = 0; y < colorCanvas.height; y += 2) {
+        for (let x = 0; x < colorCanvas.width; x += 2) {
+          const fieldMagnitude = fieldData[dataIndex++];
+          const intensity = Math.min(fieldMagnitude / (maxField * 0.3), 1);
+          
+          // Color mapping: blue (low) -> green -> yellow -> red (high)
+          let r, g, b;
+          if (intensity < 0.25) {
+            r = 0;
+            g = Math.floor(intensity * 4 * 255);
+            b = 255;
+          } else if (intensity < 0.5) {
+            r = 0;
+            g = 255;
+            b = Math.floor((0.5 - intensity) * 4 * 255);
+          } else if (intensity < 0.75) {
+            r = Math.floor((intensity - 0.5) * 4 * 255);
+            g = 255;
+            b = 0;
+          } else {
+            r = 255;
+            g = Math.floor((1 - intensity) * 4 * 255);
+            b = 0;
+          }
+          
+          // Fill 2x2 pixel block
+          for (let dy = 0; dy < 2 && y + dy < colorCanvas.height; dy++) {
+            for (let dx = 0; dx < 2 && x + dx < colorCanvas.width; dx++) {
+              const pixelIndex = ((y + dy) * colorCanvas.width + (x + dx)) * 4;
+              imageData.data[pixelIndex] = r;
+              imageData.data[pixelIndex + 1] = g;
+              imageData.data[pixelIndex + 2] = b;
+              imageData.data[pixelIndex + 3] = Math.floor(intensity * 128);
+            }
+          }
+        }
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+      canvas.appendChild(colorCanvas);
+    }
+
+    function checkAnswer(questionNum, isCorrect) {
+      const feedback = document.getElementById('quiz-feedback');
+      feedback.style.display = 'block';
+      quizTotal++;
+      
+      if (isCorrect) {
+        quizScore++;
+        feedback.style.background = 'rgba(0, 128, 0, 0.3)';
+        feedback.style.border = '2px solid #90EE90';
+        feedback.innerHTML = `<strong style="color: #90EE90;">✓ Correct!</strong><br>${quizQuestions[quizQuestionIndex].explanation}`;
+      } else {
+        feedback.style.background = 'rgba(139, 0, 0, 0.3)';
+        feedback.style.border = '2px solid #FF6B6B';
+        feedback.innerHTML = `<strong style="color: #FF6B6B;">✗ Incorrect.</strong><br>${quizQuestions[quizQuestionIndex].explanation}`;
+      }
+      
+      document.getElementById('quiz-score').textContent = `${quizScore} / ${quizTotal} correct`;
+    }
+
+    function nextQuestion() {
+      quizQuestionIndex = (quizQuestionIndex + 1) % quizQuestions.length;
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      const q = quizQuestions[quizQuestionIndex];
+      const questionDiv = document.getElementById('quiz-question');
+      
+      questionDiv.innerHTML = `
+        <h4 style="color: #FFD700; margin-top: 0;">Question ${quizQuestionIndex + 1} of ${quizQuestions.length}:</h4>
+        <p style="font-size: 18px; line-height: 1.6;">${q.question}</p>
+      `;
+      
+      const buttons = document.querySelectorAll('#quizzes-simulation .control-button');
+      buttons.forEach((btn, index) => {
+        if (index < 4) {
+          btn.textContent = String.fromCharCode(65 + index) + ') ' + q.options[index];
+          btn.onclick = () => checkAnswer(quizQuestionIndex, index === q.correct);
+        }
+      });
+      
+      document.getElementById('quiz-feedback').style.display = 'none';
+    }
+
+    function resetQuiz() {
+      quizQuestionIndex = 0;
+      quizScore = 0;
+      quizTotal = 0;
+      document.getElementById('quiz-score').textContent = '0 / 0 correct';
+      loadQuestion();
+    }
+
+    function calculateElectricField(x, y) {
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      const charges = canvas.querySelectorAll('.charge');
+      
+      let Ex = 0;
+      let Ey = 0;
+      
+      charges.forEach(charge => {
+        const chargeRect = charge.getBoundingClientRect();
+        const chargeX = chargeRect.left - canvasRect.left + 40;
+        const chargeY = chargeRect.top - canvasRect.top + 40;
+        const chargeQ = parseFloat(charge.getAttribute('data-charge')) * 1e-6;
+        
+        const dx = (x - chargeX) * pixelsToMeters;
+        const dy = (y - chargeY) * pixelsToMeters;
+        const r = Math.sqrt(dx * dx + dy * dy);
+        
+        if (r > 0.01) { // Avoid division by zero
+          const E = k * Math.abs(chargeQ) / (r * r);
+          const direction = chargeQ > 0 ? 1 : -1;
+          
+          Ex += direction * E * (dx / r);
+          Ey += direction * E * (dy / r);
+        }
+      });
+      
+      const magnitude = Math.sqrt(Ex * Ex + Ey * Ey);
+      const angle = Math.atan2(Ey, Ex);
+      
+      return { magnitude, angle, Ex, Ey };
+    }
+
+    function calculateElectricPotential(x, y) {
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      const charges = canvas.querySelectorAll('.charge');
+      
+      let V = 0;
+      
+      charges.forEach(charge => {
+        const chargeRect = charge.getBoundingClientRect();
+        const chargeX = chargeRect.left - canvasRect.left + 40;
+        const chargeY = chargeRect.top - canvasRect.top + 40;
+        const chargeQ = parseFloat(charge.getAttribute('data-charge')) * 1e-6;
+        
+        const dx = (x - chargeX) * pixelsToMeters;
+        const dy = (y - chargeY) * pixelsToMeters;
+        const r = Math.sqrt(dx * dx + dy * dy);
+        
+        if (r > 0.01) {
+          V += k * chargeQ / r;
+        }
+      });
+      
+      return V;
+    }
+
+    function traceFieldLine(startX, startY, fromPositive) {
+      const points = [{ x: startX, y: startY }];
+      let x = startX;
+      let y = startY;
+      const stepSize = 3;
+      const maxSteps = 200;
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      
+      for (let step = 0; step < maxSteps; step++) {
+        const field = calculateElectricField(x, y);
+        
+        if (field.magnitude < 1e-6) break;
+        
+        const direction = fromPositive ? 1 : -1;
+        const dx = direction * stepSize * Math.cos(field.angle);
+        const dy = direction * stepSize * Math.sin(field.angle);
+        
+        x += dx;
+        y += dy;
+        
+        // Check bounds
+        if (x < 0 || x > canvasRect.width || y < 0 || y > canvasRect.height) break;
+        
+        // Check if we're too close to any charge
+        const charges = canvas.querySelectorAll('.charge');
+        let tooClose = false;
+        charges.forEach(charge => {
+          const chargeRect = charge.getBoundingClientRect();
+          const chargeX = chargeRect.left - canvasRect.left + 40;
+          const chargeY = chargeRect.top - canvasRect.top + 40;
+          const distance = Math.sqrt((x - chargeX) ** 2 + (y - chargeY) ** 2);
+          if (distance < 35) tooClose = true;
+        });
+        
+        if (tooClose) break;
+        
+        points.push({ x, y });
+      }
+      
+      return points;
+    }
+
+    function toggleProbe() {
+      probeMode = !probeMode;
+      const canvas = document.getElementById('simulation-canvas');
+      
+      if (probeMode) {
+        canvas.classList.add('probe-cursor');
+        canvas.addEventListener('click', handleProbeClick);
+      } else {
+        canvas.classList.remove('probe-cursor');
+        canvas.removeEventListener('click', handleProbeClick);
+        if (probeMarker) {
+          probeMarker.remove();
+          probeMarker = null;
+        }
+      }
+    }
+
+    function handleProbeClick(event) {
+      if (!probeMode) return;
+      
+      const canvas = document.getElementById('simulation-canvas');
+      const canvasRect = canvas.getBoundingClientRect();
+      const x = event.clientX - canvasRect.left;
+      const y = event.clientY - canvasRect.top;
+      
+      // Remove existing probe marker
+      if (probeMarker) {
+        probeMarker.remove();
+      }
+      
+      // Add new probe marker
+      probeMarker = document.createElement('div');
+      probeMarker.className = 'probe-marker';
+      probeMarker.style.left = x + 'px';
+      probeMarker.style.top = y + 'px';
+      canvas.appendChild(probeMarker);
+      
+      // Calculate field and potential at this point
+      const field = calculateElectricField(x, y);
+      const potential = calculateElectricPotential(x, y);
+      const testCharge = parseFloat(document.getElementById('test-charge').value) * 1e-6;
+      const force = field.magnitude * Math.abs(testCharge);
+      
+      // Update probe info
+      document.getElementById('probe-position').textContent = `(${Math.round(x)}, ${Math.round(y)}) px`;
+      document.getElementById('probe-field').textContent = `E = ${field.magnitude.toExponential(2)} N/C`;
+      document.getElementById('probe-potential').textContent = `V = ${potential.toExponential(2)} V`;
+      document.getElementById('probe-force').textContent = `F = ${force.toExponential(2)} N`;
+      
+      if (showWork) {
+        document.getElementById('probe-calculation').style.display = 'block';
+        document.getElementById('test-q-display').textContent = `${testCharge.toExponential(1)}`;
+        document.getElementById('field-display').textContent = `${field.magnitude.toExponential(2)}`;
+        document.getElementById('force-result').textContent = `${force.toExponential(2)}`;
+      } else {
+        document.getElementById('probe-calculation').style.display = 'none';
+      }
+    }
+
+    function updateFieldProperties() {
+      const canvas = document.getElementById('simulation-canvas');
+      const charges = canvas.querySelectorAll('.charge');
+      
+      document.getElementById('charge-count').textContent = charges.length;
+      
+      // Calculate field range
+      let maxField = 0;
+      let minField = Infinity;
+      
+      for (let x = 50; x < canvas.offsetWidth - 50; x += 50) {
+        for (let y = 50; y < canvas.offsetHeight - 50; y += 50) {
+          const field = calculateElectricField(x, y);
+          maxField = Math.max(maxField, field.magnitude);
+          if (field.magnitude > 0) {
+            minField = Math.min(minField, field.magnitude);
+          }
+        }
+      }
+      
+      document.getElementById('field-range').textContent = 
+        `${minField.toExponential(1)} - ${maxField.toExponential(1)} N/C`;
+    }
+
+    function exportFieldImage() {
+      const canvas = document.getElementById('simulation-canvas');
+      
+      // Create a temporary canvas for export
+      const exportCanvas = document.createElement('canvas');
+      const ctx = exportCanvas.getContext('2d');
+      
+      exportCanvas.width = canvas.offsetWidth;
+      exportCanvas.height = canvas.offsetHeight;
+      
+      // Fill background
+      ctx.fillStyle = '#2d0a0a';
+      ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+      
+      // Add title
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Electric Field Visualization', exportCanvas.width / 2, 30);
+      
+      ctx.font = '16px Arial';
+      ctx.fillText(`Mode: ${currentRenderMode.charAt(0).toUpperCase() + currentRenderMode.slice(1)}`, exportCanvas.width / 2, 55);
+      
+      // Create download link
+      const link = document.createElement('a');
+      link.download = `electric-field-${currentRenderMode}-${Date.now()}.png`;
+      link.href = exportCanvas.toDataURL();
+      link.click();
+      
+      // Show confirmation
+      const confirmation = document.createElement('div');
+      confirmation.style.position = 'fixed';
+      confirmation.style.top = '20px';
+      confirmation.style.right = '20px';
+      confirmation.style.background = 'rgba(0, 128, 0, 0.9)';
+      confirmation.style.color = 'white';
+      confirmation.style.padding = '15px 25px';
+      confirmation.style.borderRadius = '10px';
+      confirmation.style.zIndex = '1000';
+      confirmation.textContent = 'Field visualization exported!';
+      
+      document.body.appendChild(confirmation);
+      setTimeout(() => confirmation.remove(), 3000);
+    }
+
+    async function onConfigChange(newConfig) {
+      const labTitle = document.getElementById('lab-title');
+      const moduleTitle = document.getElementById('module-title');
+      const realworldTitle = document.getElementById('realworld-title');
+      const discussionTitle = document.getElementById('discussion-title');
+      const quizzesTitle = document.getElementById('quizzes-title');
+
+      if (labTitle) labTitle.textContent = newConfig.lab_title || defaultConfig.lab_title;
+      if (moduleTitle) moduleTitle.textContent = newConfig.module_title || defaultConfig.module_title;
+      if (realworldTitle) realworldTitle.textContent = newConfig.real_world_label || defaultConfig.real_world_label;
+      if (discussionTitle) discussionTitle.textContent = newConfig.discussion_label || defaultConfig.discussion_label;
+      if (quizzesTitle) quizzesTitle.textContent = newConfig.quizzes_label || defaultConfig.quizzes_label;
+
+      const customFont = newConfig.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+      document.body.style.fontFamily = `${customFont}, ${baseFontStack}`;
+
+      const baseSize = newConfig.font_size || defaultConfig.font_size;
+      document.querySelector('.header h1').style.fontSize = `${baseSize * 3}px`;
+      document.querySelector('.header p').style.fontSize = `${baseSize * 1.125}px`;
+      document.querySelectorAll('.menu-box h2').forEach(el => el.style.fontSize = `${baseSize * 1.75}px`);
+      document.querySelectorAll('.menu-box p').forEach(el => el.style.fontSize = `${baseSize}px`);
+      document.querySelectorAll('.content-header h2').forEach(el => el.style.fontSize = `${baseSize * 2.25}px`);
+      document.querySelectorAll('.tab-content h3').forEach(el => el.style.fontSize = `${baseSize * 1.5}px`);
+      document.querySelectorAll('.tab-content p, .tab-content li').forEach(el => el.style.fontSize = `${baseSize}px`);
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["lab_title", config.lab_title || defaultConfig.lab_title],
+          ["module_title", config.module_title || defaultConfig.module_title],
+          ["real_world_label", config.real_world_label || defaultConfig.real_world_label],
+          ["discussion_label", config.discussion_label || defaultConfig.discussion_label],
+          ["quizzes_label", config.quizzes_label || defaultConfig.quizzes_label]
+        ])
+      });
+    }
+
+    // Coulomb's Law Simulation Functions
+    function initCoulombDragAndDrop() {
+      const coulombCharges = document.querySelectorAll('.coulomb-charge');
+      
+      coulombCharges.forEach(charge => {
+        charge.addEventListener('mousedown', startCoulombDrag);
+        charge.addEventListener('touchstart', startCoulombDrag);
+      });
+
+      document.addEventListener('mousemove', coulombDrag);
+      document.addEventListener('touchmove', coulombDrag);
+      document.addEventListener('mouseup', stopCoulombDrag);
+      document.addEventListener('touchend', stopCoulombDrag);
+    }
+
+    function startCoulombDrag(e) {
+      coulombDraggedElement = e.target.closest('.coulomb-charge');
+      const rect = coulombDraggedElement.getBoundingClientRect();
+      const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      
+      coulombOffsetX = clientX - rect.left;
+      coulombDraggedElement.style.cursor = 'grabbing';
+      e.preventDefault();
+    }
+
+    function coulombDrag(e) {
+      if (!coulombDraggedElement) return;
+      
+      const rulerContainer = document.querySelector('.ruler-container');
+      const rulerRect = rulerContainer.getBoundingClientRect();
+      const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      
+      let newX = clientX - rulerRect.left - coulombOffsetX;
+      
+      // Constrain to ruler bounds
+      newX = Math.max(0, Math.min(newX, rulerRect.width - 80));
+      
+      coulombDraggedElement.style.left = (newX + 50) + 'px'; // Offset for ruler container position
+      
+      updateCoulombForce();
+      e.preventDefault();
+    }
+
+    function stopCoulombDrag() {
+      if (coulombDraggedElement) {
+        coulombDraggedElement.style.cursor = 'move';
+        coulombDraggedElement = null;
+      }
+    }
+
+    function updateCoulombForce() {
+      const q1Element = document.getElementById('coulomb-q1');
+      const q2Element = document.getElementById('coulomb-q2');
+      const q1Input = document.getElementById('q1-value');
+      const q2Input = document.getElementById('q2-value');
+      const unitsSelect = document.getElementById('distance-units');
+      const chargeUnitsSelect = document.getElementById('charge-units');
+      const obj1Type = document.getElementById('object1-type').value;
+      const obj2Type = document.getElementById('object2-type').value;
+      
+      // Update charge values and appearance
+      const q1Value = parseFloat(q1Input.value);
+      const q2Value = parseFloat(q2Input.value);
+      const chargeUnit = chargeUnitsSelect.value;
+      
+      // Update unit labels
+      document.getElementById('q1-unit-label').textContent = chargeUnit;
+      document.getElementById('q2-unit-label').textContent = chargeUnit;
+      
+      // Update appearance based on object type
+      if (obj1Type === 'human') {
+        q1Element.classList.add('coulomb-human');
+        q1Element.innerHTML = createWalkingHuman(q1Value, chargeUnit);
+      } else {
+        q1Element.classList.remove('coulomb-human');
+        updateChargeAppearance(q1Element, q1Value, chargeUnit);
+      }
+      
+      if (obj2Type === 'human') {
+        q2Element.classList.add('coulomb-human');
+        q2Element.innerHTML = createWalkingHuman(q2Value, chargeUnit);
+      } else {
+        q2Element.classList.remove('coulomb-human');
+        updateChargeAppearance(q2Element, q2Value, chargeUnit);
+      }
+      
+      // Calculate distance between charges
+      const q1Rect = q1Element.getBoundingClientRect();
+      const q2Rect = q2Element.getBoundingClientRect();
+      const pixelDistance = Math.abs((q1Rect.left + 40) - (q2Rect.left + 40));
+      
+      // Convert pixel distance to real distance
+      const rulerContainer = document.querySelector('.ruler-container');
+      const rulerWidth = rulerContainer.offsetWidth;
+      const maxDistance = 2.0; // 2 meters max on ruler
+      const distanceMeters = (pixelDistance / rulerWidth) * maxDistance;
+      
+      // Convert to selected units
+      let displayDistance = distanceMeters;
+      let unitLabel = 'm';
+      let calculationDistance = distanceMeters;
+      
+      switch(unitsSelect.value) {
+        case 'cm':
+          displayDistance = distanceMeters * 100;
+          unitLabel = 'cm';
+          calculationDistance = distanceMeters;
+          break;
+        case 'mm':
+          displayDistance = distanceMeters * 1000;
+          unitLabel = 'mm';
+          calculationDistance = distanceMeters;
+          break;
+        default:
+          displayDistance = distanceMeters;
+          unitLabel = 'm';
+          calculationDistance = distanceMeters;
+      }
+      
+      // Calculate forces based on object types and solve mode
+      const k = 8.99e9; // Coulomb's constant
+      const G = 6.67e-11; // Gravitational constant
+      const humanMass = 70; // kg
+      
+      let electrostaticForce = 0;
+      let gravitationalForce = 0;
+      let forceTitle = 'Force Magnitude:';
+      let forceType = '';
+      let showGravityComparison = false;
+      let calculatedValue = 0;
+      let calculatedDistance = calculationDistance;
+      
+      if (calculationDistance > 0.001 || solveMode === 'distance') { // Avoid division by zero
+        const q1Coulombs = convertToCoulombs(q1Value, chargeUnit);
+        const q2Coulombs = convertToCoulombs(q2Value, chargeUnit);
+        
+        switch(solveMode) {
+          case 'force':
+            // Calculate electrostatic force
+            electrostaticForce = k * Math.abs(q1Coulombs * q2Coulombs) / (calculationDistance * calculationDistance);
+            calculatedValue = electrostaticForce;
+            break;
+            
+          case 'distance':
+            // Calculate distance from force: r = sqrt(k * |q1 * q2| / F)
+            const inputForce = parseFloat(document.getElementById('force-value-input').value);
+            if (inputForce > 0 && Math.abs(q1Coulombs * q2Coulombs) > 0) {
+              calculatedDistance = Math.sqrt(k * Math.abs(q1Coulombs * q2Coulombs) / inputForce);
+              electrostaticForce = inputForce;
+              calculatedValue = calculatedDistance;
+              
+              // Update visual distance on ruler
+              const rulerContainer = document.querySelector('.ruler-container');
+              const rulerWidth = rulerContainer.offsetWidth;
+              const maxDistance = 2.0;
+              const pixelDistance = Math.min((calculatedDistance / maxDistance) * rulerWidth, rulerWidth - 80);
+              
+              const centerX = rulerWidth / 2;
+              const q1X = centerX - pixelDistance / 2;
+              const q2X = centerX + pixelDistance / 2;
+              
+              document.getElementById('coulomb-q1').style.left = (q1X + 50 - 40) + 'px';
+              document.getElementById('coulomb-q2').style.left = (q2X + 50 - 40) + 'px';
+            }
+            break;
+            
+          case 'charge1':
+            // Calculate q1 from force: q1 = F * r² / (k * |q2|)
+            const inputForce1 = parseFloat(document.getElementById('force-value-input').value);
+            if (inputForce1 > 0 && Math.abs(q2Coulombs) > 0 && calculationDistance > 0) {
+              const q1Calculated = inputForce1 * calculationDistance * calculationDistance / (k * Math.abs(q2Coulombs));
+              const q1Sign = q1Value >= 0 ? 1 : -1; // Preserve sign
+              calculatedValue = q1Sign * q1Calculated;
+              
+              // Convert back to display units
+              switch(chargeUnit) {
+                case 'C': q1Value = calculatedValue; break;
+                case 'μC': q1Value = calculatedValue * 1e6; break;
+                case 'nC': q1Value = calculatedValue * 1e9; break;
+                case 'mC': q1Value = calculatedValue * 1e3; break;
+              }
+              
+              electrostaticForce = inputForce1;
+              document.getElementById('q1-value').value = q1Value.toFixed(3);
+            }
+            break;
+            
+          case 'charge2':
+            // Calculate q2 from force: q2 = F * r² / (k * |q1|)
+            const inputForce2 = parseFloat(document.getElementById('force-value-input').value);
+            if (inputForce2 > 0 && Math.abs(q1Coulombs) > 0 && calculationDistance > 0) {
+              const q2Calculated = inputForce2 * calculationDistance * calculationDistance / (k * Math.abs(q1Coulombs));
+              const q2Sign = q2Value >= 0 ? 1 : -1; // Preserve sign
+              calculatedValue = q2Sign * q2Calculated;
+              
+              // Convert back to display units
+              switch(chargeUnit) {
+                case 'C': q2Value = calculatedValue; break;
+                case 'μC': q2Value = calculatedValue * 1e6; break;
+                case 'nC': q2Value = calculatedValue * 1e9; break;
+                case 'mC': q2Value = calculatedValue * 1e3; break;
+              }
+              
+              electrostaticForce = inputForce2;
+              document.getElementById('q2-value').value = q2Value.toFixed(3);
+            }
+            break;
+        }
+        
+        // Calculate gravitational force if humans are involved
+        if (obj1Type === 'human' || obj2Type === 'human') {
+          const m1 = obj1Type === 'human' ? humanMass : 1e-6;
+          const m2 = obj2Type === 'human' ? humanMass : 1e-6;
+          gravitationalForce = G * m1 * m2 / (calculatedDistance * calculatedDistance);
+          showGravityComparison = true;
+        }
+      }
+      
+      // Determine primary force and type
+      let primaryForce = electrostaticForce;
+      const isAttractive = (q1Value * q2Value) < 0;
+      
+      if (obj1Type === 'human' && obj2Type === 'human') {
+        forceTitle = 'Electrostatic vs Gravitational:';
+        forceType = isAttractive ? 'Electrostatic: Attractive' : 'Electrostatic: Repulsive';
+      } else if (obj1Type === 'human' || obj2Type === 'human') {
+        forceTitle = 'Force on Human:';
+        forceType = isAttractive ? 'Attractive Force' : 'Repulsive Force';
+      } else {
+        forceTitle = 'Force Magnitude:';
+        forceType = isAttractive ? 'Attractive Force' : 'Repulsive Force';
+      }
+      
+      // Update displays based on solve mode
+      let finalDisplayDistance = displayDistance;
+      if (solveMode === 'distance') {
+        // Convert calculated distance to display units
+        switch(unitsSelect.value) {
+          case 'cm': finalDisplayDistance = calculatedDistance * 100; break;
+          case 'mm': finalDisplayDistance = calculatedDistance * 1000; break;
+          default: finalDisplayDistance = calculatedDistance; break;
+        }
+      }
+      
+      document.getElementById('distance-display').textContent = 
+        `Distance: ${finalDisplayDistance.toFixed(3)} ${unitLabel}${solveMode === 'distance' ? ' (calculated)' : ''}`;
+      
+      // Update force title based on solve mode
+      switch(solveMode) {
+        case 'force':
+          forceTitle = obj1Type === 'human' && obj2Type === 'human' ? 'Electrostatic vs Gravitational:' : 
+                      (obj1Type === 'human' || obj2Type === 'human') ? 'Force on Human:' : 'Force Magnitude:';
+          break;
+        case 'distance':
+          forceTitle = 'Required Distance:';
+          break;
+        case 'charge1':
+          forceTitle = 'Calculated Charge 1:';
+          break;
+        case 'charge2':
+          forceTitle = 'Calculated Charge 2:';
+          break;
+      }
+      
+      document.getElementById('force-title').textContent = forceTitle;
+      
+      // Update force value display
+      let displayValue = electrostaticForce;
+      let displayUnit = ' N';
+      
+      if (solveMode === 'distance') {
+        displayValue = finalDisplayDistance;
+        displayUnit = ` ${unitLabel}`;
+      } else if (solveMode === 'charge1' || solveMode === 'charge2') {
+        displayValue = Math.abs(calculatedValue);
+        if (solveMode === 'charge1') displayValue = Math.abs(q1Value);
+        if (solveMode === 'charge2') displayValue = Math.abs(q2Value);
+        displayUnit = ` ${chargeUnit}`;
+      }
+      
+      document.getElementById('force-value').textContent = 
+        displayValue < 1e-3 && solveMode === 'force' ? displayValue.toExponential(3) + displayUnit : 
+        displayValue.toFixed(solveMode === 'distance' ? 4 : 3) + displayUnit;
+      document.getElementById('force-type').textContent = forceType;
+      
+      // Update gravity comparison
+      const gravityComparisonDiv = document.getElementById('force-comparison');
+      if (showGravityComparison && gravitationalForce > 0) {
+        gravityComparisonDiv.style.display = 'block';
+        const ratio = electrostaticForce / gravitationalForce;
+        document.getElementById('gravity-ratio').textContent = 
+          ratio > 1e6 ? ratio.toExponential(1) + '× stronger' : ratio.toFixed(0) + '× stronger';
+        
+        if (obj1Type === 'human' && obj2Type === 'human') {
+          gravityComparisonDiv.innerHTML = `
+            <div>Electrostatic: ${electrostaticForce.toExponential(2)} N</div>
+            <div>Gravitational: ${gravitationalForce.toExponential(2)} N</div>
+            <div>Ratio: ${ratio.toExponential(1)}:1</div>
+          `;
+        }
+      } else {
+        gravityComparisonDiv.style.display = 'none';
+      }
+      
+      // Update measurement data
+      document.getElementById('measured-distance').textContent = 
+        `${finalDisplayDistance.toFixed(3)} ${unitLabel}${solveMode === 'distance' ? ' (calculated)' : ''}`;
+      
+      if (obj1Type === 'human') {
+        document.getElementById('measured-q1').textContent = 
+          `Human (${q1Value > 0 ? '+' : ''}${q1Value.toFixed(3)} ${chargeUnit}${solveMode === 'charge1' ? ' - calculated' : ''})`;
+      } else {
+        document.getElementById('measured-q1').textContent = 
+          `${q1Value > 0 ? '+' : ''}${q1Value.toFixed(3)} ${chargeUnit}${solveMode === 'charge1' ? ' (calculated)' : ''}`;
+      }
+      
+      if (obj2Type === 'human') {
+        document.getElementById('measured-q2').textContent = 
+          `Human (${q2Value > 0 ? '+' : ''}${q2Value.toFixed(3)} ${chargeUnit}${solveMode === 'charge2' ? ' - calculated' : ''})`;
+      } else {
+        document.getElementById('measured-q2').textContent = 
+          `${q2Value > 0 ? '+' : ''}${q2Value.toFixed(3)} ${chargeUnit}${solveMode === 'charge2' ? ' (calculated)' : ''}`;
+      }
+      
+      document.getElementById('force-direction-text').textContent = 
+        `${forceType} (${isAttractive ? 'opposite' : 'like'} charges)`;
+      
+      // Calculate force per unit charge (electric field)
+      const q1Coulombs = convertToCoulombs(q1Value, chargeUnit);
+      const electricField = electrostaticForce / Math.abs(q1Coulombs);
+      document.getElementById('force-per-charge').textContent = 
+        electricField.toExponential(2) + ' N/C';
+      
+      // Update physics insights
+      updatePhysicsInsights(primaryForce, calculationDistance, q1Value, q2Value, obj1Type, obj2Type);
+      
+      // Update calculation steps if shown
+      if (coulombShowWork) {
+        updateCalculationSteps(q1Value, q2Value, calculatedDistance, electrostaticForce, chargeUnit, obj1Type, obj2Type, solveMode);
+      }
+      
+      // Draw force vectors
+      drawCoulombForceVectors(q1Element, q2Element, primaryForce, isAttractive);
+      
+      // Update ruler markings
+      updateRulerMarkings(maxDistance, unitsSelect.value);
+    }
+
+    function updateChargeAppearance(element, value, unit = 'μC') {
+      const sign = value >= 0 ? '+' : '−';
+      const absValue = Math.abs(value);
+      
+      if (value >= 0) {
+        element.style.background = 'radial-gradient(circle, #FFD700, #FFA500)';
+        element.style.color = '#8B0000';
+        element.style.borderColor = '#FFA500';
+      } else {
+        element.style.background = 'radial-gradient(circle, #4169E1, #1E90FF)';
+        element.style.color = 'white';
+        element.style.borderColor = '#1E90FF';
+      }
+      
+      element.innerHTML = `
+        <div style="font-size: 28px;">${sign}</div>
+        <span style="font-size: 12px; margin-top: 2px;">${absValue.toFixed(1)}${unit}</span>
+      `;
+    }
+
+    function updatePhysicsInsights(force, distance, q1, q2, obj1Type = 'charge', obj2Type = 'charge') {
+      // Inverse square law demonstration
+      const doubleDistanceForce = force / 4;
+      document.getElementById('distance-effect').textContent = 
+        `Force becomes ${doubleDistanceForce.toExponential(2)} N`;
+      
+      // Charge doubling effect
+      const doubleChargeForce = force * 4;
+      document.getElementById('charge-effect').textContent = 
+        `Force becomes ${doubleChargeForce.toExponential(2)} N`;
+      
+      // Gravity comparison with appropriate masses
+      const mass1 = obj1Type === 'human' ? 70 : 1e-6; // 70kg for human, 1 microgram for charged particle
+      const mass2 = obj2Type === 'human' ? 70 : 1e-6;
+      const G = 6.67e-11;
+      const gravitationalForce = G * mass1 * mass2 / (distance * distance);
+      const ratio = force / gravitationalForce;
+      
+      let comparisonText = `~${ratio.toExponential(1)}× stronger`;
+      if (obj1Type === 'human' || obj2Type === 'human') {
+        comparisonText += ' than gravity';
+      }
+      
+      document.getElementById('gravity-comparison').textContent = comparisonText;
+    }
+
+    function updateCalculationSteps(q1, q2, distance, force, chargeUnit, obj1Type = 'charge', obj2Type = 'charge', mode = 'force') {
+      // Convert to scientific notation based on unit
+      let q1Scientific, q2Scientific, productScientific;
+      
+      switch(chargeUnit) {
+        case 'C':
+          q1Scientific = `${q1.toFixed(3)}`;
+          q2Scientific = `${q2.toFixed(3)}`;
+          productScientific = `${Math.abs(q1 * q2).toExponential(2)}`;
+          break;
+        case 'μC':
+          q1Scientific = `${q1.toFixed(3)} × 10⁻⁶`;
+          q2Scientific = `${q2.toFixed(3)} × 10⁻⁶`;
+          productScientific = `${Math.abs(q1 * q2).toFixed(2)}×10⁻¹²`;
+          break;
+        case 'nC':
+          q1Scientific = `${q1.toFixed(3)} × 10⁻⁹`;
+          q2Scientific = `${q2.toFixed(3)} × 10⁻⁹`;
+          productScientific = `${Math.abs(q1 * q2).toFixed(2)}×10⁻¹⁸`;
+          break;
+        case 'mC':
+          q1Scientific = `${q1.toFixed(3)} × 10⁻³`;
+          q2Scientific = `${q2.toFixed(3)} × 10⁻³`;
+          productScientific = `${Math.abs(q1 * q2).toFixed(2)}×10⁻⁶`;
+          break;
+        default:
+          q1Scientific = `${q1.toFixed(3)} × 10⁻⁶`;
+          q2Scientific = `${q2.toFixed(3)} × 10⁻⁶`;
+          productScientific = `${Math.abs(q1 * q2).toFixed(2)}×10⁻¹²`;
+      }
+      
+      // Add object type labels
+      if (obj1Type === 'human') q1Scientific = `Human: ${q1Scientific}`;
+      if (obj2Type === 'human') q2Scientific = `Human: ${q2Scientific}`;
+      
+      // Update the calculation panel based on solve mode
+      const calculationPanel = document.getElementById('coulomb-calculation-panel');
+      const stepsDiv = document.getElementById('coulomb-steps');
+      
+      let calculationHTML = '';
+      
+      switch(mode) {
+        case 'force':
+          calculationHTML = `
+            <p style="margin: 5px 0;"><strong>F = k × |q₁ × q₂| / r²</strong></p>
+            <p style="margin: 5px 0;">k = 8.99 × 10⁹ N⋅m²/C²</p>
+            <p style="margin: 5px 0;">q₁ = ${q1Scientific} C</p>
+            <p style="margin: 5px 0;">q₂ = ${q2Scientific} C</p>
+            <p style="margin: 5px 0;">r = ${distance.toFixed(4)} m</p>
+            <p style="margin: 10px 0; border-top: 1px solid #FFD700; padding-top: 10px;">
+              F = (8.99×10⁹) × ${productScientific} / ${(distance * distance).toFixed(6)}
+            </p>
+            <p style="margin: 5px 0; color: #FFA500; font-weight: bold;">
+              F = ${force.toExponential(3)} N
+            </p>
+          `;
+          break;
+          
+        case 'distance':
+          calculationHTML = `
+            <p style="margin: 5px 0;"><strong>r = √(k × |q₁ × q₂| / F)</strong></p>
+            <p style="margin: 5px 0;">k = 8.99 × 10⁹ N⋅m²/C²</p>
+            <p style="margin: 5px 0;">q₁ = ${q1Scientific} C</p>
+            <p style="margin: 5px 0;">q₂ = ${q2Scientific} C</p>
+            <p style="margin: 5px 0;">F = ${force.toExponential(3)} N</p>
+            <p style="margin: 10px 0; border-top: 1px solid #FFD700; padding-top: 10px;">
+              r = √((8.99×10⁹) × ${productScientific} / ${force.toExponential(3)})
+            </p>
+            <p style="margin: 5px 0; color: #FFA500; font-weight: bold;">
+              r = ${distance.toFixed(4)} m
+            </p>
+          `;
+          break;
+          
+        case 'charge1':
+          calculationHTML = `
+            <p style="margin: 5px 0;"><strong>q₁ = F × r² / (k × |q₂|)</strong></p>
+            <p style="margin: 5px 0;">k = 8.99 × 10⁹ N⋅m²/C²</p>
+            <p style="margin: 5px 0;">F = ${force.toExponential(3)} N</p>
+            <p style="margin: 5px 0;">q₂ = ${q2Scientific} C</p>
+            <p style="margin: 5px 0;">r = ${distance.toFixed(4)} m</p>
+            <p style="margin: 10px 0; border-top: 1px solid #FFD700; padding-top: 10px;">
+              q₁ = ${force.toExponential(3)} × ${(distance * distance).toFixed(6)} / (8.99×10⁹ × ${Math.abs(q2 * (chargeUnit === 'μC' ? 1e-6 : chargeUnit === 'nC' ? 1e-9 : chargeUnit === 'mC' ? 1e-3 : 1)).toExponential(2)})
+            </p>
+            <p style="margin: 5px 0; color: #FFA500; font-weight: bold;">
+              q₁ = ${q1Scientific} C
+            </p>
+          `;
+          break;
+          
+        case 'charge2':
+          calculationHTML = `
+            <p style="margin: 5px 0;"><strong>q₂ = F × r² / (k × |q₁|)</strong></p>
+            <p style="margin: 5px 0;">k = 8.99 × 10⁹ N⋅m²/C²</p>
+            <p style="margin: 5px 0;">F = ${force.toExponential(3)} N</p>
+            <p style="margin: 5px 0;">q₁ = ${q1Scientific} C</p>
+            <p style="margin: 5px 0;">r = ${distance.toFixed(4)} m</p>
+            <p style="margin: 10px 0; border-top: 1px solid #FFD700; padding-top: 10px;">
+              q₂ = ${force.toExponential(3)} × ${(distance * distance).toFixed(6)} / (8.99×10⁹ × ${Math.abs(q1 * (chargeUnit === 'μC' ? 1e-6 : chargeUnit === 'nC' ? 1e-9 : chargeUnit === 'mC' ? 1e-3 : 1)).toExponential(2)})
+            </p>
+            <p style="margin: 5px 0; color: #FFA500; font-weight: bold;">
+              q₂ = ${q2Scientific} C
+            </p>
+          `;
+          break;
+      }
+      
+      stepsDiv.innerHTML = calculationHTML;
+    }
+
+    function drawCoulombForceVectors(q1Element, q2Element, force, isAttractive) {
+      const svg = document.getElementById('coulomb-force-svg');
+      
+      // Clear existing vectors
+      const existingVectors = svg.querySelectorAll('.force-vector-line');
+      existingVectors.forEach(v => v.remove());
+      
+      if (force < 1e-9) return; // Don't draw very small forces
+      
+      const q1Rect = q1Element.getBoundingClientRect();
+      const q2Rect = q2Element.getBoundingClientRect();
+      const svgRect = svg.getBoundingClientRect();
+      
+      const q1CenterX = q1Rect.left - svgRect.left + 40;
+      const q1CenterY = q1Rect.top - svgRect.top + 40;
+      const q2CenterX = q2Rect.left - svgRect.left + 40;
+      const q2CenterY = q2Rect.top - svgRect.top + 40;
+      
+      // Calculate vector directions
+      const dx = q2CenterX - q1CenterX;
+      const distance = Math.abs(dx);
+      const direction = dx > 0 ? 1 : -1;
+      
+      // Enhanced vector length calculation for better visibility
+      const baseLength = 40;
+      const forceScale = Math.max(0.5, Math.min(3, Math.log10(force * 1e12) / 10));
+      const vectorLength = baseLength + (30 * forceScale);
+      
+      // Force vectors with enhanced visibility
+      let q1VectorEndX, q2VectorEndX;
+      const vectorColor = isAttractive ? '#FF1493' : '#FF4500'; // Pink for attractive, orange-red for repulsive
+      const strokeWidth = Math.max(4, Math.min(8, 4 + forceScale));
+      
+      if (isAttractive) {
+        // Attractive: vectors point toward each other
+        q1VectorEndX = q1CenterX + vectorLength * direction;
+        q2VectorEndX = q2CenterX - vectorLength * direction;
+      } else {
+        // Repulsive: vectors point away from each other
+        q1VectorEndX = q1CenterX - vectorLength * direction;
+        q2VectorEndX = q2CenterX + vectorLength * direction;
+      }
+      
+      // Draw enhanced force vector on q1
+      const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line1.setAttribute('class', 'force-vector-line');
+      line1.setAttribute('x1', q1CenterX);
+      line1.setAttribute('y1', q1CenterY);
+      line1.setAttribute('x2', q1VectorEndX);
+      line1.setAttribute('y2', q1CenterY);
+      line1.setAttribute('stroke', vectorColor);
+      line1.setAttribute('stroke-width', strokeWidth);
+      line1.setAttribute('marker-end', isAttractive ? 'url(#coulomb-arrowhead)' : 'url(#coulomb-arrowhead-repulsive)');
+      line1.setAttribute('opacity', '0.9');
+      
+      // Add glow effect
+      const glow1 = line1.cloneNode(true);
+      glow1.setAttribute('stroke-width', strokeWidth + 4);
+      glow1.setAttribute('opacity', '0.3');
+      glow1.setAttribute('marker-end', '');
+      svg.appendChild(glow1);
+      svg.appendChild(line1);
+      
+      // Draw enhanced force vector on q2
+      const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line2.setAttribute('class', 'force-vector-line');
+      line2.setAttribute('x1', q2CenterX);
+      line2.setAttribute('y1', q2CenterY);
+      line2.setAttribute('x2', q2VectorEndX);
+      line2.setAttribute('y2', q2CenterY);
+      line2.setAttribute('stroke', vectorColor);
+      line2.setAttribute('stroke-width', strokeWidth);
+      line2.setAttribute('marker-end', isAttractive ? 'url(#coulomb-arrowhead)' : 'url(#coulomb-arrowhead-repulsive)');
+      line2.setAttribute('opacity', '0.9');
+      
+      // Add glow effect
+      const glow2 = line2.cloneNode(true);
+      glow2.setAttribute('stroke-width', strokeWidth + 4);
+      glow2.setAttribute('opacity', '0.3');
+      glow2.setAttribute('marker-end', '');
+      svg.appendChild(glow2);
+      svg.appendChild(line2);
+      
+      // Add enhanced force magnitude labels with background
+      const labelBg1 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      labelBg1.setAttribute('class', 'force-vector-line');
+      labelBg1.setAttribute('x', q1VectorEndX - 15);
+      labelBg1.setAttribute('y', q1CenterY - 25);
+      labelBg1.setAttribute('width', '30');
+      labelBg1.setAttribute('height', '18');
+      labelBg1.setAttribute('fill', 'rgba(0,0,0,0.8)');
+      labelBg1.setAttribute('rx', '4');
+      svg.appendChild(labelBg1);
+      
+      const text1 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text1.setAttribute('class', 'force-vector-line');
+      text1.setAttribute('x', q1VectorEndX);
+      text1.setAttribute('y', q1CenterY - 12);
+      text1.setAttribute('fill', vectorColor);
+      text1.setAttribute('font-size', '14');
+      text1.setAttribute('font-weight', 'bold');
+      text1.setAttribute('text-anchor', 'middle');
+      text1.textContent = isAttractive ? '←F' : 'F→';
+      svg.appendChild(text1);
+      
+      const labelBg2 = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      labelBg2.setAttribute('class', 'force-vector-line');
+      labelBg2.setAttribute('x', q2VectorEndX - 15);
+      labelBg2.setAttribute('y', q2CenterY - 25);
+      labelBg2.setAttribute('width', '30');
+      labelBg2.setAttribute('height', '18');
+      labelBg2.setAttribute('fill', 'rgba(0,0,0,0.8)');
+      labelBg2.setAttribute('rx', '4');
+      svg.appendChild(labelBg2);
+      
+      const text2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text2.setAttribute('class', 'force-vector-line');
+      text2.setAttribute('x', q2VectorEndX);
+      text2.setAttribute('y', q2CenterY - 12);
+      text2.setAttribute('fill', vectorColor);
+      text2.setAttribute('font-size', '14');
+      text2.setAttribute('font-weight', 'bold');
+      text2.setAttribute('text-anchor', 'middle');
+      text2.textContent = isAttractive ? 'F→' : '←F';
+      svg.appendChild(text2);
+      
+      // Add force type indicator
+      const midX = (q1CenterX + q2CenterX) / 2;
+      const midY = Math.min(q1CenterY, q2CenterY) - 40;
+      
+      const typeLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      typeLabel.setAttribute('class', 'force-vector-line');
+      typeLabel.setAttribute('x', midX);
+      typeLabel.setAttribute('y', midY);
+      typeLabel.setAttribute('fill', vectorColor);
+      typeLabel.setAttribute('font-size', '16');
+      typeLabel.setAttribute('font-weight', 'bold');
+      typeLabel.setAttribute('text-anchor', 'middle');
+      typeLabel.textContent = isAttractive ? '⟷ ATTRACTIVE' : '⟵ ⟶ REPULSIVE';
+      
+      const typeBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      typeBg.setAttribute('class', 'force-vector-line');
+      typeBg.setAttribute('x', midX - 60);
+      typeBg.setAttribute('y', midY - 15);
+      typeBg.setAttribute('width', '120');
+      typeBg.setAttribute('height', '20');
+      typeBg.setAttribute('fill', 'rgba(0,0,0,0.8)');
+      typeBg.setAttribute('rx', '6');
+      
+      svg.appendChild(typeBg);
+      svg.appendChild(typeLabel);
+    }
+
+    function updateRulerMarkings(maxDistance, units) {
+      const markingsContainer = document.getElementById('ruler-markings');
+      markingsContainer.innerHTML = '';
+      
+      const rulerWidth = markingsContainer.offsetWidth;
+      let numMarkings = 10;
+      let markingInterval = maxDistance / numMarkings;
+      
+      // Adjust for different units
+      switch(units) {
+        case 'cm':
+          numMarkings = 20;
+          markingInterval = (maxDistance * 100) / numMarkings;
+          break;
+        case 'mm':
+          numMarkings = 40;
+          markingInterval = (maxDistance * 1000) / numMarkings;
+          break;
+      }
+      
+      for (let i = 0; i <= numMarkings; i++) {
+        const marking = document.createElement('div');
+        marking.style.position = 'absolute';
+        marking.style.left = (i * rulerWidth / numMarkings) + 'px';
+        marking.style.top = '0';
+        marking.style.width = '2px';
+        marking.style.height = i % 5 === 0 ? '20px' : '10px';
+        marking.style.background = '#8B0000';
+        
+        if (i % 5 === 0) {
+          const label = document.createElement('div');
+          label.style.position = 'absolute';
+          label.style.left = '-10px';
+          label.style.top = '22px';
+          label.style.fontSize = '10px';
+          label.style.color = '#8B0000';
+          label.style.fontWeight = 'bold';
+          label.style.width = '20px';
+          label.style.textAlign = 'center';
+          
+          let labelValue = i * markingInterval;
+          switch(units) {
+            case 'cm':
+              labelValue = (i * maxDistance / numMarkings * 100);
+              break;
+            case 'mm':
+              labelValue = (i * maxDistance / numMarkings * 1000);
+              break;
+            default:
+              labelValue = (i * maxDistance / numMarkings);
+          }
+          
+          label.textContent = labelValue.toFixed(units === 'm' ? 1 : 0);
+          marking.appendChild(label);
+        }
+        
+        markingsContainer.appendChild(marking);
+      }
+    }
+
+    function toggleCoulombWork() {
+      coulombShowWork = !coulombShowWork;
+      const panel = document.getElementById('coulomb-calculation-panel');
+      panel.style.display = coulombShowWork ? 'block' : 'none';
+      
+      if (coulombShowWork) {
+        updateCoulombForce(); // Refresh calculations
+      }
+    }
+
+    function resetCoulombCharges() {
+      document.getElementById('coulomb-q1').style.left = '100px';
+      document.getElementById('coulomb-q2').style.left = '300px';
+      document.getElementById('q1-value').value = '2';
+      document.getElementById('q2-value').value = '-3';
+      document.getElementById('distance-units').value = 'm';
+      updateCoulombForce();
+    }
+
+    function setPresetDistance(targetDistance) {
+      const rulerContainer = document.querySelector('.ruler-container');
+      const rulerWidth = rulerContainer.offsetWidth;
+      const maxDistance = 2.0; // 2 meters max
+      
+      const pixelDistance = (targetDistance / maxDistance) * rulerWidth;
+      
+      // Position charges symmetrically around center
+      const centerX = rulerWidth / 2;
+      const q1X = centerX - pixelDistance / 2;
+      const q2X = centerX + pixelDistance / 2;
+      
+      document.getElementById('coulomb-q1').style.left = (q1X + 50 - 40) + 'px';
+      document.getElementById('coulomb-q2').style.left = (q2X + 50 - 40) + 'px';
+      
+      updateCoulombForce();
+    }
+
+    function clearCoulombArrows() {
+      const svg = document.getElementById('coulomb-force-svg');
+      
+      // Clear all force vector elements
+      const existingVectors = svg.querySelectorAll('.force-vector-line');
+      existingVectors.forEach(v => v.remove());
+      
+      // Show confirmation
+      const confirmation = document.createElement('div');
+      confirmation.style.position = 'fixed';
+      confirmation.style.top = '20px';
+      confirmation.style.right = '20px';
+      confirmation.style.background = 'rgba(0, 128, 0, 0.9)';
+      confirmation.style.color = 'white';
+      confirmation.style.padding = '15px 25px';
+      confirmation.style.borderRadius = '10px';
+      confirmation.style.zIndex = '1000';
+      confirmation.textContent = 'Force arrows cleared!';
+      
+      document.body.appendChild(confirmation);
+      setTimeout(() => confirmation.remove(), 2000);
+    }
+
+    function exportCoulombData() {
+      const q1 = document.getElementById('q1-value').value;
+      const q2 = document.getElementById('q2-value').value;
+      const chargeUnit = document.getElementById('charge-units').value;
+      const distanceUnit = document.getElementById('distance-units').value;
+      const distance = document.getElementById('measured-distance').textContent;
+      const force = document.getElementById('force-value').textContent;
+      const forceType = document.getElementById('force-type').textContent;
+      
+      const data = `Coulomb's Law Measurement Data
+Generated: ${new Date().toLocaleString()}
+
+Charge 1: ${q1} ${chargeUnit}
+Charge 2: ${q2} ${chargeUnit}
+Distance: ${distance}
+Force Magnitude: ${force}
+Force Type: ${forceType}
+
+Units Used:
+- Charge: ${chargeUnit}
+- Distance: ${distanceUnit}
+
+Coulomb's Law: F = k × |q₁ × q₂| / r²
+Where k = 8.99 × 10⁹ N⋅m²/C²`;
+      
+      const blob = new Blob([data], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `coulomb-law-data-${Date.now()}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      // Show confirmation
+      const confirmation = document.createElement('div');
+      confirmation.style.position = 'fixed';
+      confirmation.style.top = '20px';
+      confirmation.style.right = '20px';
+      confirmation.style.background = 'rgba(0, 128, 0, 0.9)';
+      confirmation.style.color = 'white';
+      confirmation.style.padding = '15px 25px';
+      confirmation.style.borderRadius = '10px';
+      confirmation.style.zIndex = '1000';
+      confirmation.textContent = 'Coulomb data exported!';
+      
+      document.body.appendChild(confirmation);
+      setTimeout(() => confirmation.remove(), 3000);
+    }
+
+    window.addEventListener('load', () => {
+      initDragAndDrop();
+      initCoulombDragAndDrop();
+      loadQuestion();
+      
+      // Initialize the simulation with the first charge selected
+      selectedCharge = document.getElementById('charge1');
+      updateAnalysis();
+      updateFieldVisualization();
+      
+      // Initialize Coulomb simulation
+      updateCoulombForce();
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c701655447104ea',t:'MTc2OTkzNDYzMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
