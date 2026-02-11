@@ -3990,7 +3990,7 @@ window.addEventListener('load', () => {
   function fetchLocksFromServer(name, section){
     try{
       if(!name && !section) return Promise.reject(new Error('missing name/section'));
-      const base = 'https://script.google.com/macros/s/AKfycbx-VVgOkLZOBr1yK2THSGWdbaFdxrNqYK_V2fgprn1inHxFr1fx5caL-NB3xSrjhnZm/exec';
+      const base = 'https://script.google.com/macros/s/AKfycbzCff8pXngkPykh6RN6sgkNqumXNyJTjlQdTe2KVoPlmBsfzhd19-ZiTyXVrhNPGkHJ/exec';
       const url = base + '?name=' + encodeURIComponent(String(name||'')) + '&section=' + encodeURIComponent(String(section||''));
       return fetch(url, { method: 'GET', cache: 'no-store' }).then(function(resp){
         if(!resp || resp.status !== 200) throw new Error('bad response');
