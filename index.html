@@ -1135,6 +1135,24 @@ button,
           }catch(e){ console.error(e); }
         }
 
+        async function fetchLocksFromServer(name, section) {
+          const base = "https://script.google.com/macros/s/AKfycbzCff8pXngkPykh6RN6sgkNqumXNyJTjlQdTe2KVoPlmBsfzhd19-ZiTyXVrhNPGkHJ/exec";
+
+          try {
+            const res = await fetch(`${base}?name=${encodeURIComponent(name)}&section=${encodeURIComponent(section)}`);
+            const data = await res.json();
+
+            console.log("[LOCKS] server response:", data);
+
+            window.serverLocks = data;
+            return data;
+          } catch (err) {
+            console.error("Failed to fetch locks:", err);
+            window.serverLocks = {};
+            return {};
+          }
+        }
+
         function saveAndEnter(role){
           try{
             const name = nameInput && nameInput.value && nameInput.value.trim();
